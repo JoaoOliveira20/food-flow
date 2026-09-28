@@ -1,0 +1,51 @@
+/* Tokens e reset. Arquivo IDÊNTICO nos três experimentos. */
+
+:root {
+  --bg: #f4f1ec;
+  --surface: #fbf9f6;
+  --hover: #f1ede7;
+  --chip: #ece7df;
+  --line: #ddd6cc;
+  --ink: #1f1a17;
+  --muted: #6f665d;
+  --accent: #f5a524;
+  --accent-strong: #b86e00;
+  --accent-soft: #fdf0d9;
+  --danger: #b3261e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Durante um arraste (marcado pelo hook useCompositionDrag). */
+html[data-dragging],
+html[data-dragging] * {
+  cursor: grabbing !important;
+  user-select: none;
+}

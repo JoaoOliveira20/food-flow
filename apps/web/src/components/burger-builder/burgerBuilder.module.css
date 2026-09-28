@@ -1,0 +1,581 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 32px 32px;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.logo {
+  width: 34px;
+  height: 34px;
+  fill: var(--accent);
+  flex: none;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.resetButton svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 280px;
+  grid-template-areas: "ingredients center buns";
+  gap: 24px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.04), 0 8px 24px rgba(60, 40, 20, 0.05);
+}
+
+.panelTitle {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.panelReplacing {
+  outline: 2px solid var(--accent);
+}
+
+.ingredients {
+  grid-area: ingredients;
+}
+
+.ingredientList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ingredientButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  text-align: left;
+}
+
+.ingredientButton {
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.ingredientButton:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+.ingredientButton:disabled {
+  opacity: 0.45;
+}
+
+.thumbnail {
+  width: 56px;
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbnail img,
+.bunThumbnail img,
+.selectionThumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ingredientName {
+  flex: 1;
+  font-size: 15px;
+}
+
+.ingredientAction {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--chip);
+  font-size: 18px;
+}
+
+.center {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: min(66dvh, 640px);
+  min-height: 380px;
+}
+
+.stage::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  width: min(64%, 380px);
+  height: 26px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(60, 40, 20, 0.18), transparent);
+  pointer-events: none;
+}
+
+.stack {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  z-index: 1;
+}
+
+.layer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  transform-origin: 50% 70%;
+}
+
+.layerImage {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+}
+
+.layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.layerDragging .layerImage {
+  opacity: 0.4;
+}
+
+.layerSelected img {
+  filter: drop-shadow(0 0 1.5px var(--accent)) drop-shadow(0 0 1.5px var(--accent))
+    drop-shadow(0 0 8px rgba(245, 165, 36, 0.55));
+}
+
+.hitArea {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.hitArea:focus-visible {
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+}
+
+.dropIndicator {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.dropArrow {
+  position: absolute;
+  top: -10px;
+  width: 20px;
+  margin-left: -10px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--accent-strong);
+}
+
+.ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.ghost img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+  transform: rotate(-3deg);
+  filter: drop-shadow(0 6px 8px rgba(40, 25, 10, 0.25));
+}
+
+.ghostOutside img {
+  opacity: 0.45;
+}
+
+.ghostBadge {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  z-index: 200;
+  max-width: 92%;
+  margin: 0;
+  padding: 6px 14px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(31, 26, 23, 0.88);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+
+.status:empty {
+  display: none;
+}
+
+.panelHint {
+  margin: -6px 0 10px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.hint {
+  margin: 0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.selectionToolbar {
+  min-height: 52px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  padding: 6px 8px 6px 12px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.04), 0 8px 24px rgba(60, 40, 20, 0.06);
+}
+
+.selectionName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.selectionThumbnail {
+  width: 40px;
+  height: 28px;
+  display: flex;
+}
+
+.selectionActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.selectionActions button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.selectionActions button:disabled {
+  opacity: 0.4;
+}
+
+.actionActive {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+}
+
+.actionDanger {
+  color: var(--danger);
+}
+
+.actionClose {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 20px;
+}
+
+.buns {
+  grid-area: buns;
+}
+
+.bunList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.bunButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  background: var(--hover);
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.bunThumbnail {
+  width: 64px;
+  height: 40px;
+  display: flex;
+}
+
+.bunButtonSelected {
+  border-color: var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .main {
+    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-areas:
+      "ingredients buns"
+      "ingredients center";
+  }
+
+  .bunList {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 12px 16px 24px;
+    gap: 12px;
+  }
+
+  .title {
+    font-size: 21px;
+  }
+
+  .main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "center"
+      "buns"
+      "ingredients";
+    gap: 16px;
+  }
+
+  .center {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin: 0 -16px;
+    padding: 0 16px 10px;
+    background: var(--bg);
+    box-shadow: 0 10px 12px -12px rgba(60, 40, 20, 0.25);
+  }
+
+  .stage {
+    height: 40dvh;
+    min-height: 240px;
+  }
+
+  .hint {
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .ingredients {
+    scroll-margin-top: calc(40dvh + 120px);
+  }
+
+  .ingredientList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .ingredientButton {
+    background: var(--hover);
+    min-height: 56px;
+  }
+
+  .thumbnail {
+    width: 44px;
+  }
+
+  .ingredientAction {
+    display: none;
+  }
+
+  .actionLabel {
+    display: none;
+  }
+
+  .selectionToolbar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  .selectionActions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .bunList {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .bunThumbnail {
+    width: 48px;
+    height: 32px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .page {
+    padding: 8px 16px 16px;
+    gap: 8px;
+  }
+
+  .main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "center buns"
+      "center ingredients";
+    gap: 12px;
+  }
+
+  .center {
+    position: sticky;
+    top: 8px;
+    align-self: start;
+  }
+
+  .stage {
+    height: calc(100dvh - 140px);
+    min-height: 200px;
+  }
+
+  .hint {
+    min-height: 32px;
+    font-size: 13px;
+  }
+
+  .bunList {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .bunThumbnail {
+    width: 44px;
+    height: 28px;
+  }
+}

@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "experiments/*"
+
+# Gerado pelo create-next-app em cada app; centralizado aqui porque
+# arquivos pnpm-workspace.yaml dentro dos pacotes são ignorados no monorepo.
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
