@@ -19,10 +19,10 @@ export function BunPicker({ selectedBunVariantId, onSelectBunVariant }: BunPicke
               key={variant.id}
               role="radio"
               aria-checked={isSelected}
-              className={`${styles.bunButton} ${isSelected ? styles.bunButtonSelected : ""}`}
+              className={`${styles.optionCard} ${isSelected ? styles.optionCardSelected : ""}`}
               onClick={() => onSelectBunVariant(variant.id)}
             >
-              <span className={styles.bunThumbnail}>
+              <span className={styles.optionThumbnail}>
                 <Image
                   src={variant.topBun.imagePath}
                   alt=""

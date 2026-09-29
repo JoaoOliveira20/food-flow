@@ -106,3 +106,73 @@ documentação com uma entrevista ao responsável pelas pendências.
 - Lista definitiva de variantes de pão (`OPEN_DECISIONS.md` §13).
 - Reutilização e segundo dataset: adiados.
 - Documento original do desafio: o responsável vai adicioná-lo em `docs/`.
+
+---
+
+## 2026-09-29 — Presets, testes automatizados e correções
+
+**Ferramenta:** Claude Code (Claude Opus 5.5).
+
+### Contexto e solicitação
+
+Implementar o que faltava a partir das decisões já tomadas, sem reabrir decisões. A análise do código
+confirmou que o único requisito decidido e não implementado eram os presets (`DOMAIN_DECISIONS.md` §19);
+não havia testes automatizados.
+
+### Sugestões adotadas
+
+- **Receitas:** estado inicial e presets passaram a ser dados do mesmo tipo (`CompositionRecipe`) e usam a
+  mesma ação (`applyRecipe`), em vez de uma implementação paralela para presets. A composição guarda a
+  última receita aplicada (`appliedRecipe`) para decidir se a troca de preset precisa de confirmação.
+- **Confirmação no próprio painel** (não `window.confirm`), com foco no botão de confirmar e Esc para
+  cancelar. Detalhes registrados como decisões de implementação, não de produto (`DOMAIN_DECISIONS.md` §19).
+- **Miniatura do preset** gerada pelo próprio `computeStackLayout` (SVG), sem assets novos.
+- **Posição do painel** escolhida para não empurrar o palco para baixo entre 721 e 1100 px.
+- **Faixas de clique sem sobreposição:** um teste novo revelou que a altura mínima das faixas fazia camadas
+  finas invadirem as vizinhas (até ~3,5 px), contrariando `OPEN_DECISIONS.md` §10. Corrigido em
+  `stackLayout.ts`.
+- **Vitest** como dependência de desenvolvimento de `apps/web` (`pnpm test`), cobrindo reducer, receitas,
+  presets e empilhamento. Aviso de peer: o Vitest 5 pede `@types/node` ≥ 22; o template usa ^20. Não afeta
+  a execução e não foi alterado.
+- Verificação da interface com Chrome headless (`puppeteer-core` fora do repositório), em desenvolvimento e
+  produção: 62 verificações de layout, presets, confirmação, teclado, toque, arraste, rajadas e movimento
+  reduzido.
+
+### Decisões ainda abertas
+
+- Lista definitiva de variantes de pão (`OPEN_DECISIONS.md` §13).
+- Reutilização e segundo dataset (§15 e §16): adiados até o montador estar concluído; com os presets
+  implementados, a retomada depende do responsável.
+- Documento original do desafio; mockup de `docs/design/references/` ausente do disco.
+
+---
+
+## 2026-09-29 — Novos assets de molhos
+
+**Ferramenta:** Claude Code (Claude Opus 5.5).
+
+### Contexto e solicitação
+
+O responsável substituiu `ketchup.png`, `mustard.png` e `mayonnaise.png` por zigue-zagues horizontais
+(~4:1) e pediu que os molhos ficassem proporcionais ao hambúrguer e com aparência de aplicados sobre os
+ingredientes, sem colocá-los à frente de tudo.
+
+### Sugestões adotadas
+
+- **Causa da distorção:** o catálogo ainda declarava o tamanho dos PNGs antigos (~1,5:1), e a altura
+  exibida vem de `imageSize`. Corrigido, com um teste novo que compara `imageSize` com o cabeçalho de cada
+  PNG do catálogo.
+- **Sem abstração nova:** os três molhos usam uma configuração compartilhada (`SAUCE_SHAPE`) com os mesmos
+  três valores de `shape` dos outros ingredientes. A largura é relativa à base da pilha, que já escala com o
+  tamanho real do palco.
+- **Integração:** o molho afunda bastante na camada de baixo e cresce pouco a pilha; a ordem de desenho
+  continua sendo a lógica. Duas calibrações comparadas visualmente em 6 cenários; escolhida a que deixa o
+  molho mais visível sobre o ingrediente (afundamento 0,78, apoio 0,95).
+- Um teste anterior assumia que a base de cada imagem fica acima da base da anterior; isso deixou de valer
+  por projeto (gotas do molho passam da base de ingredientes finos). Substituído pelos invariantes reais:
+  ordem de desenho, faixas de clique crescentes e sem sobreposição, e molho que se sobrepõe à camada de baixo
+  acrescentando pouca altura.
+
+### Pendente
+
+- Miniaturas dos molhos no painel de ingredientes ficam finas; decisão de interface não tomada.

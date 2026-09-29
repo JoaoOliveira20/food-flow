@@ -31,6 +31,8 @@ export type BunVariant = {
 
 const ingredientImagePath = (fileName: string) => `/assets/ingredients/${fileName}.png`;
 
+const SAUCE_SHAPE: StackShape = { displayWidth: 256, restingSurfaceRatio: 0.95, sinkRatio: 0.78 };
+
 export const INGREDIENTS: Ingredient[] = [
   {
     id: "beef",
@@ -99,22 +101,22 @@ export const INGREDIENTS: Ingredient[] = [
     id: "mayo",
     name: "Maionese",
     imagePath: ingredientImagePath("mayonnaise"),
-    imageSize: { width: 200, height: 138 },
-    shape: { displayWidth: 156, restingSurfaceRatio: 0.46, sinkRatio: 0.18 },
+    imageSize: { width: 1389, height: 319 },
+    shape: SAUCE_SHAPE,
   },
   {
     id: "ketchup",
     name: "Ketchup",
     imagePath: ingredientImagePath("ketchup"),
-    imageSize: { width: 201, height: 135 },
-    shape: { displayWidth: 156, restingSurfaceRatio: 0.46, sinkRatio: 0.18 },
+    imageSize: { width: 1426, height: 350 },
+    shape: SAUCE_SHAPE,
   },
   {
     id: "mustard",
     name: "Mostarda",
     imagePath: ingredientImagePath("mustard"),
-    imageSize: { width: 198, height: 135 },
-    shape: { displayWidth: 156, restingSurfaceRatio: 0.46, sinkRatio: 0.18 },
+    imageSize: { width: 1354, height: 338 },
+    shape: SAUCE_SHAPE,
   },
   {
     id: "middle-bun",

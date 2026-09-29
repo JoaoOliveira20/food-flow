@@ -192,7 +192,7 @@ documentação · **[Resposta]** respondido pelo responsável · **[Pendente]** 
 | C5 — documento original do desafio | aguardando o arquivo; C1–C4 poderão ser conferidos com ele |
 | `OPEN_DECISIONS.md` §13 — lista definitiva de variantes de pão | as quatro implementadas não foram confirmadas explicitamente |
 | `OPEN_DECISIONS.md` §15 e §16 — reutilização e segundo dataset | adiados até o montador de hambúrguer estar concluído |
-| Presets | decididos; implementação pendente |
+| Presets | ✅ implementados em 29/09/2026 (ver `AI_DECISIONS.md`) |
 | Validação com pessoas e em aparelhos reais | não realizada |
 | F3 — "pouso" animado da miniatura e marcadores animados | melhoria opcional, não solicitada |
 | `favicon.ico` inexistente (404 no console) | observado; não discutido |

@@ -260,9 +260,11 @@ Estado da implementação (28/09/2026): em `apps/web`, a troca altera os pães s
 
 ## 14. Presets
 
-🟢 **Decidido / implementação pendente**
+🟢 **Decidido e implementado**
 
 **Decisão (28/09/2026):** presets Clássico, Bacon e Duplo, em painel próprio; aplicar substitui a composição, com confirmação se houve edição desde o último preset/reset; animação igual à do reset. Detalhes em `DOMAIN_DECISIONS.md` §19.
+
+Implementado em 29/09/2026 (`apps/web/src/burger/presetCatalog.ts`, `PresetPicker.tsx`); detalhes de implementação em `DOMAIN_DECISIONS.md` §19.
 
 _Histórico:_
 

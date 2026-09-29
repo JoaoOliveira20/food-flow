@@ -4,14 +4,19 @@ import { useReducer, useRef, type PointerEvent } from "react";
 import {
   compositionReducer,
   createInstanceId,
+  createRecipeInstanceIds,
+  hasChangedSinceAppliedRecipe,
   hasReachedLayerLimit,
   INITIAL_COMPOSITION,
-  INITIAL_INGREDIENT_IDS,
+  INITIAL_RECIPE,
+  matchesRecipe,
   MAX_LAYERS,
   placeDraggedItem,
   type Composition,
+  type CompositionRecipe,
 } from "@/burger/composition";
 import { findBunVariant, findIngredient } from "@/burger/ingredientCatalog";
+import { PRESETS, type CompositionPreset } from "@/burger/presetCatalog";
 import { computeStackLayout, scaleStackToStage } from "@/burger/stackLayout";
 import { useElementSize } from "@/hooks/useElementSize";
 import { useTransientMessage } from "@/hooks/useTransientMessage";
@@ -22,6 +27,7 @@ import { BurgerStage } from "./BurgerStage";
 import { DragGhost } from "./DragGhost";
 import { dragHintMessage } from "./dragMessages";
 import { IngredientPanel } from "./IngredientPanel";
+import { PresetPicker } from "./PresetPicker";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useBuilderDrag } from "./useBuilderDrag";
 import styles from "./burgerBuilder.module.css";
@@ -56,6 +62,7 @@ export function BurgerBuilder() {
   const selectedLayer = selectedIndex === -1 ? null : composition.layers[selectedIndex];
   const selectedIngredient = selectedLayer ? findIngredient(selectedLayer.ingredientId) : null;
   const stageMessage = drag ? dragHintMessage(drag, displayedComposition.layers, bunName) : message;
+  const currentPresetId = PRESETS.find((preset) => matchesRecipe(composition, preset))?.id ?? null;
 
   function pickIngredient(ingredientId: string) {
     if (composition.isReplacingSelection) {
@@ -71,13 +78,18 @@ export function BurgerBuilder() {
     if (layer && instance) startLayerDrag(event, layer, instance.ingredientId);
   }
 
-  function resetComposition() {
-    dispatch({ type: "resetComposition", instanceIds: INITIAL_INGREDIENT_IDS.map(() => createInstanceId()) });
+  function applyRecipe(recipe: CompositionRecipe) {
+    dispatch({ type: "applyRecipe", recipe, instanceIds: createRecipeInstanceIds(recipe) });
+  }
+
+  function applyPreset(preset: CompositionPreset) {
+    applyRecipe(preset);
+    showMessage(`✓ Preset ${preset.name} aplicado.`);
   }
 
   return (
     <div className={styles.page}>
-      <BuilderHeader onReset={resetComposition} />
+      <BuilderHeader onReset={() => applyRecipe(INITIAL_RECIPE)} />
 
       <main className={styles.main}>
         <IngredientPanel
@@ -140,6 +152,12 @@ export function BurgerBuilder() {
         <BunPicker
           selectedBunVariantId={composition.bunVariantId}
           onSelectBunVariant={(bunVariantId) => dispatch({ type: "selectBunVariant", bunVariantId })}
+        />
+
+        <PresetPicker
+          currentPresetId={currentPresetId}
+          requiresConfirmation={hasChangedSinceAppliedRecipe(composition)}
+          onApplyPreset={applyPreset}
         />
       </main>
 

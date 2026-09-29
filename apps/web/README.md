@@ -10,6 +10,7 @@ pnpm build
 pnpm start
 pnpm --filter @food-flow/web lint
 pnpm --filter @food-flow/web typecheck
+pnpm --filter @food-flow/web test   # Vitest (composição, empilhamento, presets e tamanhos dos PNGs)
 ```
 
 ---
@@ -28,19 +29,23 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 | Pasta / arquivo | Responsabilidade | Depende do Motion? |
 | --- | --- | --- |
 | `src/burger/ingredientCatalog.ts` | catálogo de ingredientes e variantes de pão (dados) | não |
-| `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`) | não |
+| `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`); receitas (`INITIAL_RECIPE`, `matchesRecipe`) | não |
+| `src/burger/presetCatalog.ts` | presets (dados: nome, variante de pão, ingredientes) | não |
 | `src/burger/stackLayout.ts` | posições finais da pilha (`computeStackLayout`, `scaleStackToStage`) | não |
 | `src/burger/dragGeometry.ts` | índice de inserção e posição da miniatura durante o arraste | não |
 | `src/hooks/useCompositionDrag.ts` | arrastar e soltar com Pointer Events | não |
 | `src/hooks/useElementSize.ts`, `useTransientMessage.ts` | medida do palco; mensagens temporárias | não |
+| `src/hooks/useScrollIntoViewWhen.ts` | rola um painel até a área visível (lista de substituição, confirmação de preset) | não¹ |
 | `src/components/burger-builder/BurgerBuilder.tsx` | tela: liga estado, layout, arraste e painéis | não |
 | `src/components/burger-builder/useBuilderDrag.ts` | liga o arraste às ações da composição e às mensagens | não |
 | `src/components/burger-builder/layerMotion.ts` | **definições de animação** (spring, entrada, saída, acomodação do pão) | sim |
 | `src/components/burger-builder/StackLayer.tsx` | **uma camada animada** (`motion.div`) | sim |
 | `src/components/burger-builder/BurgerStage.tsx` | **palco animado**: escala, `AnimatePresence`, `MotionConfig` | sim |
-| demais componentes em `burger-builder/` | painéis, barra de seleção, faixas de clique, miniatura e indicador do arraste | não¹ |
+| `src/components/burger-builder/PresetPicker.tsx` | painel de presets e confirmação de troca | não |
+| `src/components/burger-builder/RecipePreview.tsx` | miniatura estática de uma receita (SVG a partir de `computeStackLayout`) | não |
+| demais componentes em `burger-builder/` | painéis, barra de seleção, faixas de clique, miniatura e indicador do arraste | não |
 
-¹ `IngredientPanel` usa `useReducedMotion` do Motion só para decidir se a rolagem até a lista é suave.
+¹ `useScrollIntoViewWhen` usa `useReducedMotion` do Motion só para decidir se a rolagem é suave.
 
 ### Composição e empilhamento
 
@@ -51,7 +56,27 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
   - `restingSurfaceRatio` — fração da altura da imagem onde a próxima camada se apoia;
   - `sinkRatio` — fração da própria altura que afunda na camada de baixo.
 - Não há posições fixas nem regras por ingrediente. A altura vem da proporção do PNG.
+- Molhos (ketchup, mostarda, maionese) compartilham `SAUCE_SHAPE`: largura 256 (≈ 88% da carne),
+  afundam 78% da própria altura na camada de baixo e acrescentam pouca altura à pilha. A camada seguinte
+  cobre só a parte de cima do molho; ondas e gotas ficam visíveis sobre o ingrediente em que foi aplicado.
+  A ordem de desenho continua sendo a ordem lógica.
+- Cada ingrediente tem uma faixa de clique entre as superfícies de apoio, com altura mínima de 18 px
+  na escala base; quando a altura mínima faria duas faixas se sobreporem, elas se dividem no ponto
+  médio da sobreposição (`separateHitAreas`).
 - `scaleStackToStage` reduz a composição para caber no palco (máximo 1,25×).
+
+### Receitas, reset e presets
+
+- Uma receita (`CompositionRecipe`) é `{ bunVariantId, ingredientIds }`. A composição inicial
+  (`INITIAL_RECIPE`) e os presets (`PRESETS`) são receitas; reset e preset usam a mesma ação
+  (`applyRecipe`), que cria novas instâncias e guarda a receita em `appliedRecipe`.
+- `hasChangedSinceAppliedRecipe` compara ingredientes, ordem e pão com a última receita aplicada
+  (seleção não conta). Se houve mudança, escolher um preset abre a confirmação no próprio painel
+  (foco no botão "Trocar"; Esc ou "Cancelar" fecham); sem mudança, a troca é direta.
+- O preset igual à composição atual (`matchesRecipe`) aparece marcado (`aria-current`); escolhê-lo não
+  faz nada. O reset não pede confirmação (comportamento anterior mantido).
+- Layout: no desktop, o painel de presets fica abaixo do de pão; entre 721 e 1100 px, no topo da coluna
+  dos ingredientes, ao lado do pão, para não empurrar o palco; no celular, entre pão e ingredientes.
 
 ### Animações (Motion)
 
@@ -59,7 +84,7 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 | --- | --- | --- |
 | Camada nova (adicionar, duplicar, substituir, arrastar do menu) | entra de 56 px acima com −3° e opacidade 0, até o repouso | `enteringLayerState` → `restingLayerState` |
 | Camada muda de posição (ordem, remoção de vizinha, prévia do arraste) | `animate.y` muda e a mola parte da posição e velocidade atuais | `restingLayerState` + `layerSpring` |
-| Camada removida (remover, substituir, reset) | `AnimatePresence` a mantém até a saída: desce 10 px, escala 0,85, some em 0,22 s | `leavingLayerState` |
+| Camada removida (remover, substituir, reset, preset) | `AnimatePresence` a mantém até a saída: desce 10 px, escala 0,85, some em 0,22 s | `leavingLayerState` |
 | Troca de pão | acomodação de escala 0,94 → 1 nos dois pães (`useAnimate`) | `useBunSettleAnimation` em `BurgerStage` |
 | Composição cresce/encolhe | escala do conjunto com a mesma mola | `BurgerStage` |
 
@@ -94,8 +119,10 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 | Quero… | Onde |
 | --- | --- |
 | adicionar um ingrediente | colocar o PNG em `public/assets/ingredients/` e uma entrada em `INGREDIENTS` (`ingredientCatalog.ts`) com `imageSize` e `shape`; nenhuma outra mudança |
+| trocar o PNG de um ingrediente | atualizar `imageSize` com o tamanho natural do novo arquivo (o teste `ingredientCatalog.test.ts` falha se divergir) e revisar `shape` |
 | ajustar como um ingrediente se encaixa | `shape` do ingrediente (`restingSurfaceRatio`, `sinkRatio`, `displayWidth`) |
 | adicionar uma variante de pão | PNGs de topo e base + entrada em `BUN_VARIANTS` |
+| adicionar ou mudar um preset | entrada em `PRESETS` (`presetCatalog.ts`); o teste `presetCatalog.test.ts` confere ids e limite |
 | mudar a entrada, a saída ou a mola | `layerMotion.ts` |
 | criar um novo comportamento de composição | nova ação em `compositionReducer` (`composition.ts`) e o gatilho na interface; o Motion anima o resultado sem mudanças |
 | mudar regras do arraste | `useCompositionDrag.ts` (gestos) e `dragGeometry.ts` (geometria) |
@@ -115,7 +142,12 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 ## Limitações conhecidas
 
-- Presets decididos, mas ainda não implementados (`docs/DOMAIN_DECISIONS.md` §19).
 - Os valores de `shape` foram ajustados visualmente; não há medição automática dos PNGs.
 - A miniatura do arraste não "pousa" animada no destino ao soltar.
+- Nas miniaturas do painel de ingredientes (56×40, `object-fit: contain`), os molhos, muito horizontais,
+  aparecem como faixas finas; a maionese tem pouco contraste com o fundo claro.
 - Validação feita com Chrome headless e toque emulado; sem dispositivos físicos nem testes com pessoas.
+- Testes automatizados cobrem só a lógica pura (`src/burger/`); a interface e as animações foram
+  verificadas com um roteiro headless fora do repositório.
+- Entre 721 e 1100 px de largura, com alturas próximas de 768 px, a base do palco pode ficar abaixo da
+  primeira dobra (já era assim antes dos presets).

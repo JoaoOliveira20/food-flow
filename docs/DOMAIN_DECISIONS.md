@@ -479,7 +479,7 @@ O preset não deve possuir uma implementação paralela específica.
 
 ### Presets decididos (28/09/2026)
 
-Implementação pendente. Ingredientes da base para o topo:
+Implementados em 29/09/2026 (`apps/web/src/burger/presetCatalog.ts`). Ingredientes da base para o topo:
 
 | Preset | Pão | Ingredientes |
 | --- | --- | --- |
@@ -490,6 +490,13 @@ Implementação pendente. Ingredientes da base para o topo:
 * A escolha fica em um painel próprio ("Presets"), no estilo dos cards de tipo de pão.
 * Aplicar um preset substitui a composição. Se a composição foi editada desde o último preset ou reset, é pedida confirmação; sem edições, a troca é direta.
 * A animação é igual à do reset: as camadas atuais saem e as do preset entram ao mesmo tempo; o pão troca com a acomodação existente.
+
+Detalhes de implementação (29/09/2026; escolhidos na implementação e reversíveis, não são decisões de produto confirmadas):
+
+* A confirmação aparece dentro do painel de presets ("Trocar" / "Cancelar"), sem janela modal do navegador.
+* "Editada" significa ingredientes, ordem ou pão diferentes da última receita aplicada; selecionar camadas não conta, e desfazer as mudanças volta a dispensar a confirmação.
+* O preset igual à composição atual fica marcado; escolhê-lo não altera nada.
+* Cada card mostra uma miniatura da composição do preset, gerada a partir dos mesmos dados e do mesmo cálculo de empilhamento.
 
 ---
 

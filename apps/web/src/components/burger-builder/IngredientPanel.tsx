@@ -1,9 +1,9 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
 import Image from "next/image";
-import { useEffect, useRef, type PointerEvent } from "react";
+import type { PointerEvent } from "react";
 import { INGREDIENTS } from "@/burger/ingredientCatalog";
+import { useScrollIntoViewWhen } from "@/hooks/useScrollIntoViewWhen";
 import styles from "./burgerBuilder.module.css";
 
 type IngredientPanelProps = {
@@ -13,18 +13,6 @@ type IngredientPanelProps = {
   onIngredientPointerDown: (event: PointerEvent, ingredientId: string) => void;
 };
 
-function useScrollIntoViewWhen(isActive: boolean) {
-  const elementRef = useRef<HTMLElement>(null);
-  const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (!isActive) return;
-    elementRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "nearest" });
-  }, [isActive, prefersReducedMotion]);
-
-  return elementRef;
-}
-
 export function IngredientPanel({
   replacedIngredientName,
   isDisabled,
@@ -32,7 +20,7 @@ export function IngredientPanel({
   onIngredientPointerDown,
 }: IngredientPanelProps) {
   const isReplacing = replacedIngredientName !== null;
-  const panelRef = useScrollIntoViewWhen(isReplacing);
+  const panelRef = useScrollIntoViewWhen<HTMLElement>(isReplacing);
 
   return (
     <aside

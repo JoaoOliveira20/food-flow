@@ -3,11 +3,17 @@ export type LayerInstance = {
   ingredientId: string;
 };
 
+export type CompositionRecipe = {
+  bunVariantId: string;
+  ingredientIds: string[];
+};
+
 export type Composition = {
   layers: LayerInstance[];
   bunVariantId: string;
   selectedInstanceId: string | null;
   isReplacingSelection: boolean;
+  appliedRecipe: CompositionRecipe;
 };
 
 export type DragSource =
@@ -25,11 +31,13 @@ export type CompositionAction =
   | { type: "clearSelection" }
   | { type: "toggleReplacing" }
   | { type: "selectBunVariant"; bunVariantId: string }
-  | { type: "resetComposition"; instanceIds: string[] };
+  | { type: "applyRecipe"; recipe: CompositionRecipe; instanceIds: string[] };
 
 export const MAX_LAYERS = 14;
-export const INITIAL_INGREDIENT_IDS = ["beef", "cheddar", "onion", "tomato", "lettuce"];
-export const INITIAL_BUN_VARIANT_ID = "classic";
+export const INITIAL_RECIPE: CompositionRecipe = {
+  bunVariantId: "classic",
+  ingredientIds: ["beef", "cheddar", "onion", "tomato", "lettuce"],
+};
 
 let instanceCounter = 0;
 
@@ -38,18 +46,36 @@ export function createInstanceId(): string {
   return `layer-${instanceCounter}`;
 }
 
-export function createInitialComposition(instanceIds: string[]): Composition {
+export function createRecipeInstanceIds(recipe: CompositionRecipe): string[] {
+  return recipe.ingredientIds.map(() => createInstanceId());
+}
+
+export function createCompositionFromRecipe(recipe: CompositionRecipe, instanceIds: string[]): Composition {
   return {
-    layers: INITIAL_INGREDIENT_IDS.map((ingredientId, index) => ({ instanceId: instanceIds[index], ingredientId })),
-    bunVariantId: INITIAL_BUN_VARIANT_ID,
+    layers: recipe.ingredientIds.map((ingredientId, index) => ({ instanceId: instanceIds[index], ingredientId })),
+    bunVariantId: recipe.bunVariantId,
     selectedInstanceId: null,
     isReplacingSelection: false,
+    appliedRecipe: recipe,
   };
 }
 
-export const INITIAL_COMPOSITION = createInitialComposition(
-  INITIAL_INGREDIENT_IDS.map((_, index) => `initial-layer-${index}`),
+export const INITIAL_COMPOSITION = createCompositionFromRecipe(
+  INITIAL_RECIPE,
+  INITIAL_RECIPE.ingredientIds.map((_, index) => `initial-layer-${index}`),
 );
+
+export function matchesRecipe(composition: Composition, recipe: CompositionRecipe): boolean {
+  return (
+    composition.bunVariantId === recipe.bunVariantId &&
+    composition.layers.length === recipe.ingredientIds.length &&
+    composition.layers.every((layer, index) => layer.ingredientId === recipe.ingredientIds[index])
+  );
+}
+
+export function hasChangedSinceAppliedRecipe(composition: Composition): boolean {
+  return !matchesRecipe(composition, composition.appliedRecipe);
+}
 
 export function hasReachedLayerLimit(layers: LayerInstance[]): boolean {
   return layers.length >= MAX_LAYERS;
@@ -145,7 +171,7 @@ export function compositionReducer(state: Composition, action: CompositionAction
       return state.selectedInstanceId ? { ...state, isReplacingSelection: !state.isReplacingSelection } : state;
     case "selectBunVariant":
       return { ...state, bunVariantId: action.bunVariantId };
-    case "resetComposition":
-      return createInitialComposition(action.instanceIds);
+    case "applyRecipe":
+      return createCompositionFromRecipe(action.recipe, action.instanceIds);
   }
 }

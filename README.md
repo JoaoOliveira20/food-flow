@@ -34,6 +34,7 @@ pnpm build               # build da app principal
 pnpm build:all           # build de todos os pacotes
 pnpm lint                # ESLint em todos os pacotes
 pnpm typecheck           # verificação de tipos em todos os pacotes
+pnpm test                # testes (Vitest) da app principal
 ```
 
 ## Documentação

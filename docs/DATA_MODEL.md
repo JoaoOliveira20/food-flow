@@ -19,13 +19,17 @@ Reutilização para outros datasets continua adiada (`OPEN_DECISIONS.md` §15 e 
 | `bunVariantId` | variante de pão; define os pães superior e inferior, que não são camadas |
 | `selectedInstanceId` | camada selecionada, ou `null` |
 | `isReplacingSelection` | se o próximo ingrediente escolhido substitui a camada selecionada |
+| `appliedRecipe` | última receita aplicada (estado inicial, reset ou preset); base para saber se houve edição |
 
 - Limite: 14 camadas intermediárias (`MAX_LAYERS`).
-- Estado inicial: carne, cheddar, cebola roxa, tomate, alface (base → topo), pão clássico.
+- Estado inicial (`INITIAL_RECIPE`): carne, cheddar, cebola roxa, tomate, alface (base → topo), pão clássico.
+- **Receita** (`CompositionRecipe`): `bunVariantId` + `ingredientIds` (base → topo). Aplicar uma receita
+  cria instâncias novas para cada ingrediente.
 - Todas as mudanças passam pelo `compositionReducer` (funções puras); os `instanceId` são criados fora dele.
 
-## Presets
+## Presets — `apps/web/src/burger/presetCatalog.ts`
 
-Decididos em `DOMAIN_DECISIONS.md` §19 (Clássico, Bacon, Duplo). **Implementação pendente**: a estrutura de
-dados dos presets ainda não existe no código e deve reutilizar a composição acima (lista de ingredientes +
-variante de pão), sem implementação paralela.
+Decididos em `DOMAIN_DECISIONS.md` §19 (Clássico, Bacon, Duplo); implementados em 29/09/2026.
+
+- **Preset** (`CompositionPreset`): uma receita com `id` e `name`. Não há implementação paralela: aplicar
+  um preset usa a mesma ação do reset (`applyRecipe`).

@@ -12,6 +12,7 @@
     "dev:react-spring": "pnpm --filter @food-flow/experiment-react-spring dev",
     "build:all": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @food-flow/web test"
   }
 }

@@ -77,6 +77,25 @@ function hitAreaBetween(lowerSurface: number, upperSurface: number): HitArea {
   return { bottom: lowerSurface + (upperSurface - lowerSurface - height) / 2, height };
 }
 
+function hitAreaTop(hitArea: HitArea): number {
+  return hitArea.bottom + hitArea.height;
+}
+
+function boundaryBetween(lower: HitArea, upper: HitArea): number {
+  return (hitAreaTop(lower) + upper.bottom) / 2;
+}
+
+function separateHitAreas(layers: PositionedLayer[]): PositionedLayer[] {
+  return layers.map((layer, index) => {
+    if (!layer.hitArea) return layer;
+    const below = layers[index - 1]?.hitArea;
+    const above = layers[index + 1]?.hitArea;
+    const bottom = below ? Math.max(layer.hitArea.bottom, boundaryBetween(below, layer.hitArea)) : layer.hitArea.bottom;
+    const top = above ? Math.min(hitAreaTop(layer.hitArea), boundaryBetween(layer.hitArea, above)) : hitAreaTop(layer.hitArea);
+    return { ...layer, hitArea: { bottom, height: top - bottom } };
+  });
+}
+
 export function computeStackLayout(composition: Composition): StackLayout {
   const layers: PositionedLayer[] = [];
   let restingSurface = 0;
@@ -105,7 +124,7 @@ export function computeStackLayout(composition: Composition): StackLayout {
     stackHeight = Math.max(stackHeight, bottom + height);
   });
 
-  return { layers, height: stackHeight };
+  return { layers: separateHitAreas(layers), height: stackHeight };
 }
 
 export function scaleStackToStage(layout: StackLayout, stage: StageSize): number {
