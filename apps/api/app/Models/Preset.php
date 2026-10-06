@@ -47,7 +47,7 @@ class Preset extends Model
 
     public function isAvailable(): bool
     {
-        return $this->items->every(fn (PresetItem $item) => $item->ingredient->is_visible);
+        return $this->loadMissing('items.ingredient')->items->every(fn (PresetItem $item) => $item->ingredient->is_visible);
     }
 
     /**

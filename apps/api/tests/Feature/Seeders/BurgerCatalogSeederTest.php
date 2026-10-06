@@ -44,7 +44,7 @@ class BurgerCatalogSeederTest extends TestCase
 
         $builder = Builder::where('slug', 'burger')->firstOrFail();
         $recipe = fn (Preset $preset) => [
-            $preset->bunVariant->slug,
+            $preset->loadMissing(['bunVariant', 'items.ingredient'])->bunVariant->slug,
             $preset->items->map(fn ($item) => $item->ingredient->slug)->all(),
         ];
 

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Media\ImageStorage;
 use App\Media\StoredImage;
 use App\Models\Builder;
-use App\Models\Ingredient;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;

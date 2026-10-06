@@ -407,6 +407,17 @@ evolução futura (T-H8), pois o fluxo acima evita órfãos na operação normal
 - Rotas separadas em `/api/...` (público, só leitura) e `/api/admin/...` (gestão). Contrato inicial:
   `ARCHITECTURE.md` §5.
 
+Decidido na implementação (T-B7, 06/10/2026):
+
+- **camelCase** nas respostas e nos corpos das requisições (o frontend é TypeScript; as chaves de erro 422
+  coincidem com os campos do formulário); a conversão para as colunas snake_case fica nos Form Requests/Resources.
+- Mensagens da API em **pt-BR** (`APP_LOCALE=pt_BR`, arquivos em `lang/`), com inglês como alternativa.
+- Toda resposta de erro é JSON; modelo inexistente responde 404 com `{"message": "Recurso não encontrado."}`.
+- Limites: 120 requisições/min por IP nas rotas públicas e 60/min nas de gestão.
+- CORS só para `FRONTEND_URL` (padrão `http://localhost:3000`), métodos GET/POST/PATCH/DELETE.
+- Eloquent em modo estrito fora de produção (impede consultas N+1 e atributos inexistentes).
+- API pura: removidos do esqueleto o Vite/Tailwind, a página de boas-vindas e as rotas web; `/` responde 404.
+
 ### BD-19 — Localização do backend no monorepo e banco
 
 | Item | Proposta | Alternativas |
