@@ -110,8 +110,8 @@ T-E1 não depende do backend e pode começar logo após a Fase 0, em paralelo co
 
 | ID | Tarefa | Decisões | Depende de | Estado |
 | --- | --- | --- | --- | --- |
-| T-F1 | Estrutura `/admin`: layout, navegação, cliente de gestão, exibição de erros 422/409 | BD-12, BD-20 | T-E2, T-B7 | ⏳ |
-| T-F2 | Dashboard: contagens, listas de ingredientes (miniatura, visível) e presets, ações de editar | — | T-F1, T-C1, T-D1 | ⏳ |
+| T-F1 | Estrutura `/admin`: layout, navegação, cliente de gestão, exibição de erros 422/409 | BD-12, BD-20 | T-E2, T-B7 | ✅ 06/10/2026 — `/admin` com layout próprio (ponto único para proteger no futuro), aviso de versão sem login, `loading`/`error`; `src/api/admin/` com leituras no servidor (`queries.ts`), escritas do navegador (`mutations.ts`, `ApiError` com erros por campo e mensagens para 409/413/429) e tipos; `NEXT_PUBLIC_API_URL` no `.env.example` |
+| T-F2 | Dashboard: contagens, listas de ingredientes (miniatura, visível) e presets, ações de editar | — | T-F1, T-C1, T-D1 | ✅ 06/10/2026 — painel com contagens, lista de ingredientes (miniatura, visível/oculto, uso em presets) e de presets (miniatura pelo mesmo `RecipePreview` do builder, composição inicial, indisponível), links de edição e criação; verificado com a API real |
 | T-F3 | Criar ingrediente: imagem com preview local no renderer real, dicas de imagem, nome, forma com valores sugeridos | BD-08, `ASSET_ANALYSIS.md` | T-F1, T-C2, T-E1 | ⏳ |
 | T-F4 | Editar ingrediente: ajuste da forma com preview, troca de imagem | BD-08, BD-16 | T-F3, T-C3 | ⏳ |
 | T-F5 | Publicar/ocultar com aviso dos presets que ficam indisponíveis | BD-14 | T-F4, T-C4 | ⏳ |

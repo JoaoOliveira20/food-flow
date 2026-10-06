@@ -1,4 +1,5 @@
 import type { BuilderCatalog } from "@/burger/catalog";
+import { serverApiUrl } from "./config";
 
 type ApiImage = {
   url: string;
@@ -57,26 +58,26 @@ export function toBuilderCatalog(data: ApiBuilderCatalog): BuilderCatalog | null
   };
 }
 
-function apiUrl(): string {
-  const url = process.env.API_URL;
-  if (!url) throw new Error("API_URL is not set. Copy apps/web/.env.example to apps/web/.env.local.");
-  return url.replace(/\/+$/, "");
-}
-
 export type BuilderCatalogResult =
   | { status: "available"; catalog: BuilderCatalog }
   | { status: "unavailable" }
   | { status: "notFound" };
 
-export async function fetchBuilderCatalog(slug: string): Promise<BuilderCatalogResult> {
-  const response = await fetch(`${apiUrl()}/api/builders/${encodeURIComponent(slug)}`, {
+export async function fetchBuilderCatalogData(slug: string): Promise<ApiBuilderCatalog | null> {
+  const response = await fetch(`${serverApiUrl()}/api/builders/${encodeURIComponent(slug)}`, {
     headers: { Accept: "application/json" },
   });
 
-  if (response.status === 404) return { status: "notFound" };
+  if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Builder catalog request failed with status ${response.status}.`);
 
   const { data } = (await response.json()) as { data: ApiBuilderCatalog };
+  return data;
+}
+
+export async function fetchBuilderCatalog(slug: string): Promise<BuilderCatalogResult> {
+  const data = await fetchBuilderCatalogData(slug);
+  if (!data) return { status: "notFound" };
   const catalog = toBuilderCatalog(data);
   return catalog ? { status: "available", catalog } : { status: "unavailable" };
 }

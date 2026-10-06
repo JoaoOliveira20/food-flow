@@ -346,6 +346,11 @@ deve seguir a documentação do Next 16 em `node_modules/next/dist/docs/` no mom
 
 **Proposta:** A.
 
+Implementação (T-F1, 06/10/2026): as **leituras** do admin são feitas no servidor do Next (`API_URL`, com
+`connection()`), como no builder, com `loading`/`error` por rota; as **escritas** saem do navegador direto para a API
+(`NEXT_PUBLIC_API_URL`, CORS) e, em seguida, `router.refresh()`/navegação recarregam os dados do servidor. Erros 422
+viram mensagens por campo; 409, 413 e 429 têm mensagens próprias.
+
 ### BD-13 — Limite de camadas
 
 **Proposta:** `builders.max_layers` (seed: 14). O backend valida presets com ele; a API o envia ao frontend, que
