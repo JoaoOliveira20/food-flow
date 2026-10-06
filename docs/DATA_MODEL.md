@@ -38,7 +38,7 @@ Decididos em `DOMAIN_DECISIONS.md` §19 (Clássico, Bacon, Duplo); implementados
 
 ## Modelo persistido — fase Backend/Admin
 
-Status: 🔷 **Proposta de 06/10/2026, aguardando revisão** (`BACKEND_DECISIONS.md`). O modelo da composição
+Status: 🟢 **Decidido em 06/10/2026** (revisão T-A9, `BACKEND_DECISIONS.md`); migrations em `apps/api/database/migrations/2026_10_06_*`. O modelo da composição
 acima **não muda**: muda a origem do catálogo e dos presets, que passam a vir da API.
 
 ```text
@@ -53,8 +53,8 @@ builders 1 ──── * bun_variants
 | `builders` | `id`, `slug` (único), `name`, `max_layers`, `initial_preset_id` (nulo), timestamps | Criado por seed (BD-02). Seed: `burger`, 14 camadas (BD-13) |
 | `bun_variants` | `id`, `builder_id`, `slug`, `name`, `top_image_path`, `top_image_width`, `top_image_height`, `bottom_image_path`, `bottom_image_width`, `bottom_image_height`, `sort_order`, timestamps | `slug` único por montador; só leitura nesta fase (BD-03) |
 | `ingredients` | `id`, `builder_id`, `slug`, `name`, `image_path`, `image_width`, `image_height`, `display_width`, `resting_surface_ratio`, `sink_ratio`, `is_visible` (padrão `false`), `sort_order`, timestamps | `slug` único por montador; dimensões calculadas no upload (BD-04, BD-05, BD-14) |
-| `presets` | `id`, `builder_id`, `name`, `bun_variant_id`, `sort_order`, timestamps | Variante do mesmo montador (BD-06) |
-| `preset_items` | `id`, `preset_id`, `ingredient_id`, `position` | `position` 0..n−1 base → topo, único por preset; repetição de ingrediente permitida; `ingredient_id` com `restrict` (BD-06, BD-15) |
+| `presets` | `id`, `builder_id`, `name`, `bun_variant_id`, `sort_order`, timestamps | Variante do mesmo montador (BD-06); `name` único por montador (adicionado na implementação, 06/10/2026) |
+| `preset_items` | `id`, `preset_id`, `ingredient_id`, `position` (sem timestamps: os itens são substituídos em bloco) | `position` 0..n−1 base → topo, único por preset; repetição de ingrediente permitida; `ingredient_id` com `restrict` (BD-06, BD-15) |
 
 Correspondência com o frontend atual:
 
