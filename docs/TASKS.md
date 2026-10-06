@@ -41,12 +41,12 @@ pelo Explorador do Windows travou no `node_modules` e foi descartada; o reposit�
 
 | ID | Tarefa | Depende de | Estado |
 | --- | --- | --- | --- |
-| T-01 | Commitar e enviar ao GitHub a documentação desta fase; manter a cópia do Windows intocada como backup | T-A10 | 🚧 06/10/2026 — commit `66cf65f` no branch `feature/backend-admin`; push aguardando autorização do responsável |
+| T-01 | Commitar e enviar ao GitHub a documentação desta fase; manter a cópia do Windows intocada como backup | T-A10 | 🚧 06/10/2026 — tudo commitado no branch `feature/backend-admin`; push aguardando autorização do responsável |
 | T-02 | Preparar o Ubuntu: corrigir `~/.ssh` (dono e permissões), `core.autocrlf input`, Node 24 (nvm), Corepack/pnpm; conferir que `node`/`pnpm` são os do Linux | T-A10 | ✅ 06/10/2026 — `autocrlf input`, Node 24.21.0 (padrão no nvm), Corepack e pnpm 12.6.0 do Linux; SSH com o GitHub funcionando. Recomendado (não bloqueia): `~/.ssh` ainda pertence ao `root` |
 | T-03 | Docker: ligar a integração WSL do Docker Desktop para `Ubuntu`; conferir `docker info`, `docker compose version` e `kool`; conferir se as imagens PHP do Kool atendem ao Laravel atual | T-A10 | ✅ 06/10/2026 — Docker 29.5.2, Compose v5.1.3 e Kool 3.6.0 no Ubuntu; Laravel atual (skeleton 13.10.1 / framework 13.34.0) exige PHP ^8.3 e o Kool tem `kooldev/php` 8.3, 8.4 e 8.5 com nginx (atualizadas em 30/08/2026) |
 | T-04 | Clonar em `/home/palad/projetos/food-flow`; adicionar `.gitattributes` (LF); `pnpm install` | T-01, T-02 | ✅ 06/10/2026 — clonado da cópia do Windows (histórico completo, `origin` → GitHub), documentação copiada em LF e conferida, `pnpm install`, `.gitattributes` (renormalização sem mudança em código) |
 | T-05 | Validar no Linux: `pnpm lint`, `typecheck`, `test`, `build`, `build:all`; `pnpm dev` e os três experimentos abertos no navegador do Windows | T-04 | ✅ 06/10/2026 — `lint`, `typecheck`, `test` (61), `build:all`; `pnpm dev` e os três experimentos responderam 200 no Linux e no navegador do Windows |
-| T-06 | Editores e Claude Code apontando para a pasta do WSL; atualizar `README.md` com o fluxo de desenvolvimento | T-05 | 🚧 06/10/2026 — `README.md` com o fluxo no WSL; Claude Code rodando no WSL com as conversas migradas; VS Code: abrir com `code .` na pasta do WSL |
+| T-06 | Editores e Claude Code apontando para a pasta do WSL; atualizar `README.md` com o fluxo de desenvolvimento | T-05 | ✅ 06/10/2026 — Claude Code rodando no WSL com as conversas migradas; `README.md` com o fluxo (WSL, `code .`, como rodar e parar) |
 | T-07 | Aposentar a cópia do Windows (decisão do responsável) | T-05 | ⏳ |
 
 T-B1 passa a depender de T-03 e T-05.
