@@ -74,12 +74,12 @@ ambiente e não devem ser alterados nem mantidos; servem de referência para a d
 
 | ID | Tarefa | Decisões | Depende de | Estado |
 | --- | --- | --- | --- | --- |
-| T-C1 | Listar e detalhar ingredientes no admin (inclui ocultos e uso em presets) | BD-18 | T-B7 | ⏳ |
-| T-C2 | Criar ingrediente com upload: Form Request, regras de arquivo, dimensões calculadas, nome por hash, nasce oculto | BD-04, BD-05, BD-08–BD-10 | T-B3, T-C1 | ⏳ |
-| T-C3 | Editar ingrediente: nome, slug, forma; troca de imagem com remoção do arquivo antigo após o commit | BD-16, BD-17 | T-C2 | ⏳ |
-| T-C4 | Publicar/ocultar (`is_visible`) e reflexo na disponibilidade dos presets | BD-14 | T-C1 | ⏳ |
-| T-C5 | Excluir ingrediente: 409 se usado em preset; arquivo removido após o commit | BD-15, BD-16 | T-C2 | ⏳ |
-| T-C6 | Testes de upload: extensão falsa, MIME trocado, SVG, JPEG, arquivo corrompido, grande demais, pequeno demais, nome com caminho | BD-10 | T-C2 | ⏳ |
+| T-C1 | Listar e detalhar ingredientes no admin (inclui ocultos e uso em presets) | BD-18 | T-B7 | ✅ 06/10/2026 — lista com ocultos e `presetsCount` (presets distintos); detalhe com os presets que usam o ingrediente |
+| T-C2 | Criar ingrediente com upload: Form Request, regras de arquivo, dimensões calculadas, nome por hash, nasce oculto | BD-04, BD-05, BD-08–BD-10 | T-B3, T-C1 | ✅ 06/10/2026 — `StoreIngredientRequest` (PNG/WebP pelo conteúdo + extensão coerente, 2 MB, 280–3000 px, faixas da forma, slug único por montador ou gerado), `IngredientService` (grava a imagem antes do banco; remove se falhar); nasce oculto (`isVisible` proibido na criação); mensagens em pt-BR |
+| T-C3 | Editar ingrediente: nome, slug, forma; troca de imagem com remoção do arquivo antigo após o commit | BD-16, BD-17 | T-C2 | ✅ 06/10/2026 — edição parcial; troca de imagem por `POST` + `_method=PATCH`; arquivo antigo removido só após o commit; troca recusada mantém a imagem atual |
+| T-C4 | Publicar/ocultar (`is_visible`) e reflexo na disponibilidade dos presets | BD-14 | T-C1 | ✅ 06/10/2026 — `isVisible` no PATCH; ocultar retira o ingrediente e os presets que o usam da API pública |
+| T-C5 | Excluir ingrediente: 409 se usado em preset; arquivo removido após o commit | BD-15, BD-16 | T-C2 | ✅ 06/10/2026 — 409 com a lista de presets se estiver em uso (FK `restrict` como reforço); sem uso: remove registro e arquivo |
+| T-C6 | Testes de upload: extensão falsa, MIME trocado, SVG, JPEG, arquivo corrompido, grande demais, pequeno demais, nome com caminho | BD-10 | T-C2 | ✅ 06/10/2026 — 21 testes: JPEG, GIF, SVG com script, texto e PHP renomeados para .png, PNG com extensão .php, estreito, alto e pesado demais, WebP aceito, falha de banco sem órfão; verificado ao vivo também 3,5 MB (422) e 5 MB (413 do nginx) |
 
 ## Fase D — Presets (backend)
 

@@ -62,6 +62,11 @@ validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18)
 | --- | --- | --- |
 | `GET /api/builders/{slug}` | 120/min | Catálogo público do montador |
 | `GET /api/admin/builders` | 60/min | Montadores com contagens (dashboard) |
+| `GET /api/admin/builders/{id}/ingredients` | 60/min | Ingredientes do montador, inclusive ocultos, com `presetsCount` |
+| `POST /api/admin/builders/{id}/ingredients` | 60/min | Cria (multipart: `name`, `image`, `displayWidth`, `restingSurfaceRatio`, `sinkRatio`; `slug` e `sortOrder` opcionais); nasce oculto; 201 |
+| `GET /api/admin/ingredients/{id}` | 60/min | Detalhe, com os `presets` que usam o ingrediente |
+| `PATCH /api/admin/ingredients/{id}` | 60/min | Edição parcial (JSON); com nova imagem, `POST` multipart + `_method=PATCH` |
+| `DELETE /api/admin/ingredients/{id}` | 60/min | 204; **409** com `presets` se estiver em uso |
 
 `GET /api/builders/burger` devolve só o que o builder público pode usar:
 
@@ -74,3 +79,13 @@ data.presets[]       só disponíveis (todos os ingredientes visíveis), sem o p
                      { id, name, bunVariantId, ingredientIds[] }   ingredientIds da base para o topo, com repetições
 data.initialRecipe   { bunVariantId, ingredientIds[] } — vazia se o preset inicial estiver indisponível
 ```
+
+### Erros que o cliente deve tratar
+
+| Status | Quando | Corpo |
+| --- | --- | --- |
+| 404 | montador, ingrediente ou preset inexistente | `{ message }` |
+| 409 | exclusão bloqueada por relação | `{ message, presets[] }` |
+| 413 | requisição acima de 4 MB (barrada pelo nginx) | **HTML**, não JSON: tratar pelo status |
+| 422 | validação, inclusive arquivo entre 2 e 3 MB recusado pelo PHP | `{ message, errors: { campo: [mensagens] } }` |
+| 429 | limite de requisições por minuto | `{ message }` |
