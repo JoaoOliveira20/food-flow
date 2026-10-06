@@ -116,8 +116,8 @@ T-E1 não depende do backend e pode começar logo após a Fase 0, em paralelo co
 | T-F4 | Editar ingrediente: ajuste da forma com preview, troca de imagem | BD-08, BD-16 | T-F3, T-C3 | ✅ 06/10/2026 — `/admin/ingredients/[id]`: mesmo formulário, troca de imagem (multipart + `_method=PATCH`), erros por campo do 422 |
 | T-F5 | Publicar/ocultar com aviso dos presets que ficam indisponíveis | BD-14 | T-F4, T-C4 | ✅ 06/10/2026 — publicar/ocultar; ao ocultar um ingrediente usado, confirmação na tela listando os presets que ficam indisponíveis |
 | T-F6 | Excluir ingrediente com confirmação e explicação do 409 | BD-15 | T-F2, T-C5 | ✅ 06/10/2026 — exclusão com confirmação na tela; 409 mostra os presets que bloqueiam, com links. Verificação: páginas renderizadas com a API real, 404 próprio do admin, preflight CORS de PATCH/DELETE aceito, 9 testes do cliente de escrita; cliques no navegador não verificados (sem navegador automatizado) |
-| T-F7 | Criar/editar preset: nome, pão, ingredientes ordenados (adicionar, mover, remover, repetir), limite, miniatura | BD-06, BD-13 | T-F1, T-D3, T-E1 | ⏳ |
-| T-F8 | Excluir preset (bloqueio do preset inicial explicado) | BD-15 | T-F7, T-D4 | ⏳ |
+| T-F7 | Criar/editar preset: nome, pão, ingredientes ordenados (adicionar, mover, remover, repetir), limite, miniatura | BD-06, BD-13 | T-F1, T-D3, T-E1 | ✅ 06/10/2026 — `/admin/presets/new` e `/admin/presets/[id]`: nome, pão, receita desenhada como a pilha (pão superior no alto), subir/descer/remover por camada, adicionar no topo com repetição, contador e limite, ingredientes ocultos marcados com aviso de indisponibilidade, miniatura pelo `RecipePreview`; erros por campo e por item |
+| T-F8 | Excluir preset (bloqueio do preset inicial explicado) | BD-15 | T-F7, T-D4 | ✅ 06/10/2026 — exclusão com confirmação na tela; o preset inicial explica por que não pode ser excluído (e a API responde 409). Páginas verificadas com a API real; cliques no navegador não verificados |
 
 ## Fase G — Qualidade
 
