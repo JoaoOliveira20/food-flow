@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\BuilderController as AdminBuilderController;
 use App\Http\Controllers\Admin\IngredientController as AdminIngredientController;
+use App\Http\Controllers\Admin\PresetController as AdminPresetController;
 use App\Http\Controllers\Catalog\ShowBuilderCatalogController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,4 +26,10 @@ Route::prefix('admin')->name('admin.')->middleware('throttle:admin-api')->group(
     Route::get('ingredients/{ingredient}', [AdminIngredientController::class, 'show'])->name('ingredients.show');
     Route::patch('ingredients/{ingredient}', [AdminIngredientController::class, 'update'])->name('ingredients.update');
     Route::delete('ingredients/{ingredient}', [AdminIngredientController::class, 'destroy'])->name('ingredients.destroy');
+
+    Route::get('builders/{builder}/presets', [AdminPresetController::class, 'index'])->name('presets.index');
+    Route::post('builders/{builder}/presets', [AdminPresetController::class, 'store'])->name('presets.store');
+    Route::get('presets/{preset}', [AdminPresetController::class, 'show'])->name('presets.show');
+    Route::patch('presets/{preset}', [AdminPresetController::class, 'update'])->name('presets.update');
+    Route::delete('presets/{preset}', [AdminPresetController::class, 'destroy'])->name('presets.destroy');
 });

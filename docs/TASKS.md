@@ -87,11 +87,11 @@ Pode correr em paralelo com a Fase C.
 
 | ID | Tarefa | Decisões | Depende de | Estado |
 | --- | --- | --- | --- | --- |
-| T-D1 | Listar e detalhar presets no admin (itens ordenados, disponibilidade, marca do inicial) | BD-06, BD-14 | T-B7 | ⏳ |
-| T-D2 | Criar preset: nome, variante e ingredientes do mesmo montador, 1 a `max_layers` itens, repetição permitida | BD-06, BD-13 | T-D1 | ⏳ |
-| T-D3 | Editar preset: substituição transacional da lista de itens | BD-06 | T-D2 | ⏳ |
-| T-D4 | Excluir preset: itens em cascata; 409 para o preset inicial | BD-15 | T-D1 | ⏳ |
-| T-D5 | Testes: ingrediente de outro montador, inexistente, acima do limite, ordem e repetição preservadas | BD-06 | T-D3 | ⏳ |
+| T-D1 | Listar e detalhar presets no admin (itens ordenados, disponibilidade, marca do inicial) | BD-06, BD-14 | T-B7 | ✅ 06/10/2026 — lista (inclui o inicial, `isInitial`) e detalhe com `ingredientIds` ordenados e `isAvailable` |
+| T-D2 | Criar preset: nome, variante e ingredientes do mesmo montador, 1 a `max_layers` itens, repetição permitida | BD-06, BD-13 | T-D1 | ✅ 06/10/2026 — `StorePresetRequest`: nome único por montador, pão e ingredientes do mesmo montador (`exists` com escopo), 1 a `maxLayers` itens, lista (não objeto), repetições permitidas, ingredientes ocultos permitidos (preset fica indisponível); `PresetService` em transação |
+| T-D3 | Editar preset: substituição transacional da lista de itens | BD-06 | T-D2 | ✅ 06/10/2026 — edição parcial; `ingredientIds` substitui a lista inteira na transação; edição inválida não altera nada; preset inicial editável |
+| T-D4 | Excluir preset: itens em cascata; 409 para o preset inicial | BD-15 | T-D1 | ✅ 06/10/2026 — itens em cascata; 409 para o preset inicial (mensagem explicativa) |
+| T-D5 | Testes: ingrediente de outro montador, inexistente, acima do limite, ordem e repetição preservadas | BD-06 | T-D3 | ✅ 06/10/2026 — 14 testes (outro montador, inexistente, acima do limite, lista malformada, ordem e repetição, disponibilidade, inicial) |
 
 ## Fase E — Integração com o builder
 

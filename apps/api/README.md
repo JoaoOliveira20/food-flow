@@ -67,6 +67,11 @@ validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18)
 | `GET /api/admin/ingredients/{id}` | 60/min | Detalhe, com os `presets` que usam o ingrediente |
 | `PATCH /api/admin/ingredients/{id}` | 60/min | Edição parcial (JSON); com nova imagem, `POST` multipart + `_method=PATCH` |
 | `DELETE /api/admin/ingredients/{id}` | 60/min | 204; **409** com `presets` se estiver em uso |
+| `GET /api/admin/builders/{id}/presets` | 60/min | Presets do montador, inclusive o inicial (`isInitial`), com `isAvailable` |
+| `POST /api/admin/builders/{id}/presets` | 60/min | Cria (JSON: `name`, `bunVariantId`, `ingredientIds` da base para o topo, repetições permitidas; `sortOrder` opcional); 201 |
+| `GET /api/admin/presets/{id}` | 60/min | Detalhe |
+| `PATCH /api/admin/presets/{id}` | 60/min | Edição parcial; `ingredientIds` substitui a lista inteira |
+| `DELETE /api/admin/presets/{id}` | 60/min | 204; **409** se for o preset inicial do montador |
 
 `GET /api/builders/burger` devolve só o que o builder público pode usar:
 
@@ -85,7 +90,7 @@ data.initialRecipe   { bunVariantId, ingredientIds[] } — vazia se o preset ini
 | Status | Quando | Corpo |
 | --- | --- | --- |
 | 404 | montador, ingrediente ou preset inexistente | `{ message }` |
-| 409 | exclusão bloqueada por relação | `{ message, presets[] }` |
+| 409 | exclusão bloqueada: ingrediente em uso (`{ message, presets[] }`) ou preset inicial (`{ message }`) | ver ao lado |
 | 413 | requisição acima de 4 MB (barrada pelo nginx) | **HTML**, não JSON: tratar pelo status |
 | 422 | validação, inclusive arquivo entre 2 e 3 MB recusado pelo PHP | `{ message, errors: { campo: [mensagens] } }` |
 | 429 | limite de requisições por minuto | `{ message }` |
