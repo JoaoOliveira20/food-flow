@@ -2,7 +2,7 @@
 
 Atualizado em 06/10/2026.
 
-- **Seção 1:** arquitetura atual (implementada).
+- **Seção 1:** arquitetura anterior a esta fase (histórico).
 - **Seções 2 a 9:** arquitetura-alvo da fase Backend, Admin e Conteúdo Dinâmico — 🟢 **revisada pelo responsável
   em 06/10/2026** (banco: MySQL).
 - **Seção 10:** ambiente de desenvolvimento (WSL2 + Kool) — 🟢 **adotado em 06/10/2026**. As decisões e alternativas estão em `BACKEND_DECISIONS.md` (IDs `DT-xx`, `BD-xx`); as tarefas, em
@@ -12,7 +12,7 @@ Detalhes do montador (empilhamento, animações, arraste): `apps/web/README.md`.
 
 ---
 
-## 1. Estado atual (implementado)
+## 1. Estado anterior à fase Backend/Admin (até 06/10/2026)
 
 ```text
 Navegador ── Next.js (apps/web)

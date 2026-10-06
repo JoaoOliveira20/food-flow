@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { BURGER_CATALOG } from "./burgerCatalog";
+import { BURGER_CATALOG_FIXTURE } from "../test/burgerCatalogFixture";
 import { createInitialComposition, type Composition } from "./composition";
 import { computeStackLayout, scaleStackToStage, STACK_BASE_WIDTH } from "./stackLayout";
 
-const INITIAL_COMPOSITION = createInitialComposition(BURGER_CATALOG.initialRecipe, BURGER_CATALOG.maxLayers);
-const INGREDIENTS = BURGER_CATALOG.ingredients;
-const BUN_VARIANTS = BURGER_CATALOG.bunVariants;
-const MAX_LAYERS = BURGER_CATALOG.maxLayers;
+const INITIAL_COMPOSITION = createInitialComposition(BURGER_CATALOG_FIXTURE.initialRecipe, BURGER_CATALOG_FIXTURE.maxLayers);
+const INGREDIENTS = BURGER_CATALOG_FIXTURE.ingredients;
+const BUN_VARIANTS = BURGER_CATALOG_FIXTURE.bunVariants;
+const MAX_LAYERS = BURGER_CATALOG_FIXTURE.maxLayers;
 
 function layoutOf(composition: Composition) {
-  return computeStackLayout(composition, BURGER_CATALOG);
+  return computeStackLayout(composition, BURGER_CATALOG_FIXTURE);
 }
 
 function compositionWith(ingredientIds: string[], bunVariantId = "classic"): Composition {

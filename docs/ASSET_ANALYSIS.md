@@ -4,7 +4,7 @@ Status: 🟡 **Parcial** — inventário e diretrizes de upload registrados (06/
 
 Este documento vai registrar a análise dos assets de ingredientes: dimensões, recortes, pontos de ancoragem, espessura visual e consistência entre as imagens.
 
-Os 21 PNGs estão em `apps/web/public/assets/ingredients/` (verificado em 28/09/2026). A direção artística decidida é o estilo fotográfico dos PNGs atuais (`OPEN_DECISIONS.md` §12). A análise detalhada descrita acima ainda não foi feita.
+Os 21 PNGs estavam em `apps/web/public/assets/ingredients/` (verificado em 28/09/2026); desde a T-E5 (06/10/2026) ficam em `apps/api/database/seeders/assets/` e chegam ao builder pelo Storage da API. A direção artística decidida é o estilo fotográfico dos PNGs atuais (`OPEN_DECISIONS.md` §12). A análise detalhada descrita acima ainda não foi feita.
 
 ## Molhos (29/09/2026)
 

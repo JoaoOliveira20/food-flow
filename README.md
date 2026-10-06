@@ -6,7 +6,6 @@ Experimento visual de composição de elementos em camadas. Primeiro caso de uso
 
 ```text
 apps/web/                  Aplicação principal: montador com Motion (ver apps/web/README.md)
-  public/assets/ingredients/  PNGs dos ingredientes (ver README do diretório)
 apps/api/                  API Laravel + MySQL, roda via Kool/Docker (ver apps/api/README.md)
 experiments/
   motion/                  Montador de referência com Motion for React

@@ -1,6 +1,6 @@
-import type { BuilderCatalog, BunVariant, CompositionPreset, Ingredient, StackShape } from "./catalog";
+import type { BuilderCatalog, BunVariant, CompositionPreset, Ingredient, StackShape } from "@/burger/catalog";
 
-const ingredientImagePath = (fileName: string) => `/assets/ingredients/${fileName}.png`;
+const ingredientImagePath = (fileName: string) => `https://api.test/storage/${fileName}.png`;
 
 const SAUCE_SHAPE: StackShape = { displayWidth: 256, restingSurfaceRatio: 0.95, sinkRatio: 0.78 };
 
@@ -146,7 +146,7 @@ const PRESETS: CompositionPreset[] = [
   },
 ];
 
-export const BURGER_CATALOG: BuilderCatalog = {
+export const BURGER_CATALOG_FIXTURE: BuilderCatalog = {
   maxLayers: 14,
   ingredients: INGREDIENTS,
   bunVariants: BUN_VARIANTS,

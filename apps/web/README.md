@@ -37,7 +37,8 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 | --- | --- | --- |
 | `src/burger/catalog.ts` | tipos do catálogo (`BuilderCatalog`, ingredientes, variantes de pão, presets) e buscas (`findIngredient`, `findBunVariant`) | não |
 | `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`); receitas (`createInitialComposition`, `matchesRecipe`) | não |
-| `src/burger/burgerCatalog.ts` | dados do catálogo do hambúrguer (`BURGER_CATALOG`); provisório até a API substituí-lo (T-E3/T-E5) | não |
+| `src/api/builderCatalog.ts` | busca o catálogo na API (`fetchBuilderCatalog`) e converte a resposta (`toBuilderCatalog`) | não |
+| `src/test/burgerCatalogFixture.ts` | catálogo de exemplo, só para os testes | não |
 | `src/burger/stackLayout.ts` | posições finais da pilha (`computeStackLayout`, `scaleStackToStage`) | não |
 | `src/burger/dragGeometry.ts` | índice de inserção e posição da miniatura durante o arraste | não |
 | `src/hooks/useCompositionDrag.ts` | arrastar e soltar com Pointer Events | não |
@@ -125,11 +126,10 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 | Quero… | Onde |
 | --- | --- |
-| adicionar um ingrediente | colocar o PNG em `public/assets/ingredients/` e uma entrada em `BURGER_CATALOG.ingredients` (`burgerCatalog.ts`) com `imageSize` e `shape`; nenhuma outra mudança (provisório: com a API, pelo admin) |
-| trocar o PNG de um ingrediente | atualizar `imageSize` com o tamanho natural do novo arquivo (o teste `burgerCatalog.test.ts` falha se divergir) e revisar `shape` |
+| adicionar ou trocar um ingrediente | pelo admin (fase F); até lá, nos dados iniciais da API (`apps/api/database/seeders/BurgerCatalogSeeder.php`) |
 | ajustar como um ingrediente se encaixa | `shape` do ingrediente (`restingSurfaceRatio`, `sinkRatio`, `displayWidth`) |
-| adicionar uma variante de pão | PNGs de topo e base + entrada em `BURGER_CATALOG.bunVariants` |
-| adicionar ou mudar um preset | entrada em `BURGER_CATALOG.presets`; o teste `burgerCatalog.test.ts` confere ids e limite |
+| adicionar uma variante de pão | nos dados iniciais da API (não há admin de variantes nesta fase, BD-03) |
+| adicionar ou mudar um preset | pelo admin (fase F); até lá, nos dados iniciais da API |
 | mudar a entrada, a saída ou a mola | `layerMotion.ts` |
 | criar um novo comportamento de composição | nova ação em `compositionReducer` (`composition.ts`) e o gatilho na interface; o Motion anima o resultado sem mudanças |
 | mudar regras do arraste | `useCompositionDrag.ts` (gestos) e `dragGeometry.ts` (geometria) |

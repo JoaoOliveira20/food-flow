@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BURGER_CATALOG } from "./burgerCatalog";
+import { BURGER_CATALOG_FIXTURE } from "../test/burgerCatalogFixture";
 import {
   compositionReducer,
   createInitialComposition,
@@ -11,8 +11,8 @@ import {
   type LayerInstance,
 } from "./composition";
 
-const INITIAL_RECIPE = BURGER_CATALOG.initialRecipe;
-const MAX_LAYERS = BURGER_CATALOG.maxLayers;
+const INITIAL_RECIPE = BURGER_CATALOG_FIXTURE.initialRecipe;
+const MAX_LAYERS = BURGER_CATALOG_FIXTURE.maxLayers;
 const INITIAL_COMPOSITION = createInitialComposition(INITIAL_RECIPE, MAX_LAYERS);
 
 function compositionWith(ingredientIds: string[], overrides: Partial<Composition> = {}): Composition {
