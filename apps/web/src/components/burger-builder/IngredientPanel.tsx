@@ -38,6 +38,7 @@ export function IngredientPanel({
           arrastar).
         </p>
       )}
+      {ingredients.length === 0 && <p className={styles.emptyHint}>Nenhum ingrediente disponível no momento.</p>}
       <ul className={styles.ingredientList}>
         {ingredients.map((ingredient) => (
           <li key={ingredient.id}>

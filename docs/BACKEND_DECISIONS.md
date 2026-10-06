@@ -313,6 +313,12 @@ Conversão e otimização: **nenhuma** no backend nesta fase. O `<Image>` do Nex
 (WebP/AVIF, tamanho certo) aos navegadores; o arquivo original preserva a qualidade. Sem nova dependência
 (ex.: Intervention Image).
 
+Correção (06/10/2026, T-E4): o builder usa `<Image unoptimized>` em todas as imagens (decisão anterior do frontend),
+então o Next **não** otimiza a entrega: o navegador carrega o arquivo direto do Storage. Por isso o limite de 2 MB e a
+orientação de tamanho importam. Como o otimizador não é usado, não é preciso `images.remotePatterns` nem
+`dangerouslyAllowLocalIP`. O Laravel 13 traz um componente de imagens (`Illuminate\Image`, driver GD) que pode ser
+usado se a otimização no backend (T-H11) for necessária, sem pacote extra.
+
 ### BD-11 — Integração dos dados com o builder
 
 **Contexto:** hoje os componentes importam constantes de módulo (`INGREDIENTS`, `BUN_VARIANTS`, `PRESETS`,

@@ -39,6 +39,7 @@ export function PresetPicker({ catalog, currentPresetId, requiresConfirmation, o
       <h2 id="preset-picker-title" className={styles.panelTitle}>
         Presets
       </h2>
+      {catalog.presets.length === 0 && <p className={styles.emptyHint}>Nenhum preset disponível no momento.</p>}
       <div className={styles.presetList}>
         {catalog.presets.map((preset) => {
           const isCurrent = preset.id === currentPresetId;

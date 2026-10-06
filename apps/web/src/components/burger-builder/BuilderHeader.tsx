@@ -1,7 +1,7 @@
 import styles from "./burgerBuilder.module.css";
 
 type BuilderHeaderProps = {
-  onReset: () => void;
+  onReset?: () => void;
 };
 
 export function BuilderHeader({ onReset }: BuilderHeaderProps) {
@@ -15,12 +15,14 @@ export function BuilderHeader({ onReset }: BuilderHeaderProps) {
         </svg>
         <span className={styles.title}>Food Flow</span>
       </div>
-      <button className={styles.resetButton} onClick={onReset}>
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" />
-        </svg>
-        Resetar
-      </button>
+      {onReset && (
+        <button className={styles.resetButton} onClick={onReset}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" />
+          </svg>
+          Resetar
+        </button>
+      )}
     </header>
   );
 }

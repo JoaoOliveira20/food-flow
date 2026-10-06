@@ -206,8 +206,8 @@ do Laravel é snake_case; erros no formato padrão do Laravel (BD-18); URLs de i
 
 1. **Paridade visual na migração:** valores de forma e tamanhos precisam chegar idênticos ao renderer; validar
    com o roteiro headless existente antes/depois (T-E6).
-2. **Imagens remotas no Next 16:** `remotePatterns` e o bloqueio de IP local em desenvolvimento
-   (`dangerouslyAllowLocalIP`); sem isso, o `<Image>` falha.
+2. ~~**Imagens remotas no Next 16:** `remotePatterns` e o bloqueio de IP local em desenvolvimento~~ — não se aplica:
+   as imagens usam `unoptimized` e são carregadas direto do Storage (verificado na T-E4).
 3. **Multipart em PATCH:** exige `POST` + `_method` (BD-08).
 4. **Repetição de ingredientes em presets:** `belongsToMany` com `sync()` descartaria repetições (BD-06).
 5. **Laravel dentro do pnpm workspace:** o `package.json` do Laravel entraria nos scripts recursivos (BD-19).

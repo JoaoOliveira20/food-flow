@@ -639,3 +639,46 @@
     height: 28px;
   }
 }
+
+.statusScreen {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.statusCard {
+  max-width: 420px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.statusTitle {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.statusMessage {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.statusAction {
+  margin-top: 20px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  font-weight: 700;
+}
+
+.emptyHint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}

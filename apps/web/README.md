@@ -4,6 +4,9 @@ Aplicação principal do Food Flow: montador visual de hambúrguer em camadas (N
 React 19, TypeScript). As animações usam **Motion for React** (`motion`, importado de `motion/react`) —
 decisão registrada em `docs/LIBRARY_DECISION.md`.
 
+O catálogo (ingredientes, pães, presets) vem da API Laravel (`apps/api`), buscada no servidor a cada requisição.
+Antes de rodar: `cp .env.example .env.local` (define `API_URL`) e suba a API (`pnpm dev:api` na raiz).
+
 ```bash
 pnpm dev        # na raiz do monorepo → http://localhost:3000
 pnpm build
