@@ -42,7 +42,7 @@ class BuilderCatalogTest extends TestCase
     {
         $this->getJson('/api/builders/burger')
             ->assertOk()
-            ->assertHeader('X-RateLimit-Limit', '120')
+            ->assertHeader('X-RateLimit-Limit', '600')
             ->assertJson(fn (AssertableJson $json) => $json
                 ->has('data', fn (AssertableJson $data) => $data
                     ->where('slug', 'burger')
