@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdminBuilder, getAdminCatalog, listIngredients } from "@/api/admin/queries";
+import { getAdminBuilder, getAdminCatalog, listIngredients, listPresets } from "@/api/admin/queries";
 import { AdminStatus } from "@/components/admin/AdminStatus";
-import { PresetForm } from "@/components/admin/PresetForm";
+import { PresetEditor } from "@/components/admin/PresetEditor";
 import styles from "@/components/admin/admin.module.css";
 
 export default async function NewPresetPage() {
   const builder = await getAdminBuilder();
   if (!builder) notFound();
-  const ingredients = await listIngredients(builder.id);
-  const catalog = await getAdminCatalog(builder, ingredients);
+  const [ingredients, presets] = await Promise.all([listIngredients(builder.id), listPresets(builder.id)]);
+  const catalog = await getAdminCatalog(builder, ingredients, presets);
+  const hiddenIngredientIds = ingredients.filter((ingredient) => !ingredient.isVisible).map((ingredient) => String(ingredient.id));
 
   return (
     <>
@@ -19,11 +20,14 @@ export default async function NewPresetPage() {
             <Link href="/admin">Painel</Link> / Novo preset
           </p>
           <h1 className={styles.pageTitle}>Novo preset</h1>
-          <p className={styles.pageSubtitle}>Aparece no montador assim que é salvo, se todos os ingredientes forem visíveis.</p>
+          <p className={styles.pageSubtitle}>
+            Monte o hambúrguer como no montador: clique ou arraste ingredientes, escolha o pão ou comece a partir de um
+            preset existente.
+          </p>
         </div>
       </div>
       {catalog ? (
-        <PresetForm builderId={builder.id} maxLayers={builder.maxLayers} catalog={catalog} ingredients={ingredients} preset={null} />
+        <PresetEditor builderId={builder.id} catalog={catalog} hiddenIngredientIds={hiddenIngredientIds} preset={null} />
       ) : (
         <AdminStatus title="Sem tipos de pão" message="Cadastre um tipo de pão antes de criar presets." />
       )}

@@ -421,7 +421,7 @@
 
 .presetList {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -681,4 +681,9 @@
   font-size: 14px;
   line-height: 1.4;
   color: var(--muted);
+}
+
+.pageEmbedded {
+  min-height: auto;
+  padding: 0;
 }

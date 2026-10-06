@@ -314,3 +314,15 @@ localmente, mas deve ser feito com padrão de produção, como se fosse ficar no
 ### Pendente
 
 - Push do branch `feature/backend-admin` (aguarda autorização); T-07 (cópia do Windows); Fase H (futuro).
+
+---
+
+## 2026-10-06 — Editor de preset no formato do montador
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável testou o admin e achou a tela de preset "um formulário chato": os ingredientes ficavam escondidos numa
+lista suspensa. A tela passou a ser o próprio `BurgerBuilder`, reaproveitado com quatro opções novas
+(`initialRecipe`, `renderHeader`, `isEmbedded`, `presetsTitle`) que não alteram o montador público. O painel de
+presets virou "Começar a partir de". A revisão por captura achou e corrigiu uma coluna da grade de presets que
+estourava com nomes longos (`minmax(0, 1fr)`).

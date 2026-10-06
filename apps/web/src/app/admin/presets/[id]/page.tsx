@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdminBuilder, getAdminCatalog, getPreset, listIngredients } from "@/api/admin/queries";
+import { getAdminBuilder, getAdminCatalog, getPreset, listIngredients, listPresets } from "@/api/admin/queries";
 import { AdminStatus } from "@/components/admin/AdminStatus";
 import { DeletePreset } from "@/components/admin/DeletePreset";
-import { PresetForm } from "@/components/admin/PresetForm";
+import { PresetEditor } from "@/components/admin/PresetEditor";
+import { presetRecipe } from "@/components/admin/presetRecipe";
 import styles from "@/components/admin/admin.module.css";
 
 export default async function EditPresetPage({ params, searchParams }: PageProps<"/admin/presets/[id]">) {
@@ -14,8 +15,10 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
 
   const [builder, preset] = await Promise.all([getAdminBuilder(), getPreset(presetId)]);
   if (!builder || !preset) notFound();
-  const ingredients = await listIngredients(builder.id);
-  const catalog = await getAdminCatalog(builder, ingredients);
+  const [ingredients, presets] = await Promise.all([listIngredients(builder.id), listPresets(builder.id)]);
+  const otherPresets = presets.filter((other) => other.id !== preset.id);
+  const catalog = await getAdminCatalog(builder, ingredients, otherPresets);
+  const hiddenIngredientIds = ingredients.filter((ingredient) => !ingredient.isVisible).map((ingredient) => String(ingredient.id));
 
   return (
     <>
@@ -40,13 +43,12 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
         </p>
       )}
       {catalog ? (
-        <PresetForm
+        <PresetEditor
           key={preset.updatedAt}
           builderId={builder.id}
-          maxLayers={builder.maxLayers}
           catalog={catalog}
-          ingredients={ingredients}
-          preset={preset}
+          hiddenIngredientIds={hiddenIngredientIds}
+          preset={{ id: preset.id, name: preset.name, recipe: presetRecipe(preset) }}
         />
       ) : (
         <AdminStatus title="Sem tipos de pão" message="Cadastre um tipo de pão para editar presets." />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useRef, type PointerEvent } from "react";
+import { useReducer, useRef, type PointerEvent, type ReactNode } from "react";
 import { findBunVariant, findIngredient, type BuilderCatalog, type CompositionPreset } from "@/burger/catalog";
 import {
   compositionReducer,
@@ -34,16 +34,43 @@ function compositionWithDragPreview(composition: Composition, drag: DragState | 
   return { ...composition, layers: placeDraggedItem(composition, drag.source, drag.insertionIndex) };
 }
 
-function initialCompositionOf(catalog: BuilderCatalog): Composition {
-  return createInitialComposition(catalog.initialRecipe, catalog.maxLayers);
+type BuilderStart = {
+  catalog: BuilderCatalog;
+  recipe: CompositionRecipe;
+};
+
+function initialCompositionOf({ catalog, recipe }: BuilderStart): Composition {
+  return createInitialComposition(recipe, catalog.maxLayers);
 }
+
+function recipeOf(composition: Composition): CompositionRecipe {
+  return {
+    bunVariantId: composition.bunVariantId,
+    ingredientIds: composition.layers.map((layer) => layer.ingredientId),
+  };
+}
+
+export type BuilderHeaderControls = {
+  recipe: CompositionRecipe;
+  reset: () => void;
+};
 
 type BurgerBuilderProps = {
   catalog: BuilderCatalog;
+  initialRecipe?: CompositionRecipe;
+  isEmbedded?: boolean;
+  presetsTitle?: string;
+  renderHeader?: (controls: BuilderHeaderControls) => ReactNode;
 };
 
-export function BurgerBuilder({ catalog }: BurgerBuilderProps) {
-  const [composition, dispatch] = useReducer(compositionReducer, catalog, initialCompositionOf);
+export function BurgerBuilder({
+  catalog,
+  initialRecipe = catalog.initialRecipe,
+  isEmbedded = false,
+  presetsTitle,
+  renderHeader,
+}: BurgerBuilderProps) {
+  const [composition, dispatch] = useReducer(compositionReducer, { catalog, recipe: initialRecipe }, initialCompositionOf);
   const stageRef = useRef<HTMLDivElement>(null);
   const stageSize = useElementSize(stageRef);
   const { message, showMessage } = useTransientMessage();
@@ -94,8 +121,12 @@ export function BurgerBuilder({ catalog }: BurgerBuilderProps) {
   }
 
   return (
-    <div className={styles.page}>
-      <BuilderHeader onReset={() => applyRecipe(catalog.initialRecipe)} />
+    <div className={`${styles.page} ${isEmbedded ? styles.pageEmbedded : ""}`}>
+      {renderHeader ? (
+        renderHeader({ recipe: recipeOf(composition), reset: () => applyRecipe(initialRecipe) })
+      ) : (
+        <BuilderHeader onReset={() => applyRecipe(initialRecipe)} />
+      )}
 
       <main className={styles.main}>
         <IngredientPanel
@@ -163,6 +194,7 @@ export function BurgerBuilder({ catalog }: BurgerBuilderProps) {
         />
 
         <PresetPicker
+          title={presetsTitle}
           catalog={catalog}
           currentPresetId={currentPresetId}
           requiresConfirmation={hasChangedSinceAppliedRecipe(composition)}

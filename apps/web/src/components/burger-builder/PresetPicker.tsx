@@ -7,13 +7,20 @@ import { RecipePreview } from "./RecipePreview";
 import styles from "./burgerBuilder.module.css";
 
 type PresetPickerProps = {
+  title?: string;
   catalog: BuilderCatalog;
   currentPresetId: string | null;
   requiresConfirmation: boolean;
   onApplyPreset: (preset: CompositionPreset) => void;
 };
 
-export function PresetPicker({ catalog, currentPresetId, requiresConfirmation, onApplyPreset }: PresetPickerProps) {
+export function PresetPicker({
+  title = "Presets",
+  catalog,
+  currentPresetId,
+  requiresConfirmation,
+  onApplyPreset,
+}: PresetPickerProps) {
   const [presetAwaitingConfirmation, setPresetAwaitingConfirmation] = useState<CompositionPreset | null>(null);
   const confirmationRef = useScrollIntoViewWhen<HTMLDivElement>(presetAwaitingConfirmation !== null);
 
@@ -37,7 +44,7 @@ export function PresetPicker({ catalog, currentPresetId, requiresConfirmation, o
   return (
     <section className={`${styles.panel} ${styles.presets}`} aria-labelledby="preset-picker-title">
       <h2 id="preset-picker-title" className={styles.panelTitle}>
-        Presets
+        {title}
       </h2>
       {catalog.presets.length === 0 && <p className={styles.emptyHint}>Nenhum preset disponível no momento.</p>}
       <div className={styles.presetList}>

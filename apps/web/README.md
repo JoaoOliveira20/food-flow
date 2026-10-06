@@ -130,7 +130,7 @@ Gestão de ingredientes e presets, sem login nesta versão (`docs/BACKEND_DECISI
 | --- | --- |
 | `/admin` | painel: contagens, ingredientes (miniatura, visível/oculto, uso) e presets (miniatura, inicial, disponível) |
 | `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview no renderer real, dicas de imagem; publicar/ocultar; excluir |
-| `/admin/presets/new`, `/admin/presets/[id]` | nome, pão, receita desenhada como a pilha (subir, descer, remover, adicionar no topo), miniatura; excluir |
+| `/admin/presets/new`, `/admin/presets/[id]` | o próprio montador (`BurgerBuilder` com `isEmbedded` e `renderHeader`) com a barra do preset: nome, salvar, desfazer, aviso de ocultos; painel "Começar a partir de" com os outros presets; excluir |
 
 Fluxo de dados (BD-12):
 

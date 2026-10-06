@@ -34,13 +34,22 @@ export async function getPreset(presetId: number): Promise<AdminPreset | null> {
   return get<AdminPreset>(`/admin/presets/${presetId}`);
 }
 
+const HIDDEN_SUFFIX = " (oculto)";
+
 /**
- * Catalog used by the admin previews: every ingredient of the builder, hidden ones
- * included, with the bun variants of the public catalog. Null when the builder has
- * no bun variant to draw a preview with.
+ * Catalog used by the admin previews and the preset editor: every ingredient of the
+ * builder, hidden ones included and marked in their names, the given presets and the
+ * bun variants of the public catalog. Null when the builder has no bun variant.
  */
-export async function getAdminCatalog(builder: AdminBuilder, ingredients: AdminIngredient[]): Promise<BuilderCatalog | null> {
+export async function getAdminCatalog(
+  builder: AdminBuilder,
+  ingredients: AdminIngredient[],
+  presets: AdminPreset[] = [],
+): Promise<BuilderCatalog | null> {
   const data = await fetchBuilderCatalogData(builder.slug);
   if (!data) return null;
-  return toBuilderCatalog({ ...data, ingredients, presets: [] });
+  const markedIngredients = ingredients.map((ingredient) =>
+    ingredient.isVisible ? ingredient : { ...ingredient, name: `${ingredient.name}${HIDDEN_SUFFIX}` },
+  );
+  return toBuilderCatalog({ ...data, ingredients: markedIngredients, presets });
 }
