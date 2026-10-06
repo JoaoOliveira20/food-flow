@@ -30,7 +30,7 @@ Legenda: ✅ concluída · 📝 proposta registrada, aguarda confirmação · �
 | T-A7 | Definir respostas e contrato da API | BD-18, `ARCHITECTURE.md` §5 | T-A5 | ✅ 06/10/2026 |
 | T-A8 | Definir visibilidade/publicação e exclusões | BD-14, BD-15 | T-A5 | ✅ 06/10/2026 |
 | T-A9 | **Revisão do responsável:** confirmar propostas, conflitos C1–C5 e abertas O1–O6; registrar respostas | todas | T-A2–T-A8 | ✅ 06/10/2026 — todas as recomendações aceitas; banco MySQL; pendente só O5 (não bloqueia) |
-| T-A10 | Definir o ambiente de desenvolvimento (WSL2 + Docker/Kool) | BD-21, `ARCHITECTURE.md` §10 | T-A9 | 📝 aguardando revisão |
+| T-A10 | Definir o ambiente de desenvolvimento (WSL2 + Docker/Kool) | BD-21, `ARCHITECTURE.md` §10 | T-A9 | ✅ 06/10/2026 |
 
 ---
 
@@ -41,7 +41,7 @@ pelo Explorador do Windows travou no `node_modules` e foi descartada; o reposit�
 
 | ID | Tarefa | Depende de | Estado |
 | --- | --- | --- | --- |
-| T-01 | Commitar e enviar ao GitHub a documentação desta fase; manter a cópia do Windows intocada como backup | T-A10 | 🚧 sem commit: a documentação foi levada ao clone do WSL como alterações locais; cópia do Windows mantida como backup |
+| T-01 | Commitar e enviar ao GitHub a documentação desta fase; manter a cópia do Windows intocada como backup | T-A10 | 🚧 06/10/2026 — commit `66cf65f` no branch `feature/backend-admin`; push aguardando autorização do responsável |
 | T-02 | Preparar o Ubuntu: corrigir `~/.ssh` (dono e permissões), `core.autocrlf input`, Node 24 (nvm), Corepack/pnpm; conferir que `node`/`pnpm` são os do Linux | T-A10 | ✅ 06/10/2026 — `autocrlf input`, Node 24.21.0 (padrão no nvm), Corepack e pnpm 12.6.0 do Linux; SSH com o GitHub funcionando. Recomendado (não bloqueia): `~/.ssh` ainda pertence ao `root` |
 | T-03 | Docker: ligar a integração WSL do Docker Desktop para `Ubuntu`; conferir `docker info`, `docker compose version` e `kool`; conferir se as imagens PHP do Kool atendem ao Laravel atual | T-A10 | ✅ 06/10/2026 — Docker 29.5.2, Compose v5.1.3 e Kool 3.6.0 no Ubuntu; Laravel atual (skeleton 13.10.1 / framework 13.34.0) exige PHP ^8.3 e o Kool tem `kooldev/php` 8.3, 8.4 e 8.5 com nginx (atualizadas em 30/08/2026) |
 | T-04 | Clonar em `/home/palad/projetos/food-flow`; adicionar `.gitattributes` (LF); `pnpm install` | T-01, T-02 | ✅ 06/10/2026 — clonado da cópia do Windows (histórico completo, `origin` → GitHub), documentação copiada em LF e conferida, `pnpm install`, `.gitattributes` (renormalização sem mudança em código) |
@@ -60,8 +60,8 @@ ambiente e não devem ser alterados nem mantidos; servem de referência para a d
 
 | ID | Tarefa | Decisões | Depende de | Estado |
 | --- | --- | --- | --- | --- |
-| T-B1 | Criar a aplicação Laravel em `apps/api` (versão estável atual) com Kool (`kool.yml`, `docker-compose.yml`: app + MySQL); excluir do pnpm workspace; scripts `dev:api`/`test:api` na raiz; requisitos no `README.md` | BD-19, BD-21 | T-03, T-05 | ⏳ |
-| T-B2 | Configurar banco MySQL (serviço do Kool), banco de teste separado e `.env.example` | BD-19, BD-21 | T-B1 | ⏳ |
+| T-B1 | Criar a aplicação Laravel em `apps/api` (versão estável atual) com Kool (`kool.yml`, `docker-compose.yml`: app + MySQL); excluir do pnpm workspace; scripts `dev:api`/`test:api` na raiz; requisitos no `README.md` | BD-19, BD-21 | T-03, T-05 | ✅ 06/10/2026 — Laravel 13 (framework ^13.17, PHP ^8.3) em `apps/api`; `kooldev/php:8.4-nginx` (PHP 8.4.25) via `docker-compose.yml`/`kool.yml` escritos à mão (o assistente do Kool 3.6 só oferece PHP ≤ 8.3); fora do pnpm workspace; `pnpm dev:api`/`stop:api`/`test:api`; `AGENTS.md` do esqueleto (instalar PHP no host e Laravel Boost) substituído pelas regras do projeto |
+| T-B2 | Configurar banco MySQL (serviço do Kool), banco de teste separado e `.env.example` | BD-19, BD-21 | T-B1 | ✅ 06/10/2026 — `mysql:8.4` (volume `food-flow-api_database`, porta só em 127.0.0.1); bancos `food_flow` e `food_flow_testing`; `phpunit.xml` aponta para o banco de teste; `.env.example` com MySQL; migrations padrão e testes de exemplo passando; PHPUnit 12 (padrão do instalador, O6) |
 | T-B3 | Configurar Storage: disco configurável, `storage:link`, geração de URL; limites do PHP para upload | BD-09, BD-10 | T-B1 | ⏳ |
 | T-B4 | Migrations: `builders`, `bun_variants`, `ingredients`, `presets`, `preset_items` (FKs, índices únicos, `restrict`) | BD-02–BD-07 | T-B2 | ⏳ |
 | T-B5 | Models, relacionamentos (`Preset hasMany PresetItem`), casts, `$fillable` | BD-06 | T-B4 | ⏳ |

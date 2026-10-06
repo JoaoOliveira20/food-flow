@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
+  - "!apps/api"
   - "experiments/*"
 
 # Gerado pelo create-next-app em cada app; centralizado aqui porque

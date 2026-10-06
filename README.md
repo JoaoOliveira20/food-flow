@@ -7,6 +7,7 @@ Experimento visual de composição de elementos em camadas. Primeiro caso de uso
 ```text
 apps/web/                  Aplicação principal: montador com Motion (ver apps/web/README.md)
   public/assets/ingredients/  PNGs dos ingredientes (ver README do diretório)
+apps/api/                  API Laravel + MySQL, roda via Kool/Docker (ver apps/api/README.md)
 experiments/
   motion/                  Montador de referência com Motion for React
   gsap/                    Montador de comparação com GSAP
@@ -60,7 +61,14 @@ pnpm build:all           # build de todos os pacotes
 pnpm lint                # ESLint em todos os pacotes
 pnpm typecheck           # verificação de tipos em todos os pacotes
 pnpm test                # testes (Vitest) da app principal
+
+pnpm dev:api             # API Laravel + MySQL via Kool → http://localhost:8000
+pnpm stop:api            # para os containers da API
+pnpm test:api            # testes (PHPUnit) da API
 ```
+
+A API (`apps/api`) fica fora do workspace do pnpm e roda só em containers; primeira configuração e comandos em
+`apps/api/README.md`. Requer Docker Desktop (integração WSL) e Kool.
 
 ## Documentação
 

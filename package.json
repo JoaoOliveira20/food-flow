@@ -7,12 +7,15 @@
     "dev": "pnpm --filter @food-flow/web dev",
     "build": "pnpm --filter @food-flow/web build",
     "start": "pnpm --filter @food-flow/web start",
+    "dev:api": "cd apps/api && kool start",
+    "stop:api": "cd apps/api && kool stop",
     "dev:motion": "pnpm --filter @food-flow/experiment-motion dev",
     "dev:gsap": "pnpm --filter @food-flow/experiment-gsap dev",
     "dev:react-spring": "pnpm --filter @food-flow/experiment-react-spring dev",
     "build:all": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @food-flow/web test"
+    "test": "pnpm --filter @food-flow/web test",
+    "test:api": "cd apps/api && kool run test"
   }
 }

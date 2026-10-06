@@ -1,7 +1,7 @@
 # Food Flow — Decisões da fase Backend, Admin e Conteúdo Dinâmico
 
 Início: 06/10/2026. Status: 🟢 **Revisão T-A9 feita em 06/10/2026** (ver "Revisão do responsável" abaixo);
-pendentes: ambiente de desenvolvimento (BD-21) e O5. Nenhum código desta fase foi implementado.
+pendente: O5. Ambiente (BD-21) adotado; implementação em andamento (`TASKS.md`).
 
 ## Revisão do responsável — 06/10/2026
 
@@ -20,7 +20,7 @@ exceções abaixo. As seções seguintes preservam a análise original (alternat
 | O3 | 🟢 Presets com disponibilidade derivada (sem campo de visibilidade) |
 | O6 | 🟢 Framework de testes padrão do instalador do Laravel |
 | O4 | 🟢 **MySQL** (e não SQLite, como fora recomendado). BD-19 atualizado |
-| Ambiente | ⏳ O responsável quer o backend no WSL2 com Kool/Docker; proposta em BD-21, aguardando revisão |
+| Ambiente | 🟢 WSL2 + Kool/Docker (BD-21), adotado e executado em 06/10/2026 |
 | O5 | ⏳ A resposta tratou do código ir para o GitHub, que já acontece (`origin` no GitHub). A pergunta era sobre **hospedar o admin sem login na internet**; ainda sem resposta |
 
 Requisitos de origem: `docs/requirements/food-flow-backend-admin-evolution.md` (cópia do documento entregue pelo
@@ -422,7 +422,9 @@ teste separado (e não SQLite em memória), para não divergir do banco real em 
 
 ### BD-21 — Ambiente de desenvolvimento: WSL2 + Docker/Kool
 
-🔷 **Proposta de 06/10/2026, aguardando revisão.** Pedido do responsável: backend dentro do WSL2 com Kool/Docker,
+🟢 **Adotada em 06/10/2026** — o responsável seguiu o plano e a Fase 0 foi concluída (`TASKS.md`). Implementação: `apps/api/docker-compose.yml` e `kool.yml` escritos no formato do preset do Kool, porque o assistente do Kool 3.6 só oferece PHP até 8.3; imagens `kooldev/php:8.4-nginx` e `mysql:8.4` (oficial); API em `localhost:8000`; MySQL exposto só em `127.0.0.1:3306`; testes em PHPUnit 12 (O6) no banco `food_flow_testing`.
+
+Pedido do responsável: backend dentro do WSL2 com Kool/Docker,
 sem instalar PHP/Composer no Windows, mantendo Next.js e experimentos funcionando.
 
 Diagnóstico (06/10/2026):
@@ -460,7 +462,7 @@ autorização e roles/permissões conforme a necessidade.
 
 ## 4. Decisões em aberto (⏳)
 
-Respostas de 06/10/2026: ver "Revisão do responsável" no topo. Continuam abertas apenas O5 e BD-21.
+Respostas de 06/10/2026: ver "Revisão do responsável" no topo. Continua aberta apenas O5.
 
 | ID | Pergunta | Recomendação | Bloqueia |
 | --- | --- | --- | --- |

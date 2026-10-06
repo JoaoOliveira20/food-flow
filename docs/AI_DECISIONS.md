@@ -214,3 +214,36 @@ para "dado recebido" antes do backend existir.
 C1 reutilização/segundo dataset adiados × montador pensando em pizza; C2 lista de presets decidida × presets
 editáveis; C3 pão como variante × pão listado como ingrediente no exemplo; C4 composição inicial fixa no frontend;
 C5 ordem do fluxo de publicação.
+
+---
+
+## 2026-10-06 — Ambiente no WSL2 e T-B1/T-B2 (Laravel + MySQL via Kool)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), já rodando no WSL.
+
+### Contexto
+
+O responsável aceitou as recomendações do planejamento (T-A9), escolheu MySQL e pediu o backend no WSL2 com
+Kool/Docker. Uma cópia do projeto feita pelo Explorador do Windows travou no `node_modules` e recriava a pasta de
+destino; o Explorador foi reiniciado (com autorização), a pasta parcial removida e o repositório **clonado** a partir
+da cópia do Windows, com a documentação não commitada trazida por cima. As conversas do Claude Code e a memória
+foram copiadas para o projeto do WSL.
+
+### Sugestões adotadas
+
+- Fase 0: Node 24 (nvm), Corepack, `core.autocrlf input`, `.gitattributes` (LF; renormalização sem mudança em
+  código), validação completa no Linux, README com o fluxo de desenvolvimento.
+- **Experimentos encerrados** por decisão do responsável: só foram executados para validar o ambiente.
+- Laravel 13 criado com o Composer **dentro** de `kooldev/php:8.4`; nenhum PHP no host.
+- `docker-compose.yml`/`kool.yml` escritos à mão no formato do preset: o assistente do Kool 3.6 só oferece PHP
+  até 8.3 e é interativo. Imagem `kooldev/php:8.4-nginx` e `mysql:8.4` oficial; projeto Compose com nome próprio
+  (`food-flow-api`) para não colidir com outros projetos; MySQL exposto só em `127.0.0.1`.
+- Banco de testes MySQL separado (`food_flow_testing`), criado por script de inicialização, em vez de SQLite em
+  memória (decisão de usar MySQL).
+- `apps/api` excluído do pnpm workspace; scripts `dev:api`, `stop:api`, `test:api` na raiz.
+- O esqueleto do Laravel 13 traz um `AGENTS.md`/`CLAUDE.md` que manda instalar PHP no host e o Laravel Boost;
+  **substituído** pelas regras do projeto (PHP só via Kool; nenhum pacote sem decisão registrada).
+
+### Pendente
+
+- Push do branch `feature/backend-admin` (aguarda autorização); O5; aposentar a cópia do Windows (T-07).

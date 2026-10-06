@@ -5,7 +5,7 @@ Atualizado em 06/10/2026.
 - **Seção 1:** arquitetura atual (implementada).
 - **Seções 2 a 9:** arquitetura-alvo da fase Backend, Admin e Conteúdo Dinâmico — 🟢 **revisada pelo responsável
   em 06/10/2026** (banco: MySQL).
-- **Seção 10:** ambiente de desenvolvimento (WSL2 + Kool) — 🔷 **proposta, aguardando revisão**. As decisões e alternativas estão em `BACKEND_DECISIONS.md` (IDs `DT-xx`, `BD-xx`); as tarefas, em
+- **Seção 10:** ambiente de desenvolvimento (WSL2 + Kool) — 🟢 **adotado em 06/10/2026**. As decisões e alternativas estão em `BACKEND_DECISIONS.md` (IDs `DT-xx`, `BD-xx`); as tarefas, em
   `TASKS.md` (IDs `T-xx`).
 
 Detalhes do montador (empilhamento, animações, arraste): `apps/web/README.md`.
@@ -230,8 +230,8 @@ Ver BD-20. Resumo: grupo `/api/admin` e segmento `/admin` como pontos únicos de
 
 ## 10. Ambiente de desenvolvimento: Windows → WSL2 → Docker/Kool (proposta)
 
-🔷 **BD-21, aguardando revisão.** Diagnóstico da máquina em `BACKEND_DECISIONS.md` BD-21. Nada foi instalado ou
-movido.
+🟢 **BD-21, adotado em 06/10/2026.** Diagnóstico da máquina e detalhes da implementação em `BACKEND_DECISIONS.md`
+BD-21; comandos em `README.md` e `apps/api/README.md`.
 
 ### Onde cada parte roda
 
