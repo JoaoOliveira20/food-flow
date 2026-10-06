@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { PRESETS, type CompositionPreset } from "@/burger/presetCatalog";
+import type { BuilderCatalog, CompositionPreset } from "@/burger/catalog";
 import { useScrollIntoViewWhen } from "@/hooks/useScrollIntoViewWhen";
 import { RecipePreview } from "./RecipePreview";
 import styles from "./burgerBuilder.module.css";
 
 type PresetPickerProps = {
+  catalog: BuilderCatalog;
   currentPresetId: string | null;
   requiresConfirmation: boolean;
   onApplyPreset: (preset: CompositionPreset) => void;
 };
 
-export function PresetPicker({ currentPresetId, requiresConfirmation, onApplyPreset }: PresetPickerProps) {
+export function PresetPicker({ catalog, currentPresetId, requiresConfirmation, onApplyPreset }: PresetPickerProps) {
   const [presetAwaitingConfirmation, setPresetAwaitingConfirmation] = useState<CompositionPreset | null>(null);
   const confirmationRef = useScrollIntoViewWhen<HTMLDivElement>(presetAwaitingConfirmation !== null);
 
@@ -39,7 +40,7 @@ export function PresetPicker({ currentPresetId, requiresConfirmation, onApplyPre
         Presets
       </h2>
       <div className={styles.presetList}>
-        {PRESETS.map((preset) => {
+        {catalog.presets.map((preset) => {
           const isCurrent = preset.id === currentPresetId;
           const isAwaitingConfirmation = preset.id === presetAwaitingConfirmation?.id;
           return (
@@ -49,7 +50,7 @@ export function PresetPicker({ currentPresetId, requiresConfirmation, onApplyPre
               className={`${styles.optionCard} ${isCurrent || isAwaitingConfirmation ? styles.optionCardSelected : ""}`}
               onClick={() => choosePreset(preset)}
             >
-              <RecipePreview recipe={preset} className={styles.optionThumbnail} />
+              <RecipePreview catalog={catalog} recipe={preset} className={styles.optionThumbnail} />
               {preset.name}
             </button>
           );

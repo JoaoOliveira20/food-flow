@@ -1,22 +1,19 @@
 "use client";
 
 import { useReducer, useRef, type PointerEvent } from "react";
+import { findBunVariant, findIngredient, type BuilderCatalog, type CompositionPreset } from "@/burger/catalog";
 import {
   compositionReducer,
+  createInitialComposition,
   createInstanceId,
   createRecipeInstanceIds,
   hasChangedSinceAppliedRecipe,
   hasReachedLayerLimit,
-  INITIAL_COMPOSITION,
-  INITIAL_RECIPE,
   matchesRecipe,
-  MAX_LAYERS,
   placeDraggedItem,
   type Composition,
   type CompositionRecipe,
 } from "@/burger/composition";
-import { findBunVariant, findIngredient } from "@/burger/ingredientCatalog";
-import { PRESETS, type CompositionPreset } from "@/burger/presetCatalog";
 import { computeStackLayout, scaleStackToStage } from "@/burger/stackLayout";
 import { useElementSize } from "@/hooks/useElementSize";
 import { useTransientMessage } from "@/hooks/useTransientMessage";
@@ -34,20 +31,29 @@ import styles from "./burgerBuilder.module.css";
 
 function compositionWithDragPreview(composition: Composition, drag: DragState | null): Composition {
   if (!drag || drag.insertionIndex === null) return composition;
-  return { ...composition, layers: placeDraggedItem(composition.layers, drag.source, drag.insertionIndex) };
+  return { ...composition, layers: placeDraggedItem(composition, drag.source, drag.insertionIndex) };
 }
 
-export function BurgerBuilder() {
-  const [composition, dispatch] = useReducer(compositionReducer, INITIAL_COMPOSITION);
+function initialCompositionOf(catalog: BuilderCatalog): Composition {
+  return createInitialComposition(catalog.initialRecipe, catalog.maxLayers);
+}
+
+type BurgerBuilderProps = {
+  catalog: BuilderCatalog;
+};
+
+export function BurgerBuilder({ catalog }: BurgerBuilderProps) {
+  const [composition, dispatch] = useReducer(compositionReducer, catalog, initialCompositionOf);
   const stageRef = useRef<HTMLDivElement>(null);
   const stageSize = useElementSize(stageRef);
   const { message, showMessage } = useTransientMessage();
-  const bunName = findBunVariant(composition.bunVariantId).name.toLowerCase();
+  const bunName = findBunVariant(catalog, composition.bunVariantId).name.toLowerCase();
 
-  const committedStackScale = stageSize ? scaleStackToStage(computeStackLayout(composition), stageSize) : null;
+  const committedStackScale = stageSize ? scaleStackToStage(computeStackLayout(composition, catalog), stageSize) : null;
   const { drag, startLayerDrag, startIngredientDrag, attachGhostElement } = useBuilderDrag({
     stageRef,
     composition,
+    catalog,
     dispatch,
     stackScale: committedStackScale,
     bunName,
@@ -55,14 +61,14 @@ export function BurgerBuilder() {
   });
 
   const displayedComposition = compositionWithDragPreview(composition, drag);
-  const layout = computeStackLayout(displayedComposition);
+  const layout = computeStackLayout(displayedComposition, catalog);
   const stackScale = stageSize ? scaleStackToStage(layout, stageSize) : null;
-  const isFull = hasReachedLayerLimit(composition.layers);
+  const isFull = hasReachedLayerLimit(composition);
   const selectedIndex = composition.layers.findIndex((layer) => layer.instanceId === composition.selectedInstanceId);
   const selectedLayer = selectedIndex === -1 ? null : composition.layers[selectedIndex];
-  const selectedIngredient = selectedLayer ? findIngredient(selectedLayer.ingredientId) : null;
-  const stageMessage = drag ? dragHintMessage(drag, displayedComposition.layers, bunName) : message;
-  const currentPresetId = PRESETS.find((preset) => matchesRecipe(composition, preset))?.id ?? null;
+  const selectedIngredient = selectedLayer ? findIngredient(catalog, selectedLayer.ingredientId) : null;
+  const stageMessage = drag ? dragHintMessage(catalog, drag, displayedComposition.layers, bunName) : message;
+  const currentPresetId = catalog.presets.find((preset) => matchesRecipe(composition, preset))?.id ?? null;
 
   function pickIngredient(ingredientId: string) {
     if (composition.isReplacingSelection) {
@@ -89,10 +95,11 @@ export function BurgerBuilder() {
 
   return (
     <div className={styles.page}>
-      <BuilderHeader onReset={() => applyRecipe(INITIAL_RECIPE)} />
+      <BuilderHeader onReset={() => applyRecipe(catalog.initialRecipe)} />
 
       <main className={styles.main}>
         <IngredientPanel
+          ingredients={catalog.ingredients}
           replacedIngredientName={composition.isReplacingSelection ? (selectedIngredient?.name ?? null) : null}
           isDisabled={!composition.isReplacingSelection && isFull}
           onPickIngredient={pickIngredient}
@@ -143,25 +150,27 @@ export function BurgerBuilder() {
           ) : (
             <p className={styles.hint}>
               {isFull
-                ? `Limite de ${MAX_LAYERS} ingredientes atingido.`
+                ? `Limite de ${composition.maxLayers} ingredientes atingido.`
                 : "Toque em uma camada para editá-la ou arraste-a para mudar a ordem."}
             </p>
           )}
         </section>
 
         <BunPicker
+          bunVariants={catalog.bunVariants}
           selectedBunVariantId={composition.bunVariantId}
           onSelectBunVariant={(bunVariantId) => dispatch({ type: "selectBunVariant", bunVariantId })}
         />
 
         <PresetPicker
+          catalog={catalog}
           currentPresetId={currentPresetId}
           requiresConfirmation={hasChangedSinceAppliedRecipe(composition)}
           onApplyPreset={applyPreset}
         />
       </main>
 
-      {drag && <DragGhost drag={drag} attachElement={attachGhostElement} />}
+      {drag && <DragGhost catalog={catalog} drag={drag} attachElement={attachGhostElement} />}
     </div>
   );
 }

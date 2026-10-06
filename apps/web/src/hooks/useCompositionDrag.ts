@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
+import { findIngredient, type BuilderCatalog } from "@/burger/catalog";
 import { createInstanceId, hasReachedLayerLimit, type Composition, type DragSource } from "@/burger/composition";
 import {
   insertionIndexAt,
@@ -8,7 +9,6 @@ import {
   type GhostPlacement,
   type Point,
 } from "@/burger/dragGeometry";
-import { findIngredient } from "@/burger/ingredientCatalog";
 import type { PositionedLayer } from "@/burger/stackLayout";
 
 const DRAG_START_DISTANCE = 6;
@@ -35,6 +35,7 @@ type DragStartOptions = Pick<PendingDrag, "source" | "ingredientId" | "size" | "
 type CompositionDragOptions = {
   stageRef: RefObject<HTMLElement | null>;
   composition: Composition;
+  catalog: BuilderCatalog;
   stackScale: number | null;
   onDragStart: (source: DragSource) => void;
   onDrop: (source: DragSource, index: number, ingredientId: string) => void;
@@ -70,6 +71,7 @@ export function useCompositionDrag(options: CompositionDragOptions) {
     if (!stage) return null;
     return insertionIndexAt({
       composition: latestOptions.current.composition,
+      catalog: latestOptions.current.catalog,
       source: state.source,
       currentIndex: state.insertionIndex,
       pointer: pointer.current,
@@ -213,9 +215,9 @@ export function useCompositionDrag(options: CompositionDragOptions) {
   }
 
   function startIngredientDrag(event: ReactPointerEvent, ingredientId: string) {
-    const { stackScale, composition } = latestOptions.current;
-    if (!stackScale || hasReachedLayerLimit(composition.layers)) return;
-    const { shape, imageSize } = findIngredient(ingredientId);
+    const { stackScale, composition, catalog } = latestOptions.current;
+    if (!stackScale || hasReachedLayerLimit(composition)) return;
+    const { shape, imageSize } = findIngredient(catalog, ingredientId);
     const width = shape.displayWidth * stackScale;
     prepareDrag(event, {
       source: { kind: "newIngredient", instanceId: createInstanceId(), ingredientId },

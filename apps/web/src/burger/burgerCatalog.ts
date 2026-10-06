@@ -1,39 +1,10 @@
-export type ImageSize = {
-  width: number;
-  height: number;
-};
-
-export type StackShape = {
-  displayWidth: number;
-  restingSurfaceRatio: number;
-  sinkRatio: number;
-};
-
-export type Ingredient = {
-  id: string;
-  name: string;
-  imagePath: string;
-  imageSize: ImageSize;
-  shape: StackShape;
-};
-
-export type BunImage = {
-  imagePath: string;
-  imageSize: ImageSize;
-};
-
-export type BunVariant = {
-  id: string;
-  name: string;
-  topBun: BunImage;
-  bottomBun: BunImage;
-};
+import type { BuilderCatalog, BunVariant, CompositionPreset, Ingredient, StackShape } from "./catalog";
 
 const ingredientImagePath = (fileName: string) => `/assets/ingredients/${fileName}.png`;
 
 const SAUCE_SHAPE: StackShape = { displayWidth: 256, restingSurfaceRatio: 0.95, sinkRatio: 0.78 };
 
-export const INGREDIENTS: Ingredient[] = [
+const INGREDIENTS: Ingredient[] = [
   {
     id: "beef",
     name: "Carne",
@@ -127,10 +98,7 @@ export const INGREDIENTS: Ingredient[] = [
   },
 ];
 
-export const TOP_BUN_SHAPE: StackShape = { displayWidth: 318, restingSurfaceRatio: 1, sinkRatio: 0.14 };
-export const BOTTOM_BUN_SHAPE: StackShape = { displayWidth: 300, restingSurfaceRatio: 0.5, sinkRatio: 0 };
-
-export const BUN_VARIANTS: BunVariant[] = [
+const BUN_VARIANTS: BunVariant[] = [
   {
     id: "classic",
     name: "Clássico",
@@ -157,17 +125,34 @@ export const BUN_VARIANTS: BunVariant[] = [
   },
 ];
 
-const ingredientsById = new Map(INGREDIENTS.map((ingredient) => [ingredient.id, ingredient]));
-const bunVariantsById = new Map(BUN_VARIANTS.map((variant) => [variant.id, variant]));
+const PRESETS: CompositionPreset[] = [
+  {
+    id: "classic",
+    name: "Clássico",
+    bunVariantId: "classic",
+    ingredientIds: ["beef", "cheddar", "lettuce", "tomato"],
+  },
+  {
+    id: "bacon",
+    name: "Bacon",
+    bunVariantId: "brioche",
+    ingredientIds: ["beef", "cheddar", "bacon", "onion", "pickles", "ketchup"],
+  },
+  {
+    id: "double",
+    name: "Duplo",
+    bunVariantId: "classic",
+    ingredientIds: ["beef", "cheddar", "lettuce", "pickles", "middle-bun", "beef", "cheddar", "lettuce", "onion"],
+  },
+];
 
-export function findIngredient(ingredientId: string): Ingredient {
-  const ingredient = ingredientsById.get(ingredientId);
-  if (!ingredient) throw new Error(`Unknown ingredient: ${ingredientId}`);
-  return ingredient;
-}
-
-export function findBunVariant(bunVariantId: string): BunVariant {
-  const variant = bunVariantsById.get(bunVariantId);
-  if (!variant) throw new Error(`Unknown bun variant: ${bunVariantId}`);
-  return variant;
-}
+export const BURGER_CATALOG: BuilderCatalog = {
+  maxLayers: 14,
+  ingredients: INGREDIENTS,
+  bunVariants: BUN_VARIANTS,
+  presets: PRESETS,
+  initialRecipe: {
+    bunVariantId: "classic",
+    ingredientIds: ["beef", "cheddar", "onion", "tomato", "lettuce"],
+  },
+};

@@ -99,7 +99,7 @@ T-E1 não depende do backend e pode começar logo após a Fase 0, em paralelo co
 
 | ID | Tarefa | Decisões | Depende de | Estado |
 | --- | --- | --- | --- | --- |
-| T-E1 | Refatorar o catálogo para "dado recebido": funções puras e componentes recebem o catálogo; dados atuais viram fixture. **Sem mudança visual ou de comportamento** | BD-11 | T-05 | ⏳ |
+| T-E1 | Refatorar o catálogo para "dado recebido": funções puras e componentes recebem o catálogo; dados atuais viram fixture. **Sem mudança visual ou de comportamento** | BD-11 | T-05 | ✅ 06/10/2026 — `catalog.ts` (tipos, `BuilderCatalog`, buscas com o catálogo como parâmetro) e `burgerCatalog.ts` (dados, provisório); `maxLayers` no estado da composição; catálogo por props desde `BurgerBuilder`; 61 testes, lint e build; HTML renderizado idêntico ao anterior (309 linhas, 25 imagens das miniaturas) |
 | T-E2 | Tipos e cliente da API no frontend (mapeamento da resposta para `Ingredient`, `BunVariant`, `CompositionPreset`, receita inicial) | BD-11, BD-18 | T-B9 (ou contrato congelado em T-B7) | ⏳ |
 | T-E3 | `page.tsx` busca o montador no servidor e passa ao `BurgerBuilder`; estados de carregamento, erro e vazio; estratégia de cache conforme docs do Next 16 | BD-11 | T-E1, T-E2, T-B9 | ⏳ |
 | T-E4 | `next.config.ts`: `remotePatterns` da URL do Storage; `dangerouslyAllowLocalIP` só em desenvolvimento | BD-09 | T-B3 | ⏳ |

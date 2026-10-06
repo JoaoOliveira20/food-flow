@@ -1,18 +1,19 @@
 import Image from "next/image";
-import { BUN_VARIANTS } from "@/burger/ingredientCatalog";
+import type { BunVariant } from "@/burger/catalog";
 import styles from "./burgerBuilder.module.css";
 
 type BunPickerProps = {
+  bunVariants: BunVariant[];
   selectedBunVariantId: string;
   onSelectBunVariant: (bunVariantId: string) => void;
 };
 
-export function BunPicker({ selectedBunVariantId, onSelectBunVariant }: BunPickerProps) {
+export function BunPicker({ bunVariants, selectedBunVariantId, onSelectBunVariant }: BunPickerProps) {
   return (
     <aside className={`${styles.panel} ${styles.buns}`}>
       <h2 className={styles.panelTitle}>Tipo de pão</h2>
       <div className={styles.bunList} role="radiogroup" aria-label="Tipo de pão">
-        {BUN_VARIANTS.map((variant) => {
+        {bunVariants.map((variant) => {
           const isSelected = variant.id === selectedBunVariantId;
           return (
             <button

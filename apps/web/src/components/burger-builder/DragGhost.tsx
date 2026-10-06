@@ -1,15 +1,16 @@
 import Image from "next/image";
-import { findIngredient } from "@/burger/ingredientCatalog";
+import { findIngredient, type BuilderCatalog } from "@/burger/catalog";
 import type { DragState } from "@/hooks/useCompositionDrag";
 import styles from "./burgerBuilder.module.css";
 
 type DragGhostProps = {
+  catalog: BuilderCatalog;
   drag: DragState;
   attachElement: (element: HTMLDivElement | null) => void;
 };
 
-export function DragGhost({ drag, attachElement }: DragGhostProps) {
-  const ingredient = findIngredient(drag.ingredientId);
+export function DragGhost({ catalog, drag, attachElement }: DragGhostProps) {
+  const ingredient = findIngredient(catalog, drag.ingredientId);
   const isOutsideStage = drag.insertionIndex === null;
 
   return (

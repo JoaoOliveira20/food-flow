@@ -1,3 +1,4 @@
+import type { BuilderCatalog } from "./catalog";
 import { placeDraggedItem, type Composition, type DragSource } from "./composition";
 import { hitAreaCenter, computeStackLayout, scaleStackToStage, STACK_BASELINE_RATIO } from "./stackLayout";
 
@@ -31,17 +32,25 @@ export function stackBaselineY(stage: DOMRect): number {
 
 type InsertionQuery = {
   composition: Composition;
+  catalog: BuilderCatalog;
   source: DragSource;
   currentIndex: number | null;
   pointer: Point;
   stage: DOMRect;
 };
 
-export function insertionIndexAt({ composition, source, currentIndex, pointer, stage }: InsertionQuery): number | null {
+export function insertionIndexAt({
+  composition,
+  catalog,
+  source,
+  currentIndex,
+  pointer,
+  stage,
+}: InsertionQuery): number | null {
   if (!isPointNearStage(pointer, stage)) return null;
   const displayedLayers =
-    currentIndex === null ? composition.layers : placeDraggedItem(composition.layers, source, currentIndex);
-  const displayedLayout = computeStackLayout({ ...composition, layers: displayedLayers });
+    currentIndex === null ? composition.layers : placeDraggedItem(composition, source, currentIndex);
+  const displayedLayout = computeStackLayout({ ...composition, layers: displayedLayers }, catalog);
   const scale = scaleStackToStage(displayedLayout, { width: stage.width, height: stage.height });
   const pointerHeight = (stackBaselineY(stage) - pointer.y) / scale;
   return displayedLayout.layers.filter(

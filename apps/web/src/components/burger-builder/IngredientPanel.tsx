@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import type { PointerEvent } from "react";
-import { INGREDIENTS } from "@/burger/ingredientCatalog";
+import type { Ingredient } from "@/burger/catalog";
 import { useScrollIntoViewWhen } from "@/hooks/useScrollIntoViewWhen";
 import styles from "./burgerBuilder.module.css";
 
 type IngredientPanelProps = {
+  ingredients: Ingredient[];
   replacedIngredientName: string | null;
   isDisabled: boolean;
   onPickIngredient: (ingredientId: string) => void;
@@ -14,6 +15,7 @@ type IngredientPanelProps = {
 };
 
 export function IngredientPanel({
+  ingredients,
   replacedIngredientName,
   isDisabled,
   onPickIngredient,
@@ -37,7 +39,7 @@ export function IngredientPanel({
         </p>
       )}
       <ul className={styles.ingredientList}>
-        {INGREDIENTS.map((ingredient) => (
+        {ingredients.map((ingredient) => (
           <li key={ingredient.id}>
             <button
               className={styles.ingredientButton}

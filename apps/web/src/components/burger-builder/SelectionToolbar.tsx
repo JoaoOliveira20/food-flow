@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Ingredient } from "@/burger/ingredientCatalog";
+import type { Ingredient } from "@/burger/catalog";
 import styles from "./burgerBuilder.module.css";
 
 type SelectionToolbarProps = {

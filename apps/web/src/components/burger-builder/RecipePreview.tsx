@@ -1,14 +1,16 @@
+import type { BuilderCatalog } from "@/burger/catalog";
 import { createCompositionFromRecipe, type CompositionRecipe } from "@/burger/composition";
 import { computeStackLayout, STACK_BASE_WIDTH } from "@/burger/stackLayout";
 
 type RecipePreviewProps = {
+  catalog: BuilderCatalog;
   recipe: CompositionRecipe;
   className: string;
 };
 
-export function RecipePreview({ recipe, className }: RecipePreviewProps) {
+export function RecipePreview({ catalog, recipe, className }: RecipePreviewProps) {
   const previewKeys = recipe.ingredientIds.map((_, index) => `preview-${index}`);
-  const layout = computeStackLayout(createCompositionFromRecipe(recipe, previewKeys));
+  const layout = computeStackLayout(createCompositionFromRecipe(recipe, previewKeys, catalog.maxLayers), catalog);
   const viewBox = `${-STACK_BASE_WIDTH / 2} ${-layout.height} ${STACK_BASE_WIDTH} ${layout.height}`;
 
   return (

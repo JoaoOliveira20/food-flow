@@ -20,7 +20,8 @@ pnpm --filter @food-flow/web test   # Vitest (composição, empilhamento, preset
 
 ## Arquitetura
 
-O estado da composição é a única fonte de verdade. O layout é derivado dele, e as animações apenas
+O estado da composição é a única fonte de verdade. O catálogo (ingredientes, pães, presets, composição inicial e limite
+de camadas) chega como dado (`BuilderCatalog`) pela prop `catalog` do `BurgerBuilder` e é repassado às funções puras. O layout é derivado dele, e as animações apenas
 levam cada camada até a posição derivada. Nada de posição visual é guardado à parte.
 
 ```text
@@ -31,9 +32,9 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 | Pasta / arquivo | Responsabilidade | Depende do Motion? |
 | --- | --- | --- |
-| `src/burger/ingredientCatalog.ts` | catálogo de ingredientes e variantes de pão (dados) | não |
-| `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`); receitas (`INITIAL_RECIPE`, `matchesRecipe`) | não |
-| `src/burger/presetCatalog.ts` | presets (dados: nome, variante de pão, ingredientes) | não |
+| `src/burger/catalog.ts` | tipos do catálogo (`BuilderCatalog`, ingredientes, variantes de pão, presets) e buscas (`findIngredient`, `findBunVariant`) | não |
+| `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`); receitas (`createInitialComposition`, `matchesRecipe`) | não |
+| `src/burger/burgerCatalog.ts` | dados do catálogo do hambúrguer (`BURGER_CATALOG`); provisório até a API substituí-lo (T-E3/T-E5) | não |
 | `src/burger/stackLayout.ts` | posições finais da pilha (`computeStackLayout`, `scaleStackToStage`) | não |
 | `src/burger/dragGeometry.ts` | índice de inserção e posição da miniatura durante o arraste | não |
 | `src/hooks/useCompositionDrag.ts` | arrastar e soltar com Pointer Events | não |
@@ -71,7 +72,7 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 ### Receitas, reset e presets
 
 - Uma receita (`CompositionRecipe`) é `{ bunVariantId, ingredientIds }`. A composição inicial
-  (`INITIAL_RECIPE`) e os presets (`PRESETS`) são receitas; reset e preset usam a mesma ação
+  (`catalog.initialRecipe`) e os presets (`catalog.presets`) são receitas; reset e preset usam a mesma ação
   (`applyRecipe`), que cria novas instâncias e guarda a receita em `appliedRecipe`.
 - `hasChangedSinceAppliedRecipe` compara ingredientes, ordem e pão com a última receita aplicada
   (seleção não conta). Se houve mudança, escolher um preset abre a confirmação no próprio painel
@@ -121,11 +122,11 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 | Quero… | Onde |
 | --- | --- |
-| adicionar um ingrediente | colocar o PNG em `public/assets/ingredients/` e uma entrada em `INGREDIENTS` (`ingredientCatalog.ts`) com `imageSize` e `shape`; nenhuma outra mudança |
-| trocar o PNG de um ingrediente | atualizar `imageSize` com o tamanho natural do novo arquivo (o teste `ingredientCatalog.test.ts` falha se divergir) e revisar `shape` |
+| adicionar um ingrediente | colocar o PNG em `public/assets/ingredients/` e uma entrada em `BURGER_CATALOG.ingredients` (`burgerCatalog.ts`) com `imageSize` e `shape`; nenhuma outra mudança (provisório: com a API, pelo admin) |
+| trocar o PNG de um ingrediente | atualizar `imageSize` com o tamanho natural do novo arquivo (o teste `burgerCatalog.test.ts` falha se divergir) e revisar `shape` |
 | ajustar como um ingrediente se encaixa | `shape` do ingrediente (`restingSurfaceRatio`, `sinkRatio`, `displayWidth`) |
-| adicionar uma variante de pão | PNGs de topo e base + entrada em `BUN_VARIANTS` |
-| adicionar ou mudar um preset | entrada em `PRESETS` (`presetCatalog.ts`); o teste `presetCatalog.test.ts` confere ids e limite |
+| adicionar uma variante de pão | PNGs de topo e base + entrada em `BURGER_CATALOG.bunVariants` |
+| adicionar ou mudar um preset | entrada em `BURGER_CATALOG.presets`; o teste `burgerCatalog.test.ts` confere ids e limite |
 | mudar a entrada, a saída ou a mola | `layerMotion.ts` |
 | criar um novo comportamento de composição | nova ação em `compositionReducer` (`composition.ts`) e o gatilho na interface; o Motion anima o resultado sem mudanças |
 | mudar regras do arraste | `useCompositionDrag.ts` (gestos) e `dragGeometry.ts` (geometria) |

@@ -4,7 +4,10 @@ Status: 🟢 **Decidido em 28/09/2026** (oficializa o modelo implementado em `ap
 
 Reutilização para outros datasets continua adiada (`OPEN_DECISIONS.md` §15 e §16).
 
-## Catálogo — `apps/web/src/burger/ingredientCatalog.ts`
+## Catálogo — `apps/web/src/burger/catalog.ts` (tipos) e `burgerCatalog.ts` (dados)
+
+Desde a T-E1 (06/10/2026) o catálogo é um dado (`BuilderCatalog`: `maxLayers`, `ingredients`, `bunVariants`,
+`presets`, `initialRecipe`) recebido pelo `BurgerBuilder`, e não constantes importadas pelos componentes.
 
 - **Ingrediente:** `id`, `name`, `imagePath`, `imageSize` (tamanho natural do PNG) e `shape` (forma de
   empilhamento: `displayWidth`, `restingSurfaceRatio`, `sinkRatio`).
@@ -20,14 +23,15 @@ Reutilização para outros datasets continua adiada (`OPEN_DECISIONS.md` §15 e 
 | `selectedInstanceId` | camada selecionada, ou `null` |
 | `isReplacingSelection` | se o próximo ingrediente escolhido substitui a camada selecionada |
 | `appliedRecipe` | última receita aplicada (estado inicial, reset ou preset); base para saber se houve edição |
+| `maxLayers` | limite de camadas do montador, vindo do catálogo; mantido ao aplicar receitas |
 
-- Limite: 14 camadas intermediárias (`MAX_LAYERS`).
-- Estado inicial (`INITIAL_RECIPE`): carne, cheddar, cebola roxa, tomate, alface (base → topo), pão clássico.
+- Limite: 14 camadas intermediárias (`maxLayers` do catálogo; guardado em `Composition.maxLayers`).
+- Estado inicial (`catalog.initialRecipe`, criado por `createInitialComposition`): carne, cheddar, cebola roxa, tomate, alface (base → topo), pão clássico.
 - **Receita** (`CompositionRecipe`): `bunVariantId` + `ingredientIds` (base → topo). Aplicar uma receita
   cria instâncias novas para cada ingrediente.
 - Todas as mudanças passam pelo `compositionReducer` (funções puras); os `instanceId` são criados fora dele.
 
-## Presets — `apps/web/src/burger/presetCatalog.ts`
+## Presets — `catalog.presets`
 
 Decididos em `DOMAIN_DECISIONS.md` §19 (Clássico, Bacon, Duplo); implementados em 29/09/2026.
 
@@ -65,8 +69,8 @@ Correspondência com o frontend atual:
 | `Ingredient.shape` | `display_width`, `resting_surface_ratio`, `sink_ratio` |
 | `BunVariant` | `bun_variants` |
 | `CompositionPreset` | `presets` + `preset_items` |
-| `INITIAL_RECIPE` | preset apontado por `builders.initial_preset_id` (BD-07) |
-| `MAX_LAYERS` | `builders.max_layers` |
+| `catalog.initialRecipe` (antes `INITIAL_RECIPE`) | preset apontado por `builders.initial_preset_id` (BD-07) |
+| `catalog.maxLayers` (antes `MAX_LAYERS`) | `builders.max_layers` |
 | `sort_order` | Ordem de exibição nos painéis; hoje é a ordem dos arrays. Necessário para preservar a ordem atual dos painéis |
 
 Campos **não** incluídos por não terem requisito: descrição, preço, categoria, `status` de publicação, autoria,

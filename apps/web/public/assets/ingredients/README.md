@@ -13,4 +13,4 @@ Regras:
   entre todos os ingredientes (ver `docs/DOMAIN_DECISIONS.md`, seções 7 e 8).
 
 Não adicione imagens provisórias com nomes definitivos. Cada imagem nova também precisa de uma
-entrada no catálogo (`src/burger/ingredientCatalog.ts`).
+entrada no catálogo (`src/burger/burgerCatalog.ts`).
