@@ -23,7 +23,7 @@ kool run artisan ...  # comandos do Artisan
 kool run composer ... # Composer
 kool run test         # testes (PHPUnit) no banco food_flow_testing; na raiz: pnpm test:api
 kool run pint         # formatação (Laravel Pint)
-kool run reset        # recria o banco com os dados iniciais
+kool run reset        # apaga as imagens enviadas e recria o banco com os dados iniciais (seed)
 ```
 
 ## Serviços (`docker-compose.yml`)
@@ -45,3 +45,10 @@ kool run reset        # recria o banco com os dados iniciais
 - `public/storage` é um link **relativo** para `storage/app/public`, válido dentro e fora do container.
 - Limites de requisição: PHP aceita até 3 MB por arquivo (4 MB por requisição) e o nginx até 4 MB, para que um
   arquivo um pouco acima de 2 MB receba erro de validação (422) e arquivos maiores sejam barrados (413).
+
+## Dados iniciais (seed)
+
+`database/seeders/BurgerCatalogSeeder.php` cria o montador de hambúrguer com o conteúdo que existia no frontend:
+variantes de pão, ingredientes (com as formas de empilhamento), os presets Clássico, Bacon e Duplo e a composição
+inicial. As imagens de origem ficam em `database/seeders/assets/` e são gravadas pelo Storage, como um upload. O
+seeder não duplica dados se o montador já existir.

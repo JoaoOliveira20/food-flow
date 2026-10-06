@@ -14,6 +14,7 @@ scripts:
 
   reset:
     - kool run composer install
+    - kool exec app rm -rf storage/app/public/ingredients storage/app/public/bun-variants
     - kool run artisan migrate:fresh --seed
 
   before-start:
