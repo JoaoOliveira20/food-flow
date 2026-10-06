@@ -122,6 +122,26 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 ---
 
+## Admin (`/admin`)
+
+Gestão de ingredientes e presets, sem login nesta versão (`docs/BACKEND_DECISIONS.md` DT-06, BD-20).
+
+| Rota | Tela |
+| --- | --- |
+| `/admin` | painel: contagens, ingredientes (miniatura, visível/oculto, uso) e presets (miniatura, inicial, disponível) |
+| `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview no renderer real, dicas de imagem; publicar/ocultar; excluir |
+| `/admin/presets/new`, `/admin/presets/[id]` | nome, pão, receita desenhada como a pilha (subir, descer, remover, adicionar no topo), miniatura; excluir |
+
+Fluxo de dados (BD-12):
+
+- **Leituras** no servidor do Next (`src/api/admin/queries.ts`, com `API_URL` e `connection()`): sempre atualizadas,
+  com `loading.tsx`, `error.tsx` e `not-found.tsx` próprios em `src/app/admin/`.
+- **Escritas** do navegador direto para a API (`src/api/admin/mutations.ts`, com `NEXT_PUBLIC_API_URL`), seguidas de
+  `router.refresh()` ou navegação. `ApiError` traz erros por campo (422) e mensagens próprias para 409, 413 e 429.
+- Os previews usam o mesmo `computeStackLayout` do builder (`RecipePreview`) com um catálogo que inclui os
+  ingredientes ocultos (`getAdminCatalog`).
+- Componentes em `src/components/admin/`; estilos em `admin.module.css`, com os tokens de cor do builder.
+
 ## Como fazer alterações comuns
 
 | Quero… | Onde |

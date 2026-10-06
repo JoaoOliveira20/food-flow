@@ -55,21 +55,22 @@ seeder não duplica dados se o montador já existir.
 
 ## Endpoints
 
-Respostas em JSON, chaves em camelCase, envelope `data`; erros em JSON com mensagens em pt-BR (`message` e, na
+Leituras (`GET`) têm limite alto, só contra sobrecarga, porque vêm quase todas do servidor do Next (um IP para todos
+os visitantes); escritas do admin vêm do navegador de cada pessoa e têm o limite estrito. Respostas em JSON, chaves em camelCase, envelope `data`; erros em JSON com mensagens em pt-BR (`message` e, na
 validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18).
 
-| Método e rota | Limite | Descrição |
+| Método e rota | Limite por IP | Descrição |
 | --- | --- | --- |
-| `GET /api/builders/{slug}` | 120/min | Catálogo público do montador |
-| `GET /api/admin/builders` | 60/min | Montadores com contagens (dashboard) |
-| `GET /api/admin/builders/{id}/ingredients` | 60/min | Ingredientes do montador, inclusive ocultos, com `presetsCount` |
+| `GET /api/builders/{slug}` | 600/min | Catálogo público do montador |
+| `GET /api/admin/builders` | 600/min | Montadores com contagens (dashboard) |
+| `GET /api/admin/builders/{id}/ingredients` | 600/min | Ingredientes do montador, inclusive ocultos, com `presetsCount` |
 | `POST /api/admin/builders/{id}/ingredients` | 60/min | Cria (multipart: `name`, `image`, `displayWidth`, `restingSurfaceRatio`, `sinkRatio`; `slug` e `sortOrder` opcionais); nasce oculto; 201 |
-| `GET /api/admin/ingredients/{id}` | 60/min | Detalhe, com os `presets` que usam o ingrediente |
+| `GET /api/admin/ingredients/{id}` | 600/min | Detalhe, com os `presets` que usam o ingrediente |
 | `PATCH /api/admin/ingredients/{id}` | 60/min | Edição parcial (JSON); com nova imagem, `POST` multipart + `_method=PATCH` |
 | `DELETE /api/admin/ingredients/{id}` | 60/min | 204; **409** com `presets` se estiver em uso |
-| `GET /api/admin/builders/{id}/presets` | 60/min | Presets do montador, inclusive o inicial (`isInitial`), com `isAvailable` |
+| `GET /api/admin/builders/{id}/presets` | 600/min | Presets do montador, inclusive o inicial (`isInitial`), com `isAvailable` |
 | `POST /api/admin/builders/{id}/presets` | 60/min | Cria (JSON: `name`, `bunVariantId`, `ingredientIds` da base para o topo, repetições permitidas; `sortOrder` opcional); 201 |
-| `GET /api/admin/presets/{id}` | 60/min | Detalhe |
+| `GET /api/admin/presets/{id}` | 600/min | Detalhe |
 | `PATCH /api/admin/presets/{id}` | 60/min | Edição parcial; `ingredientIds` substitui a lista inteira |
 | `DELETE /api/admin/presets/{id}` | 60/min | 204; **409** se for o preset inicial do montador |
 

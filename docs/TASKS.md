@@ -123,12 +123,12 @@ T-E1 não depende do backend e pode começar logo após a Fase 0, em paralelo co
 
 | ID | Tarefa | Depende de | Estado |
 | --- | --- | --- | --- |
-| T-G1 | Suíte do backend completa (validação, uploads, relações, visibilidade, exclusões, endpoint público) e Laravel Pint | C, D | ⏳ |
-| T-G2 | Testes do frontend com fixtures; `pnpm lint`, `typecheck`, `test`, `build` | E | ⏳ |
-| T-G3 | Verificação headless do builder com dados reais da API (desktop e toque) | T-E6 | ⏳ |
-| T-G4 | Verificação dos fluxos do admin (criar oculto → testar → publicar → aparece; preset → aparece; exclusões) | F | ⏳ |
-| T-G5 | Revisão de UX do admin | F | ⏳ |
-| T-G6 | Revisão da documentação: `apps/web/README.md`, README de `apps/api`, `DATA_MODEL.md`, `ARCHITECTURE.md`, `AI_DECISIONS.md`; mover decisões confirmadas para 🟢 | todas | ⏳ |
+| T-G1 | Suíte do backend completa (validação, uploads, relações, visibilidade, exclusões, endpoint público) e Laravel Pint | C, D | ✅ 06/10/2026 — 73 testes (378 asserções) e Laravel Pint sem pendências |
+| T-G2 | Testes do frontend com fixtures; `pnpm lint`, `typecheck`, `test`, `build` | E | ✅ 06/10/2026 — 46 testes (lógica do builder, conversão da API, cliente de escrita), `lint`, `typecheck` e `build` limpos |
+| T-G3 | Verificação headless do builder com dados reais da API (desktop e toque) | T-E6 | ✅ 06/10/2026 — Chrome headless (puppeteer-core numa pasta temporária do Windows, fora do repositório) contra o build de produção e a API real: catálogo da API, clique, troca de preset com confirmação, arraste até o hambúrguer, reset |
+| T-G4 | Verificação dos fluxos do admin (criar oculto → testar → publicar → aparece; preset → aparece; exclusões) | F | ✅ 06/10/2026 — mesmo roteiro: validação (sem imagem; nome vazio vindo da API), upload real com preview local, nasce oculto, publicar → aparece no builder, preset → aparece, ocultar avisa e retira ingrediente e preset, exclusão bloqueada (409) explicada, excluir preset e ingrediente; console sem erros; 24/24 em três execuções seguidas, dados deixados como antes |
+| T-G5 | Revisão de UX do admin | F | ✅ 06/10/2026 — revisão por capturas (desktop e 390 px): corrigidas miniaturas vazias no admin, texto de apoio colado ao título, barra do topo quebrando no celular, favicon ausente; sem rolagem horizontal no celular. A verificação também revelou o problema dos limites por IP (BD-18, revisado) |
+| T-G6 | Revisão da documentação: `apps/web/README.md`, README de `apps/api`, `DATA_MODEL.md`, `ARCHITECTURE.md`, `AI_DECISIONS.md`; mover decisões confirmadas para 🟢 | todas | ✅ 06/10/2026 — READMEs (raiz: como rodar e endereço do admin; `apps/web`: seção do admin; `apps/api`: limites), BD-12/BD-18, `ARCHITECTURE.md` §7, `AI_DECISIONS.md` |
 
 Testes de cada tarefa entram junto com ela; a Fase G é a passada final.
 

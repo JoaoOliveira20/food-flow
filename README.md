@@ -77,6 +77,9 @@ pnpm dev:api                       # sobe a API em segundo plano → http://loca
 pnpm dev                           # sobe o frontend (ocupa o terminal) → http://localhost:3000
 ```
 
+- Montador: http://localhost:3000
+- Admin (ingredientes e presets): http://localhost:3000/admin
+
 Os comandos da raiz são atalhos; dá no mesmo rodar `kool start` dentro de `apps/api`.
 
 ### Parar
@@ -136,7 +139,7 @@ A API (`apps/api`) fica fora do workspace do pnpm e roda só em containers (ver 
 - `docs/ASSET_ANALYSIS.md` — medidas dos assets e diretrizes de upload
 - `docs/FINAL_REVIEW.md` — pendente
 
-### Fase atual: backend Laravel, admin e conteúdo dinâmico (em implementação)
+### Fase atual: backend Laravel, admin e conteúdo dinâmico (implementada; evoluções em `docs/TASKS.md` Fase H)
 
 - `docs/requirements/food-flow-backend-admin-evolution.md` — requisitos
 - `docs/ARCHITECTURE.md` — arquitetura atual e alvo (Next.js → Laravel API → banco → Storage)

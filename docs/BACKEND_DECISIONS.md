@@ -1,7 +1,7 @@
 # Food Flow — Decisões da fase Backend, Admin e Conteúdo Dinâmico
 
 Início: 06/10/2026. Status: 🟢 **Revisão T-A9 feita em 06/10/2026** (ver "Revisão do responsável" abaixo);
-nenhuma questão aberta. Ambiente (BD-21) adotado; implementação em andamento (`TASKS.md`).
+nenhuma questão aberta. Ambiente (BD-21) adotado; fases 0 e B a G implementadas em 06/10/2026 (`TASKS.md`).
 
 ## Revisão do responsável — 06/10/2026
 
@@ -424,7 +424,10 @@ Decidido na implementação (T-B7, 06/10/2026):
   coincidem com os campos do formulário); a conversão para as colunas snake_case fica nos Form Requests/Resources.
 - Mensagens da API em **pt-BR** (`APP_LOCALE=pt_BR`, arquivos em `lang/`), com inglês como alternativa.
 - Toda resposta de erro é JSON; modelo inexistente responde 404 com `{"message": "Recurso não encontrado."}`.
-- Limites: 120 requisições/min por IP nas rotas públicas e 60/min nas de gestão.
+- Limites por IP: **leituras 600/min** (só proteção contra sobrecarga: vêm quase todas do servidor do Next, que usa
+  um único IP para todos os visitantes) e **escritas do admin 60/min** (vêm do navegador de cada pessoa). Revisão de
+  06/10/2026: a primeira versão limitava leituras a 120 e 60/min por IP, o que, compartilhado pelo servidor do Next,
+  derrubaria páginas com pouco tráfego (visto como 429 na verificação de ponta a ponta).
 - CORS só para `FRONTEND_URL` (padrão `http://localhost:3000`), métodos GET/POST/PATCH/DELETE.
 - Eloquent em modo estrito fora de produção (impede consultas N+1 e atributos inexistentes).
 - API pura: removidos do esqueleto o Vite/Tailwind, a página de boas-vindas e as rotas web; `/` responde 404.

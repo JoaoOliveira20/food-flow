@@ -195,7 +195,7 @@ do Laravel é snake_case; erros no formato padrão do Laravel (BD-18); URLs de i
 | Arquivo malicioso (extensão falsa, SVG com script, polyglot) | MIME por conteúdo; lista fechada (PNG, WebP); decodificação obrigatória; nome gerado pelo servidor; extensão pelo conteúdo |
 | Path traversal / sobrescrita | Nome do arquivo nunca vem do cliente; diretório fixo por tipo |
 | Arquivos enormes / bomba de descompressão | Limite de 2 MB; lado máximo 3000 px; limites do PHP alinhados |
-| Abuso por volume | Rate limiting (`throttle`) nas rotas de gestão |
+| Abuso por volume | Escritas do admin limitadas a 60/min por IP; leituras a 600/min (vêm do servidor do Next, um IP para todos) |
 | Outra origem chamando a API pelo navegador | CORS restrito à origem do frontend (não protege contra chamadas diretas; é higiene) |
 | Vandalismo do conteúdo (qualquer um pode excluir) | Aceito na demonstração (DT-06); não publicar sem proteção (⏳ O5); seed reexecutável para restaurar |
 | Imagem de ingrediente oculto acessível pela URL | Aceito: ocultar não é sigilo; nome do arquivo é aleatório (BD-09) |

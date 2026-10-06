@@ -283,3 +283,34 @@ localmente, mas deve ser feito com padrão de produção, como se fosse ficar no
 - Fase F (admin), Fase G (qualidade), T-07 (cópia do Windows), push (aguarda autorização).
 - Verificação no navegador da interação do builder (arraste, animações) e da tela de erro: não havia navegador
   automatizado no WSL nesta sessão.
+
+---
+
+## 2026-10-06 — Admin (Fase F) e qualidade (Fase G)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+### Sugestões adotadas
+
+- **Admin no Next:** leituras no servidor (como o builder) e escritas do navegador direto para a API, seguidas de
+  `router.refresh()`; erros 422 por campo; 409/413/429 com mensagens próprias (o 413 do nginx não é JSON).
+- **Formulário de ingrediente:** análise local da imagem antes do envio (dimensões, tamanho, bordas sem
+  transparência, proporção, nitidez), medidas com explicação em linguagem simples e preview no mesmo cálculo de
+  empilhamento do builder, entre camadas e pão escolhidos.
+- **Editor de preset** desenhado como a pilha, com "adicionar no topo" como no builder.
+- **Confirmações dentro da tela** (sem `window.confirm`), como no builder.
+- **Verificação de ponta a ponta** com Chrome headless controlado por `puppeteer-core` instalado numa pasta temporária
+  do Windows (fora do repositório, sem dependência nova), contra o build de produção e a API real; o roteiro cria e
+  remove seus próprios itens "E2E".
+
+### Problemas encontrados pela verificação e corrigidos
+
+- **Limites de requisição por IP:** as leituras vêm do servidor do Next, então todos os visitantes compartilhavam o
+  limite de 60/120 por minuto; três execuções seguidas do roteiro geraram 429 e derrubaram uma página. Leituras
+  passaram a 600/min (proteção contra sobrecarga) e só as escritas do admin ficaram em 60/min (BD-18).
+- Miniaturas do admin desenhadas fora da caixa (pareciam vazias); texto de apoio colado ao título; barra do topo
+  quebrando no celular; favicon ausente (pendência antiga) — resolvido com `app/icon.svg`.
+
+### Pendente
+
+- Push do branch `feature/backend-admin` (aguarda autorização); T-07 (cópia do Windows); Fase H (futuro).
