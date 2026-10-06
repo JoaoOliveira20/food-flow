@@ -176,3 +176,41 @@ ingredientes, sem colocá-los à frente de tudo.
 ### Pendente
 
 - Miniaturas dos molhos no painel de ingredientes ficam finas; decisão de interface não tomada.
+
+---
+
+## 2026-10-06 — Planejamento da fase Backend, Admin e Conteúdo Dinâmico
+
+**Ferramenta:** Claude Code (Claude Opus 5.5).
+
+### Contexto e solicitação
+
+O responsável entregou os requisitos da próxima fase (Laravel como API e fonte de verdade, ingredientes e presets
+gerenciáveis, admin sem autenticação, Storage, visibilidade) e pediu **só planejamento**: incorporar os requisitos
+à documentação, analisar alternativas antes de decidir, registrar conflitos sem resolvê-los silenciosamente e
+organizar as tarefas. Nenhum código foi alterado.
+
+### O que foi feito
+
+- Requisitos copiados para `docs/requirements/food-flow-backend-admin-evolution.md`.
+- Comparação entre documentação e código: sem divergências.
+- Medição dos 21 PNGs (dimensões, alfa, tamanho) para basear os limites de upload em dados (`ASSET_ANALYSIS.md`).
+- Verificado na documentação do Next 16 instalada: bloqueio de otimização de imagens de IP local
+  (`dangerouslyAllowLocalIP`) e limite padrão de 1 MB em Server Actions — ambos influenciaram BD-11/BD-12.
+- Novos documentos: `BACKEND_DECISIONS.md` (decisões tomadas, conflitos, 20 propostas com alternativas, abertas),
+  `ARCHITECTURE.md` (estado atual, alvo, divisão de regras, contrato inicial da API, arquivos afetados) e
+  `TASKS.md` (fases A–H com dependências).
+
+### Sugestões registradas como propostas (não adotadas até a revisão)
+
+Montador como tabela; variantes de pão em tabela própria só leitura; configurações visuais em colunas; dimensões
+calculadas no upload; itens de preset em tabela própria (sem `belongsToMany`, que descartaria repetições);
+composição inicial como preset do montador; `is_visible` booleano e presets com disponibilidade derivada; Storage
+em disco configurável com caminho relativo e nome por hash; PNG/WebP, 2 MB, 280–3000 px; refatorar o catálogo
+para "dado recebido" antes do backend existir.
+
+### Conflitos registrados (aguardando o responsável)
+
+C1 reutilização/segundo dataset adiados × montador pensando em pizza; C2 lista de presets decidida × presets
+editáveis; C3 pão como variante × pão listado como ingrediente no exemplo; C4 composição inicial fixa no frontend;
+C5 ordem do fluxo de publicação.

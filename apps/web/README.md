@@ -13,6 +13,9 @@ pnpm --filter @food-flow/web typecheck
 pnpm --filter @food-flow/web test   # Vitest (composição, empilhamento, presets e tamanhos dos PNGs)
 ```
 
+> Fase seguinte em planejamento: catálogo, presets e imagens passarão a vir de uma API Laravel
+> (`docs/ARCHITECTURE.md`, `docs/TASKS.md`). Este documento descreve o código atual.
+
 ---
 
 ## Arquitetura

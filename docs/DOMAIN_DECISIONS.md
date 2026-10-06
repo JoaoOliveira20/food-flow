@@ -498,6 +498,8 @@ Detalhes de implementação (29/09/2026; escolhidos na implementação e revers�
 * O preset igual à composição atual fica marcado; escolhê-lo não altera nada.
 * Cada card mostra uma miniatura da composição do preset, gerada a partir dos mesmos dados e do mesmo cálculo de empilhamento.
 
+🟢 **06/10/2026 — confirmado pelo responsável:** com o admin da fase Backend/Admin, presets poderão ser criados, editados e excluídos. Os três presets acima viram os dados iniciais (seed), com os mesmos nomes e composições, e deixam de ser uma lista fixa de produto. Ver `BACKEND_DECISIONS.md` C2.
+
 ---
 
 # 20. Reset
@@ -597,3 +599,20 @@ Ainda não foram definidos:
 Ambos foram adiados até a conclusão do montador de hambúrguer, incluindo os presets (28/09/2026).
 
 Decididos em 28/09/2026 (detalhes em `OPEN_DECISIONS.md`, que mantém o histórico de cada item): biblioteca de animação (Motion), modelo de dados, algoritmo de empilhamento e cálculo das posições, tratamento da espessura, física simulada, interrupção de animações, detalhes do drag & drop, estratégia mobile e linguagem visual.
+
+Desde 06/10/2026, as questões da fase Backend/Admin estão em `BACKEND_DECISIONS.md` (seção 25 abaixo).
+
+---
+
+# 25. Conteúdo gerenciável: backend e admin
+
+Decidido pelo responsável em 06/10/2026 (requisitos: `docs/requirements/food-flow-backend-admin-evolution.md`). Decisões técnicas detalhadas, propostas e conflitos: `BACKEND_DECISIONS.md`.
+
+* Ingredientes e presets passam a ser dados gerenciáveis, mantidos por um backend Laravel, que é a fonte de verdade; o frontend Next.js consome a API e não mantém uma segunda cópia dos dados.
+* Cada ingrediente e cada preset pertence a um montador. Um ingrediente não aparece em todos os montadores. Hoje existe só o montador de hambúrguer; outros (ex.: pizza) devem poder ser adicionados sem reescrever a arquitetura.
+* Um ingrediente pode ser criado sem aparecer no montador público; ele só aparece depois de tornado visível no admin. A regra vale na API.
+* Antes de publicar, o admin permite ver o ingrediente com a mesma lógica visual do montador e mostra orientações para preparar a imagem.
+* O admin (`/admin`) não terá login nesta primeira versão; qualquer pessoa pode criar, editar e excluir. A API valida tudo o que recebe.
+* Autenticação, autorização, roles e permissões são evolução futura.
+
+O comportamento do montador decidido nas seções 1 a 24 não muda.
