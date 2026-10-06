@@ -247,3 +247,39 @@ foram copiadas para o projeto do WSL.
 ### Pendente
 
 - Push do branch `feature/backend-admin` (aguarda autorização); O5; aposentar a cópia do Windows (T-07).
+
+---
+
+## 2026-10-06 — Backend (T-B3 a T-B9), integração do builder (Fase E) e API de gestão (Fases C e D)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+### Contexto e solicitação
+
+O responsável pediu para seguir as tarefas com commits por etapa, sem push, e respondeu a O5: o projeto roda só
+localmente, mas deve ser feito com padrão de produção, como se fosse ficar no ar.
+
+### Sugestões adotadas (decisões de implementação)
+
+- **API:** camelCase nas respostas e requisições; mensagens em pt-BR; erros sempre em JSON; limites de 120/60
+  requisições por minuto; CORS só para o frontend; Eloquent em modo estrito fora de produção (pegou carregamentos
+  N+1 durante o desenvolvimento); API pura, sem o Vite/Tailwind do esqueleto.
+- **Storage:** `config/media.php` centraliza disco, diretórios e limites; `ImageStorage` gera nomes por hash e
+  extensão pelo conteúdo; link `public/storage` relativo (sem o pacote extra que o `--relative` exigiria); limites do
+  PHP (3 MB/4 MB) e do nginx (4 MB) alinhados à regra de 2 MB.
+- **Uploads:** validação pelo conteúdo + extensão coerente; testes com uploads reais, porque
+  `UploadedFile::fake()` informa o tipo pelo nome e esconderia falhas; grava o arquivo antes do banco e o remove se a
+  transação falhar; o antigo só é apagado após o commit.
+- **Seed:** conteúdo do frontend levado ao banco, idempotente, com as imagens gravadas pelo Storage.
+- **Frontend:** catálogo passado como dado (`BuilderCatalog`), refatorado antes da integração e validado por HTML
+  idêntico; busca no servidor com `connection()`, porque sem isso o Next 16 buscaria o catálogo uma única vez no
+  build; estados de carregamento, erro, não encontrado, indisponível e vazio.
+- **Correção do BD-10:** o builder usa `<Image unoptimized>`, então o Next não otimiza a entrega; também não é
+  preciso `remotePatterns`/`dangerouslyAllowLocalIP`.
+- **`.env.example`** estava ignorado pelos `.gitignore` (`.env*`); passou a ser versionado.
+
+### Pendente
+
+- Fase F (admin), Fase G (qualidade), T-07 (cópia do Windows), push (aguarda autorização).
+- Verificação no navegador da interação do builder (arraste, animações) e da tela de erro: não havia navegador
+  automatizado no WSL nesta sessão.
