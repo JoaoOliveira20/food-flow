@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BuilderController as AdminBuilderController;
+use App\Http\Controllers\Catalog\ShowBuilderCatalogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -8,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 | ingredients and available presets (docs/BACKEND_DECISIONS.md, BD-14).
 */
 Route::middleware('throttle:public-api')->group(function () {
-    //
+    Route::get('builders/{builder:slug}', ShowBuilderCatalogController::class)->name('builders.show');
 });
 
 /*

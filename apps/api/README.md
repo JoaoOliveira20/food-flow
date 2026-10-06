@@ -52,3 +52,25 @@ kool run reset        # apaga as imagens enviadas e recria o banco com os dados 
 variantes de pão, ingredientes (com as formas de empilhamento), os presets Clássico, Bacon e Duplo e a composição
 inicial. As imagens de origem ficam em `database/seeders/assets/` e são gravadas pelo Storage, como um upload. O
 seeder não duplica dados se o montador já existir.
+
+## Endpoints
+
+Respostas em JSON, chaves em camelCase, envelope `data`; erros em JSON com mensagens em pt-BR (`message` e, na
+validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18).
+
+| Método e rota | Limite | Descrição |
+| --- | --- | --- |
+| `GET /api/builders/{slug}` | 120/min | Catálogo público do montador |
+| `GET /api/admin/builders` | 60/min | Montadores com contagens (dashboard) |
+
+`GET /api/builders/burger` devolve só o que o builder público pode usar:
+
+```text
+data.slug, data.name, data.maxLayers
+data.bunVariants[]   { id, slug, name, topImage { url, width, height }, bottomImage { url, width, height } }
+data.ingredients[]   só visíveis, na ordem de exibição:
+                     { id, slug, name, image { url, width, height }, shape { displayWidth, restingSurfaceRatio, sinkRatio } }
+data.presets[]       só disponíveis (todos os ingredientes visíveis), sem o preset inicial:
+                     { id, name, bunVariantId, ingredientIds[] }   ingredientIds da base para o topo, com repetições
+data.initialRecipe   { bunVariantId, ingredientIds[] } — vazia se o preset inicial estiver indisponível
+```
