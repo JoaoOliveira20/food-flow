@@ -28,7 +28,7 @@ sobre mudanças de arquivos e altera permissões e fins de linha. Detalhes e mot
 | --- | --- |
 | Windows | Docker Desktop (com a integração WSL ligada para o Ubuntu), VS Code com a extensão WSL, navegador |
 | Ubuntu (WSL) | repositório, Git, Node.js 24 (nvm), pnpm (Corepack), Kool, Claude Code |
-| Containers (Kool) | backend Laravel e MySQL (a partir da T-B1, `docs/TASKS.md`) |
+| Containers (Kool) | backend Laravel e MySQL |
 
 ```bash
 cd ~/projetos/food-flow
@@ -44,6 +44,62 @@ code .                   # abre o VS Code conectado ao WSL
 
 - Node.js 24+
 - pnpm 12 (via Corepack: `corepack enable`)
+- Docker Desktop (com a integração WSL ligada) e [Kool](https://kool.dev) — para a API; PHP, Composer e MySQL
+  rodam só em containers
+
+## Como rodar
+
+O projeto tem duas partes: a **API** (Laravel + MySQL, em containers) e o **frontend** (Next.js). O frontend busca
+ingredientes, pães e presets na API, então suba a API primeiro.
+
+### Primeira vez (uma vez por clone)
+
+Com o Docker Desktop aberto:
+
+```bash
+cd ~/projetos/food-flow
+pnpm install                       # dependências do frontend
+
+cd apps/api
+kool run setup                     # cria o .env, sobe os containers, instala o Composer, gera a chave,
+                                   # cria o link das imagens e roda migrations + dados iniciais
+
+cd ../web
+cp .env.example .env.local         # endereço da API usado pelo Next (http://localhost:8000)
+```
+
+### Dia a dia
+
+```bash
+cd ~/projetos/food-flow
+
+pnpm dev:api                       # sobe a API em segundo plano → http://localhost:8000 (saúde: /up)
+pnpm dev                           # sobe o frontend (ocupa o terminal) → http://localhost:3000
+```
+
+Os comandos da raiz são atalhos; dá no mesmo rodar `kool start` dentro de `apps/api`.
+
+### Parar
+
+```bash
+Ctrl+C                             # no terminal do `pnpm dev`: para o frontend
+pnpm stop:api                      # para a API e o MySQL (ou `kool stop` dentro de `apps/api`)
+```
+
+Parar não apaga o banco: os dados ficam num volume do Docker. Se o frontend abrir com a API parada, aparece
+"Não foi possível carregar o montador"; suba a API e clique em "Tentar de novo".
+
+### Outros comandos da API (dentro de `apps/api`)
+
+```bash
+kool run test                      # testes (na raiz: pnpm test:api)
+kool run reset                     # apaga as imagens enviadas e recria o banco com os dados iniciais
+kool run artisan ...               # Artisan
+kool run composer ...              # Composer
+kool run pint                      # formatação do PHP
+```
+
+Mais detalhes da API (serviços, endpoints, erros): `apps/api/README.md`.
 
 ## Comandos (na raiz)
 
@@ -66,8 +122,7 @@ pnpm stop:api            # para os containers da API
 pnpm test:api            # testes (PHPUnit) da API
 ```
 
-A API (`apps/api`) fica fora do workspace do pnpm e roda só em containers; primeira configuração e comandos em
-`apps/api/README.md`. Requer Docker Desktop (integração WSL) e Kool.
+A API (`apps/api`) fica fora do workspace do pnpm e roda só em containers (ver "Como rodar").
 
 ## Documentação
 
@@ -81,7 +136,7 @@ A API (`apps/api`) fica fora do workspace do pnpm e roda só em containers; prim
 - `docs/ASSET_ANALYSIS.md` — medidas dos assets e diretrizes de upload
 - `docs/FINAL_REVIEW.md` — pendente
 
-### Próxima fase: backend Laravel, admin e conteúdo dinâmico (em planejamento)
+### Fase atual: backend Laravel, admin e conteúdo dinâmico (em implementação)
 
 - `docs/requirements/food-flow-backend-admin-evolution.md` — requisitos
 - `docs/ARCHITECTURE.md` — arquitetura atual e alvo (Next.js → Laravel API → banco → Storage)
