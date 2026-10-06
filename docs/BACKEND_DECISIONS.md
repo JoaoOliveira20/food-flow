@@ -1,7 +1,7 @@
 # Food Flow — Decisões da fase Backend, Admin e Conteúdo Dinâmico
 
 Início: 06/10/2026. Status: 🟢 **Revisão T-A9 feita em 06/10/2026** (ver "Revisão do responsável" abaixo);
-pendente: O5. Ambiente (BD-21) adotado; implementação em andamento (`TASKS.md`).
+nenhuma questão aberta. Ambiente (BD-21) adotado; implementação em andamento (`TASKS.md`).
 
 ## Revisão do responsável — 06/10/2026
 
@@ -21,7 +21,7 @@ exceções abaixo. As seções seguintes preservam a análise original (alternat
 | O6 | 🟢 Framework de testes padrão do instalador do Laravel |
 | O4 | 🟢 **MySQL** (e não SQLite, como fora recomendado). BD-19 atualizado |
 | Ambiente | 🟢 WSL2 + Kool/Docker (BD-21), adotado e executado em 06/10/2026 |
-| O5 | ⏳ A resposta tratou do código ir para o GitHub, que já acontece (`origin` no GitHub). A pergunta era sobre **hospedar o admin sem login na internet**; ainda sem resposta |
+| O5 | 🟢 **Só local** (06/10/2026): com Laravel + Next.js, não há hospedagem gratuita prevista; quem quiser testar roda localmente. Mas o projeto deve ser feito **com padrão de produção**, como se fosse ficar no ar (validação, segurança, testes, configuração por ambiente). Publicar exige antes a autenticação (T-H1) |
 
 Requisitos de origem: `docs/requirements/food-flow-backend-admin-evolution.md` (cópia do documento entregue pelo
 responsável). Visão de arquitetura: `ARCHITECTURE.md`. Modelo de dados proposto: `DATA_MODEL.md` (seção "Modelo
@@ -462,7 +462,7 @@ autorização e roles/permissões conforme a necessidade.
 
 ## 4. Decisões em aberto (⏳)
 
-Respostas de 06/10/2026: ver "Revisão do responsável" no topo. Continua aberta apenas O5.
+Respostas de 06/10/2026: ver "Revisão do responsável" no topo. Nenhuma questão aberta (O5 respondida em 06/10/2026).
 
 | ID | Pergunta | Recomendação | Bloqueia |
 | --- | --- | --- | --- |

@@ -9,7 +9,7 @@ scripts:
     - kool start
     - kool run composer install
     - kool run artisan key:generate
-    - kool run artisan storage:link
+    - kool exec app ln -sfn ../storage/app/public public/storage
     - kool run artisan migrate --seed
 
   reset:

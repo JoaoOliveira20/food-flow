@@ -8,6 +8,9 @@ services:
     environment:
       ASUSER: "${KOOL_ASUSER:-0}"
       UID: "${UID:-0}"
+      PHP_UPLOAD_MAX_FILESIZE: 3M
+      PHP_POST_MAX_SIZE: 4M
+      NGINX_CLIENT_MAX_BODY_SIZE: 4M
     volumes:
       - .:/app:delegated
     networks:

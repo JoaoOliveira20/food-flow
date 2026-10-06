@@ -10,7 +10,8 @@ instalado no Windows ou no WSL.
 
 ```bash
 cd apps/api
-kool run setup        # copia .env, sobe os containers, instala dependências, gera a chave, storage:link e migrations
+kool run setup        # copia .env, sobe os containers, instala dependências, gera a chave, cria o link
+                      # public/storage (relativo) e roda as migrations
 ```
 
 ## Dia a dia
@@ -36,3 +37,11 @@ kool run reset        # recria o banco com os dados iniciais
 - Credenciais locais em `.env.example`; servem só para desenvolvimento.
 - O script de criação do banco de testes só roda quando o volume é criado. Para recriar tudo do zero:
   `kool stop && docker volume rm food-flow-api_database && kool start`.
+
+## Imagens (Storage)
+
+- Disco configurável por `MEDIA_DISK` (padrão `public`); limites e diretórios em `config/media.php` (BD-09, BD-10).
+- O banco guarda só o caminho relativo; a URL é gerada por `App\Media\ImageStorage::url()`.
+- `public/storage` é um link **relativo** para `storage/app/public`, válido dentro e fora do container.
+- Limites de requisição: PHP aceita até 3 MB por arquivo (4 MB por requisição) e o nginx até 4 MB, para que um
+  arquivo um pouco acima de 2 MB receba erro de validação (422) e arquivos maiores sejam barrados (413).
