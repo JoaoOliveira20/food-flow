@@ -17,6 +17,7 @@ type BurgerWorkbenchProps = {
   canReplace?: boolean;
   hint?: string;
   stageClassName?: string;
+  showsStatus?: boolean;
 };
 
 export function BurgerWorkbench({
@@ -26,6 +27,7 @@ export function BurgerWorkbench({
   dispatch,
   canReplace = true,
   stageClassName = "",
+  showsStatus = true,
   hint = "Toque em uma camada para editá-la ou arraste-a para mudar a ordem.",
 }: BurgerWorkbenchProps) {
   const { stageRef, drag, layout, stackScale, stageMessage, startDraggingLayer, attachGhostElement } = workbench;
@@ -52,7 +54,7 @@ export function BurgerWorkbench({
             onLayerPointerDown={startDraggingLayer}
           />
         )}
-        <p className={styles.status} role="status" aria-live="polite">
+        <p className={showsStatus ? styles.status : styles.statusHidden} role="status" aria-live="polite">
           {stageMessage ?? ""}
         </p>
       </div>

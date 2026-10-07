@@ -300,6 +300,7 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
             composition={composition}
             dispatch={dispatch}
             canReplace={false}
+            showsStatus={false}
             stageClassName={styles.workbenchStage}
             hint={
               !draftImage
