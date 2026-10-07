@@ -24,7 +24,13 @@ class BunVariantFactory extends Factory
             'bottom_image_path' => 'bun-variants/'.Str::random(40).'.png',
             'bottom_image_width' => 336,
             'bottom_image_height' => 146,
+            'is_visible' => true,
             'sort_order' => 0,
         ];
+    }
+
+    public function hidden(): static
+    {
+        return $this->state(fn () => ['is_visible' => false]);
     }
 }

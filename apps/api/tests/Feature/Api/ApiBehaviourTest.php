@@ -79,6 +79,8 @@ class ApiBehaviourTest extends TestCase
                 'ingredientsCount' => 2,
                 'visibleIngredientsCount' => 1,
                 'presetsCount' => 1,
+                'bunVariantsCount' => 1,
+                'visibleBunVariantsCount' => 1,
             ]]]);
     }
 }

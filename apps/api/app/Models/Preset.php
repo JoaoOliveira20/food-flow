@@ -42,12 +42,16 @@ class Preset extends Model
     #[Scope]
     protected function available(QueryBuilder $query): void
     {
-        $query->whereDoesntHave('items.ingredient', fn (QueryBuilder $ingredients) => $ingredients->where('is_visible', false));
+        $query
+            ->whereHas('bunVariant', fn (QueryBuilder $bunVariants) => $bunVariants->where('is_visible', true))
+            ->whereDoesntHave('items.ingredient', fn (QueryBuilder $ingredients) => $ingredients->where('is_visible', false));
     }
 
     public function isAvailable(): bool
     {
-        return $this->loadMissing('items.ingredient')->items->every(fn (PresetItem $item) => $item->ingredient->is_visible);
+        $this->loadMissing(['bunVariant', 'items.ingredient']);
+
+        return $this->bunVariant->is_visible && $this->items->every(fn (PresetItem $item) => $item->ingredient->is_visible);
     }
 
     /**

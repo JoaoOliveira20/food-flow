@@ -12,7 +12,7 @@ class ShowBuilderCatalogController extends Controller
     public function __invoke(Builder $builder): BuilderCatalogResource
     {
         $builder->load([
-            'bunVariants',
+            'bunVariants' => fn (HasMany $bunVariants) => $bunVariants->visible(),
             'ingredients' => fn (HasMany $ingredients) => $ingredients->visible(),
             'presets' => function (HasMany $presets) use ($builder) {
                 $presets->available()->with('items');
@@ -21,6 +21,7 @@ class ShowBuilderCatalogController extends Controller
                     $presets->whereKeyNot($builder->initial_preset_id);
                 }
             },
+            'initialPreset.bunVariant',
             'initialPreset.items.ingredient',
         ]);
 

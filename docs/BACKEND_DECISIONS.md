@@ -483,6 +483,19 @@ Pontos de encaixe criados agora, sem código de autenticação:
 Caminho provável no futuro (não decidido): Laravel Sanctum no modo SPA (cookie), Gates/Policies para
 autorização e roles/permissões conforme a necessidade.
 
+### BD-22 — Admin de tipos de pão (T-H7)
+
+🟢 **Decidido em 07/10/2026** — o responsável pediu a T-H7; implementação no mesmo padrão dos ingredientes:
+
+- `bun_variants.is_visible` (padrão `false`); os 4 pães existentes foram marcados visíveis na migration.
+- Pão novo **nasce oculto**; duas imagens (topo e base) com as regras de upload do BD-10.
+- Só pães visíveis chegam ao catálogo público; **preset com pão oculto fica indisponível**; se o pão do preset inicial
+  estiver oculto, o montador abre vazio no primeiro pão visível.
+- Exclusão: 409 se o pão for usado por presets (lista os presets); 409 ao ocultar ou excluir o **último pão
+  visível** (o montador ficaria indisponível).
+- As formas de empilhamento dos pães (`TOP_BUN_SHAPE`/`BOTTOM_BUN_SHAPE`) continuam no renderer (BD-03): as imagens
+  novas precisam seguir as proporções dos pães atuais, o que o preview do admin ajuda a conferir.
+
 ---
 
 ## 4. Decisões em aberto (⏳)

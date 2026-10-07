@@ -22,6 +22,8 @@ class BuilderResource extends JsonResource
             'ingredientsCount' => $this->whenCounted('ingredients'),
             'visibleIngredientsCount' => $this->whenCounted('visible_ingredients'),
             'presetsCount' => $this->whenCounted('presets'),
+            'bunVariantsCount' => $this->whenCounted('bun_variants'),
+            'visibleBunVariantsCount' => $this->whenCounted('visible_bun_variants'),
         ];
     }
 }

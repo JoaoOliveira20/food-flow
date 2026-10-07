@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Expects the preset with "items.ingredient" and "builder" loaded.
+ * Expects the preset with "items.ingredient", "bunVariant" and "builder" loaded.
  *
  * @mixin Preset
  */
@@ -24,7 +24,7 @@ class PresetResource extends JsonResource
             'ingredientIds' => $this->items->map(fn (PresetItem $item) => $item->ingredient_id)->values(),
             'sortOrder' => $this->sort_order,
             'isInitial' => $this->builder->initial_preset_id === $this->id,
-            'isAvailable' => $this->items->every(fn (PresetItem $item) => $item->ingredient->is_visible),
+            'isAvailable' => $this->bunVariant->is_visible && $this->items->every(fn (PresetItem $item) => $item->ingredient->is_visible),
             'createdAt' => $this->created_at?->toIso8601String(),
             'updatedAt' => $this->updated_at?->toIso8601String(),
         ];

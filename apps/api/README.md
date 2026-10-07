@@ -73,6 +73,11 @@ validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18)
 | `GET /api/admin/presets/{id}` | 600/min | Detalhe |
 | `PATCH /api/admin/presets/{id}` | 60/min | Edição parcial; `ingredientIds` substitui a lista inteira |
 | `DELETE /api/admin/presets/{id}` | 60/min | 204; **409** se for o preset inicial do montador |
+| `GET /api/admin/builders/{id}/bun-variants` | 600/min | Tipos de pão, inclusive ocultos, com `presetsCount` |
+| `POST /api/admin/builders/{id}/bun-variants` | 60/min | Cria (multipart: `name`, `topImage`, `bottomImage`; `slug` e `sortOrder` opcionais); nasce oculto; 201 |
+| `GET /api/admin/bun-variants/{id}` | 600/min | Detalhe, com os `presets` que usam o pão |
+| `PATCH /api/admin/bun-variants/{id}` | 60/min | Edição parcial; imagens novas por `POST` multipart + `_method=PATCH`; **409** ao ocultar o último pão visível |
+| `DELETE /api/admin/bun-variants/{id}` | 60/min | 204; **409** se usado por presets ou se for o último pão visível |
 
 `GET /api/builders/burger` devolve só o que o builder público pode usar:
 

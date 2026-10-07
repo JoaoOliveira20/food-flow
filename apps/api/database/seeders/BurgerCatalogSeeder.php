@@ -93,6 +93,7 @@ class BurgerCatalogSeeder extends Seeder
                 'bottom_image_path' => $bottom->path,
                 'bottom_image_width' => $bottom->width,
                 'bottom_image_height' => $bottom->height,
+                'is_visible' => true,
                 'sort_order' => $order,
             ]);
         }

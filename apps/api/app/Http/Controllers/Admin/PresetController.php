@@ -20,7 +20,7 @@ class PresetController extends Controller
 
     public function index(Builder $builder): AnonymousResourceCollection
     {
-        $presets = $builder->presets()->with('items.ingredient')->get();
+        $presets = $builder->presets()->with(['bunVariant', 'items.ingredient'])->get();
         $presets->each->setRelation('builder', $builder);
 
         return PresetResource::collection($presets);
@@ -56,6 +56,6 @@ class PresetController extends Controller
 
     private function detail(Preset $preset): PresetResource
     {
-        return new PresetResource($preset->load(['builder', 'items.ingredient']));
+        return new PresetResource($preset->load(['builder', 'bunVariant', 'items.ingredient']));
     }
 }

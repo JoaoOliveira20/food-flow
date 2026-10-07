@@ -63,6 +63,8 @@ return [
         'isVisible' => 'visível',
         'sortOrder' => 'ordem',
         'bunVariantId' => 'tipo de pão',
+        'topImage' => 'imagem do topo',
+        'bottomImage' => 'imagem da base',
         'ingredientIds' => 'ingredientes',
         'ingredientIds.*' => 'ingrediente',
     ],

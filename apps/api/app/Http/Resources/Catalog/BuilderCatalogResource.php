@@ -29,21 +29,22 @@ class BuilderCatalogResource extends JsonResource
     }
 
     /**
-     * The initial preset when it is available; otherwise an empty composition,
-     * so a hidden ingredient never reaches the public builder (BD-07, BD-14).
+     * The initial preset when it is available; otherwise an empty composition on the
+     * first visible bun, so hidden items never reach the public builder (BD-07, BD-14, BD-22).
      *
      * @return array{bunVariantId: int, ingredientIds: list<int>}|null
      */
     private function initialRecipe(): ?array
     {
         $preset = $this->initialPreset;
-        $bunVariantId = $preset?->bun_variant_id ?? $this->bunVariants->first()?->id;
+        $hasVisibleBun = $preset !== null && $preset->bunVariant->is_visible;
+        $bunVariantId = $hasVisibleBun ? $preset->bun_variant_id : $this->bunVariants->first()?->id;
 
         if ($bunVariantId === null) {
             return null;
         }
 
-        $isAvailable = $preset !== null && $preset->items->every(fn (PresetItem $item) => $item->ingredient->is_visible);
+        $isAvailable = $hasVisibleBun && $preset->items->every(fn (PresetItem $item) => $item->ingredient->is_visible);
 
         return [
             'bunVariantId' => $bunVariantId,
