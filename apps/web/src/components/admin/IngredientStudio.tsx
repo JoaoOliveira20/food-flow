@@ -1,11 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useReducer, useState, type FormEvent } from "react";
 import { ApiError, createIngredient, updateIngredient, type FieldErrors } from "@/api/admin/mutations";
 import type { AdminIngredient, AdminShape } from "@/api/admin/types";
 import type { BuilderCatalog } from "@/burger/catalog";
-import { RecipePreview } from "@/components/burger-builder/RecipePreview";
+import {
+  compositionReducer,
+  createCompositionFromRecipe,
+  createInstanceId,
+  createRecipeInstanceIds,
+  type CompositionRecipe,
+} from "@/burger/composition";
+import { BurgerWorkbench } from "@/components/burger-builder/BurgerWorkbench";
+import { useBurgerWorkbench } from "@/components/burger-builder/useBurgerWorkbench";
 import { Icon } from "./Icon";
 import { ImagePicker } from "./ImagePicker";
 import { ImageTips } from "./ImageTips";
@@ -37,6 +45,25 @@ function sameShape(first: AdminShape, second: AdminShape): boolean {
   );
 }
 
+function previewRecipe(
+  catalog: BuilderCatalog,
+  presetId: string,
+  editedId: string | null,
+  includesDraft: boolean,
+): CompositionRecipe {
+  const preset = catalog.presets.find((item) => item.id === presetId);
+  const ingredientIds = (preset?.ingredientIds ?? []).map((id) => (id === editedId ? DRAFT_ID : id));
+  const withDraft = includesDraft && !ingredientIds.includes(DRAFT_ID) ? [...ingredientIds, DRAFT_ID] : ingredientIds;
+  return {
+    bunVariantId: preset?.bunVariantId ?? catalog.bunVariants[0].id,
+    ingredientIds: includesDraft ? withDraft.slice(0, catalog.maxLayers) : withDraft.filter((id) => id !== DRAFT_ID),
+  };
+}
+
+function compositionOf(recipe: CompositionRecipe, maxLayers: number) {
+  return createCompositionFromRecipe(recipe, createRecipeInstanceIds(recipe), maxLayers);
+}
+
 function usageLabel(count: number): string {
   if (count === 0) return "Não usado em presets";
   return count === 1 ? "Em 1 preset" : `Em ${count} presets`;
@@ -57,7 +84,9 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
   const [basePresetId, setBasePresetId] = useState(
     (catalog.presets.find((preset) => preset.name === DEFAULT_PREVIEW_PRESET) ?? catalog.presets[0])?.id ?? "",
   );
-  const [showsIngredient, setShowsIngredient] = useState(true);
+  const [composition, dispatch] = useReducer(compositionReducer, null, () =>
+    compositionOf(previewRecipe(catalog, basePresetId, editedId, ingredient !== null), catalog.maxLayers),
+  );
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,10 +107,16 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
     if (localImage) URL.revokeObjectURL(localImage.image.url);
   }, [localImage]);
 
+  function showRecipe(recipe: CompositionRecipe) {
+    dispatch({ type: "applyRecipe", recipe, instanceIds: createRecipeInstanceIds(recipe) });
+  }
+
   async function selectFile(file: File) {
     setFieldErrors((errors) => Object.fromEntries(Object.entries(errors).filter(([field]) => field !== "image")));
     try {
-      setLocalImage({ file, image: await readLocalImage(file) });
+      const image = await readLocalImage(file);
+      setLocalImage({ file, image });
+      if (!localImage && !ingredient) showRecipe(previewRecipe(catalog, basePresetId, editedId, true));
     } catch {
       setFieldErrors((errors) => ({ ...errors, image: ["Não foi possível ler este arquivo como imagem."] }));
     }
@@ -91,6 +126,7 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
     setName(savedName);
     setShape(savedShape);
     setLocalImage(null);
+    if (isNew) showRecipe(previewRecipe(catalog, basePresetId, editedId, false));
     setFieldErrors({});
     setFormError(null);
   }
@@ -144,15 +180,19 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
         ],
       }
     : { ...catalog, ingredients: neighbors };
-  const basePreset = catalog.presets.find((preset) => preset.id === basePresetId);
-  const baseIngredientIds = (basePreset?.ingredientIds ?? []).map((id) => (id === editedId ? DRAFT_ID : id));
-  const hasDraft = draftImage !== null && showsIngredient;
-  const ingredientIds = hasDraft
-    ? baseIngredientIds.includes(DRAFT_ID)
-      ? baseIngredientIds
-      : [...baseIngredientIds, DRAFT_ID]
-    : baseIngredientIds.filter((id) => id !== DRAFT_ID);
-  const bunVariantId = basePreset?.bunVariantId ?? catalog.bunVariants[0]?.id;
+  const draftLayers = composition.layers.filter((layer) => layer.ingredientId === DRAFT_ID);
+  const showsDraft = draftLayers.length > 0;
+  const workbench = useBurgerWorkbench({ catalog: previewCatalog, composition, dispatch });
+
+  function chooseBasePreset(presetId: string) {
+    setBasePresetId(presetId);
+    showRecipe(previewRecipe(catalog, presetId, editedId, draftImage !== null));
+  }
+
+  function setShowsDraft(nextShowsDraft: boolean) {
+    if (nextShowsDraft) dispatch({ type: "addIngredient", ingredientId: DRAFT_ID, instanceId: createInstanceId() });
+    else draftLayers.forEach((layer) => dispatch({ type: "removeLayer", instanceId: layer.instanceId }));
+  }
 
   return (
     <div className={styles.studio}>
@@ -254,16 +294,21 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
         </div>
 
         <div className={styles.studioCenter}>
-          <div className={styles.stage}>
-            {bunVariantId && <RecipePreview catalog={previewCatalog} recipe={{ bunVariantId, ingredientIds }} className="" />}
-          </div>
-          <p className={styles.stageCaption}>
-            {!draftImage
-              ? "Escolha uma imagem para ver o ingrediente no hambúrguer."
-              : hasDraft
-                ? "Mesmo cálculo de empilhamento do montador."
-                : "Hambúrguer sem o ingrediente, para comparar."}
-          </p>
+          <BurgerWorkbench
+            workbench={workbench}
+            catalog={previewCatalog}
+            composition={composition}
+            dispatch={dispatch}
+            canReplace={false}
+            stageClassName={styles.workbenchStage}
+            hint={
+              !draftImage
+                ? "Escolha uma imagem para ver o ingrediente no hambúrguer."
+                : showsDraft
+                  ? "Arraste o ingrediente para testar outra posição. É só o preview: nada aqui muda os presets."
+                  : "Hambúrguer sem o ingrediente, para comparar."
+            }
+          />
         </div>
 
         <div className={styles.studioOptions}>
@@ -277,7 +322,7 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
             <div className={styles.panelBody}>
               <label className={styles.field}>
                 <span className={styles.label}>Hambúrguer de base</span>
-                <select className={styles.select} value={basePresetId} onChange={(event) => setBasePresetId(event.target.value)}>
+                <select className={styles.select} value={basePresetId} onChange={(event) => chooseBasePreset(event.target.value)}>
                   {catalog.presets.map((preset) => (
                     <option key={preset.id} value={preset.id}>
                       {preset.name}
@@ -290,18 +335,22 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
                   Ingrediente no hambúrguer
                 </span>
                 <div className={styles.segmented} role="group" aria-labelledby="shows-ingredient-label">
-                  <button type="button" aria-pressed={!showsIngredient} onClick={() => setShowsIngredient(false)}>
+                  <button type="button" aria-pressed={!showsDraft} onClick={() => setShowsDraft(false)} disabled={!showsDraft}>
                     Sem
                   </button>
-                  <button type="button" aria-pressed={showsIngredient} onClick={() => setShowsIngredient(true)}>
+                  <button
+                    type="button"
+                    aria-pressed={showsDraft}
+                    onClick={() => setShowsDraft(true)}
+                    disabled={showsDraft || !draftImage}
+                  >
                     Com
                   </button>
                 </div>
               </div>
               <p className={styles.help}>
-                {baseIngredientIds.includes(DRAFT_ID)
-                  ? "Este hambúrguer já leva o ingrediente; ele aparece no lugar dele, com as suas alterações."
-                  : "O ingrediente entra no topo, logo abaixo do pão, como ao adicionar no montador."}
+                Toque numa camada para subir, descer, duplicar ou remover, ou arraste para outra posição. Trocar o
+                hambúrguer de base recomeça o preview.
               </p>
             </div>
           </section>

@@ -374,3 +374,14 @@ de ocultar ingredientes ou pães. Ingredientes e tipos de pão já tinham Public
 presets ganharam visibilidade própria no mesmo padrão (nasce oculto, publicar pela barra). Mantive a disponibilidade
 derivada como um estado separado ("Indisponível") em vez de juntar tudo em "Oculto", porque as duas causas pedem ações
 diferentes. Ocultar a composição inicial foi bloqueado na API (409) e o botão não aparece nela.
+
+## 2026-10-07 — Posição do ingrediente no preview do estúdio (T-F14)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável estranhou não poder escolher onde o ingrediente fica no preview, já que o editor de preset tem arrastar
+e soltar. Em vez de um seletor de posição, o palco do montador (arrastar, seleção, barra de ações, fantasma do
+arraste) foi extraído do `BurgerBuilder` para `useBurgerWorkbench` e `BurgerWorkbench` e reaproveitado no
+estúdio; o montador público passou a usar os mesmos componentes, sem mudança de comportamento (roteiro de ponta a
+ponta do montador inalterado). "Substituir" fica escondido no estúdio por não haver painel de ingredientes para
+escolher o substituto. O preview é só visual: não altera presets nem marca alterações não salvas.

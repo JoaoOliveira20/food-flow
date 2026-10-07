@@ -130,7 +130,7 @@ Gestão de ingredientes, tipos de pão e presets, sem login nesta versão (`docs
 | --- | --- |
 | `/admin` | visão geral: indicadores, itens que precisam de atenção (ocultos e presets indisponíveis), editados recentemente e atalhos de criação |
 | `/admin/ingredients`, `/admin/bun-variants`, `/admin/presets` | galerias com busca, filtros (publicados/ocultos; disponíveis/indisponíveis/inicial) e contagem |
-| `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview no renderer real, dicas de imagem; publicar/ocultar; excluir |
+| `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview interativo num hambúrguer pronto (arrastar e reordenar camadas com o palco do montador, `BurgerWorkbench`), dicas de imagem; publicar/ocultar; excluir |
 | `/admin/bun-variants/new`, `/admin/bun-variants/[id]` | nome, imagens do topo e da base com avisos de proporção, preview do pão novo ao lado de um existente com o recheio de um preset; publicar/ocultar; excluir |
 | `/admin/presets/new`, `/admin/presets/[id]` | o próprio montador (`BurgerBuilder` com `isEmbedded` e `renderHeader`) com a barra do preset: nome, salvar, desfazer, aviso de ocultos; painel "Começar a partir de" com os outros presets; excluir |
 

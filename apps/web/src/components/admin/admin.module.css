@@ -1329,6 +1329,14 @@
   height: 100%;
 }
 
+.workbenchStage {
+  border-radius: 28px;
+  border: 1px solid var(--line-soft);
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, var(--stage-light), transparent 72%),
+    linear-gradient(180deg, var(--panel), var(--canvas));
+}
+
 .stageEmpty {
   position: relative;
   z-index: 1;
