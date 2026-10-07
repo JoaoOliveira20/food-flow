@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { FieldError } from "./FieldError";
 import styles from "./admin.module.css";
 
@@ -16,6 +17,7 @@ type ShapeFieldProps = {
 export function ShapeField({ id, label, help, value, min, max, step, errors, onChange }: ShapeFieldProps) {
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
+  const fill = `${((value - min) / (max - min)) * 100}%`;
 
   function change(text: string) {
     const parsed = Number(text);
@@ -23,24 +25,15 @@ export function ShapeField({ id, label, help, value, min, max, step, errors, onC
   }
 
   return (
-    <div className={styles.field}>
-      <label className={styles.label} htmlFor={id}>
-        {label}
-      </label>
-      <div className={styles.rangeRow}>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          aria-label={`${label} (controle deslizante)`}
-          onChange={(event) => change(event.target.value)}
-        />
+    <div className={styles.shapeField}>
+      <div className={styles.shapeHeader}>
+        <label className={styles.label} htmlFor={id}>
+          {label}
+        </label>
         <input
           id={id}
           type="number"
-          className={`${styles.input} ${errors ? styles.inputInvalid : ""}`}
+          className={`${styles.shapeValue} ${errors ? styles.inputInvalid : ""}`}
           min={min}
           max={max}
           step={step}
@@ -50,6 +43,17 @@ export function ShapeField({ id, label, help, value, min, max, step, errors, onC
           onChange={(event) => change(event.target.value)}
         />
       </div>
+      <input
+        type="range"
+        className={styles.range}
+        style={{ "--fill": fill } as CSSProperties}
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        aria-label={label}
+        onChange={(event) => change(event.target.value)}
+      />
       <p id={helpId} className={styles.help}>
         {help}
       </p>

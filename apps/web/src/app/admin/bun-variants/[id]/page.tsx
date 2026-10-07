@@ -7,9 +7,10 @@ import {
   listIngredients,
   listPresets,
 } from "@/api/admin/queries";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { BunVariantStudio } from "@/components/admin/BunVariantStudio";
+import { CreatedToast } from "@/components/admin/CreatedToast";
 import { DeleteBunVariant } from "@/components/admin/DeleteBunVariant";
+import { PageHeader } from "@/components/admin/PageHeader";
 
 export default async function EditBunVariantPage({ params, searchParams }: PageProps<"/admin/bun-variants/[id]">) {
   const { id } = await params;
@@ -29,15 +30,16 @@ export default async function EditBunVariantPage({ params, searchParams }: PageP
 
   return (
     <>
-      <AdminPageHeader
-        trail={["Tipos de pão", bunVariant.name]}
+      {created && <CreatedToast title="Tipo de pão criado" detail="Ele está oculto: confira o preview e publique." />}
+      <PageHeader
+        isTitleHidden
+        crumbs={[{ label: "Tipos de pão", href: "/admin/bun-variants" }, { label: bunVariant.name }]}
         title={bunVariant.name}
-        subtitle={
+        description={
           <>
             Identificador <code>{bunVariant.slug}</code>
           </>
         }
-        notice={created ? "Tipo de pão criado e oculto. Confira o preview e publique quando estiver pronto." : null}
       />
       <BunVariantStudio key={bunVariant.updatedAt} builderId={builder.id} catalog={catalog} bunVariant={bunVariant} />
       <DeleteBunVariant bunVariant={bunVariant} />

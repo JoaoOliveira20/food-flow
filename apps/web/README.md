@@ -128,7 +128,8 @@ Gestão de ingredientes, tipos de pão e presets, sem login nesta versão (`docs
 
 | Rota | Tela |
 | --- | --- |
-| `/admin` | painel: contagens, ingredientes (miniatura, visível/oculto, uso) e presets (miniatura, inicial, disponível) |
+| `/admin` | visão geral: indicadores, itens que precisam de atenção (ocultos e presets indisponíveis), editados recentemente e atalhos de criação |
+| `/admin/ingredients`, `/admin/bun-variants`, `/admin/presets` | galerias com busca, filtros (publicados/ocultos; disponíveis/indisponíveis/inicial) e contagem |
 | `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview no renderer real, dicas de imagem; publicar/ocultar; excluir |
 | `/admin/bun-variants/new`, `/admin/bun-variants/[id]` | nome, imagens do topo e da base com avisos de proporção, preview do pão novo ao lado de um existente com o recheio de um preset; publicar/ocultar; excluir |
 | `/admin/presets/new`, `/admin/presets/[id]` | o próprio montador (`BurgerBuilder` com `isEmbedded` e `renderHeader`) com a barra do preset: nome, salvar, desfazer, aviso de ocultos; painel "Começar a partir de" com os outros presets; excluir |
@@ -141,19 +142,23 @@ Fluxo de dados (BD-12):
   `router.refresh()` ou navegação. `ApiError` traz erros por campo (422) e mensagens próprias para 409, 413 e 429.
 - Os previews usam o mesmo `computeStackLayout` do builder (`RecipePreview`) com um catálogo que inclui os
   ingredientes ocultos (`getAdminCatalog`).
-- Telas de criação/edição seguem o padrão **estúdio**: `AdminPageHeader`, `StudioBar` (nome, status, Voltar, Desfazer,
+- Shell em `src/components/admin/shell/`: menu lateral (gaveta no celular), busca `Ctrl K`/`⌘K` (`CommandPalette`),
+  tema claro/escuro/sistema guardado no navegador (`theme.ts`, aplicado antes da pintura para não piscar) e toasts
+  (`Toaster`, `useToast`).
+- Telas de criação/edição seguem o padrão **estúdio**: `PageHeader`, `StudioBar` (nome, status, Voltar, Desfazer,
   Publicar/Ocultar, Salvar), controles à esquerda, hambúrguer ao centro, opções e dicas à direita e `DeleteCard` como
   zona de perigo. O editor de preset usa o próprio `BurgerBuilder` no lugar das três colunas.
-- Componentes em `src/components/admin/`; estilos em `admin.module.css`, com os tokens de cor do builder.
+- Componentes em `src/components/admin/`; estilos em `admin.module.css`, com tokens próprios (claro e escuro) que
+  sobrescrevem os do builder dentro do admin.
 
 ## Como fazer alterações comuns
 
 | Quero… | Onde |
 | --- | --- |
-| adicionar ou trocar um ingrediente | pelo admin (fase F); até lá, nos dados iniciais da API (`apps/api/database/seeders/BurgerCatalogSeeder.php`) |
+| adicionar ou trocar um ingrediente | pelo admin (`/admin/ingredients`); os dados iniciais ficam em `apps/api/database/seeders/BurgerCatalogSeeder.php` |
 | ajustar como um ingrediente se encaixa | `shape` do ingrediente (`restingSurfaceRatio`, `sinkRatio`, `displayWidth`) |
-| adicionar uma variante de pão | nos dados iniciais da API (não há admin de variantes nesta fase, BD-03) |
-| adicionar ou mudar um preset | pelo admin (fase F); até lá, nos dados iniciais da API |
+| adicionar uma variante de pão | pelo admin (`/admin/bun-variants/new`) |
+| adicionar ou mudar um preset | pelo admin (`/admin/presets`) |
 | mudar a entrada, a saída ou a mola | `layerMotion.ts` |
 | criar um novo comportamento de composição | nova ação em `compositionReducer` (`composition.ts`) e o gatilho na interface; o Motion anima o resultado sem mudanças |
 | mudar regras do arraste | `useCompositionDrag.ts` (gestos) e `dragGeometry.ts` (geometria) |

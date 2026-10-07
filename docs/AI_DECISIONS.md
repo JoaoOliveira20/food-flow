@@ -351,3 +351,16 @@ O responsável apontou que cada tela de criação/edição estava de um jeito e 
 compartilhar `AdminPageHeader`, `StudioBar`, `useVisibilityToggle` e `DeleteCard`; o layout de três colunas segue o
 do montador. Na revisão, a ordem das media queries foi corrigida (a de 1100 px vinha depois da de 720 px e
 anularia o layout do celular).
+
+## 2026-10-07 — Redesenho do admin (T-F12)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável não gostou do admin anterior e pediu o menu e todas as telas no nível de produtos como Linear e
+Vercel. Decisões: menu lateral fixo com gaveta no celular em vez de abas; listas separadas por tipo (galerias) e uma
+visão geral voltada a "o que precisa de atenção"; busca `Ctrl K` alimentada pelo layout no servidor; tema com
+script no `<head>` + `useSyncExternalStore` (sem efeito com `setState`, exigência do lint do React Compiler) e
+`suppressHydrationWarning` só no `<html>`; fonte Geist via `next/font`, sem dependências novas. Na revisão por
+capturas foram corrigidos: marcadores e recuo padrão das galerias (`<ul>`), indicador do menu ativo deslocado por
+especificidade de CSS, título repetido nos estúdios (agora só no breadcrumb, com `h1` acessível), botões da barra
+do estúdio quebrando no celular (só ícone abaixo de 720 px) e `/favicon.ico` 404 (redirecionado para `/icon.svg`).

@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatus } from "@/components/admin/AdminStatus";
 import { BunVariantStudio } from "@/components/admin/BunVariantStudio";
+import { PageHeader } from "@/components/admin/PageHeader";
+
+export const metadata = { title: "Novo tipo de pão" };
 
 export default async function NewBunVariantPage() {
   const builder = await getAdminBuilder();
@@ -16,10 +18,11 @@ export default async function NewBunVariantPage() {
 
   return (
     <>
-      <AdminPageHeader
-        trail={["Novo tipo de pão"]}
+      <PageHeader
+        isTitleHidden
+        crumbs={[{ label: "Tipos de pão", href: "/admin/bun-variants" }, { label: "Novo" }]}
         title="Novo tipo de pão"
-        subtitle="Ele começa oculto: só aparece no montador depois de publicado."
+        description="Envie o topo e a base e compare com os pães atuais. Ele começa oculto até você publicar."
       />
       {catalog ? (
         <BunVariantStudio builderId={builder.id} catalog={catalog} bunVariant={null} />

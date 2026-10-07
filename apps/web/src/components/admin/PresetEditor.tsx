@@ -7,7 +7,11 @@ import type { BuilderCatalog } from "@/burger/catalog";
 import type { CompositionRecipe } from "@/burger/composition";
 import { BurgerBuilder, type BuilderHeaderControls } from "@/components/burger-builder/BurgerBuilder";
 import { FieldError } from "./FieldError";
+import { Icon } from "./Icon";
+import { useToast } from "./shell/Toaster";
+import { StatusPill } from "./StatusPill";
 import { StudioBar } from "./StudioBar";
+import { useUnsavedChangesWarning } from "./useUnsavedChangesWarning";
 import styles from "./admin.module.css";
 
 type SavedPreset = {
@@ -45,12 +49,7 @@ export function PresetEditor({ builderId, catalog, hiddenIngredientIds, hiddenBu
   const [name, setName] = useState(savedName);
   const [isDirty, setIsDirty] = useState(false);
 
-  useEffect(() => {
-    if (!isDirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [isDirty]);
+  useUnsavedChangesWarning(isDirty);
 
   return (
     <div className={styles.studio}>
@@ -107,6 +106,7 @@ function PresetEditorBar({
   onDirtyChange,
 }: PresetEditorBarProps) {
   const router = useRouter();
+  const toast = useToast();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -131,11 +131,13 @@ function PresetEditorBar({
       if (preset) {
         await updatePreset(preset.id, fields);
         onDirtyChange(false);
+        toast({ tone: "success", title: "Preset salvo" });
         router.refresh();
       } else {
         const created = await createPreset(builderId, fields);
         onDirtyChange(false);
         router.push(`/admin/presets/${created.id}?created=1`);
+        router.refresh();
       }
     } catch (error) {
       if (error instanceof ApiError) {
@@ -158,22 +160,23 @@ function PresetEditorBar({
 
   return (
     <StudioBar
+      backHref="/admin/presets"
       nameLabel="Nome do preset"
-      namePlaceholder="Ex.: Cheeseburger"
+      namePlaceholder="Nome do preset"
       name={name}
       nameErrors={fieldErrors.name}
       onNameChange={onNameChange}
       badges={
         <>
-          <span>
-            {recipe.ingredientIds.length} de {maxLayers} ingredientes
-          </span>
+          <StatusPill tone="plain">
+            {recipe.ingredientIds.length} de {maxLayers} camadas
+          </StatusPill>
           {hiddenCount > 0 && (
-            <span className={`${styles.badge} ${styles.badgeWarning}`}>
-              {hiddenCount === 1 ? "1 ingrediente oculto" : `${hiddenCount} ingredientes ocultos`}: fica fora do montador
-            </span>
+            <StatusPill tone="warning">
+              {hiddenCount === 1 ? "1 ingrediente oculto" : `${hiddenCount} ingredientes ocultos`} · fora do montador
+            </StatusPill>
           )}
-          {isBunHidden && <span className={`${styles.badge} ${styles.badgeWarning}`}>Pão oculto: fica fora do montador</span>}
+          {isBunHidden && <StatusPill tone="warning">Pão oculto · fora do montador</StatusPill>}
         </>
       }
       isNew={preset === null}
@@ -186,6 +189,7 @@ function PresetEditorBar({
           <FieldError id="preset-recipe-error" messages={recipeErrors(fieldErrors)} />
           {formError && (
             <p className={styles.alert} role="alert">
+              <Icon name="alert" />
               {formError}
             </p>
           )}

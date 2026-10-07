@@ -7,9 +7,10 @@ import {
   listIngredients,
   listPresets,
 } from "@/api/admin/queries";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { CreatedToast } from "@/components/admin/CreatedToast";
 import { DeleteIngredient } from "@/components/admin/DeleteIngredient";
 import { IngredientStudio } from "@/components/admin/IngredientStudio";
+import { PageHeader } from "@/components/admin/PageHeader";
 
 export default async function EditIngredientPage({ params, searchParams }: PageProps<"/admin/ingredients/[id]">) {
   const { id } = await params;
@@ -29,15 +30,16 @@ export default async function EditIngredientPage({ params, searchParams }: PageP
 
   return (
     <>
-      <AdminPageHeader
-        trail={["Ingredientes", ingredient.name]}
+      {created && <CreatedToast title="Ingrediente criado" detail="Ele está oculto: confira o preview e publique." />}
+      <PageHeader
+        isTitleHidden
+        crumbs={[{ label: "Ingredientes", href: "/admin/ingredients" }, { label: ingredient.name }]}
         title={ingredient.name}
-        subtitle={
+        description={
           <>
             Identificador <code>{ingredient.slug}</code>
           </>
         }
-        notice={created ? "Ingrediente criado e oculto. Confira o preview e publique quando estiver pronto." : null}
       />
       <IngredientStudio key={ingredient.updatedAt} builderId={builder.id} catalog={catalog} ingredient={ingredient} />
       <DeleteIngredient ingredient={ingredient} />

@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import type { FormEvent, ReactNode } from "react";
+import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
 import { FieldError } from "./FieldError";
+import { Icon } from "./Icon";
+import { StatusPill } from "./StatusPill";
 import styles from "./admin.module.css";
 
 type StudioBarProps = {
+  backHref: string;
   nameLabel: string;
   namePlaceholder: string;
   name: string;
@@ -24,6 +27,7 @@ type StudioBarProps = {
 };
 
 export function StudioBar({
+  backHref,
   nameLabel,
   namePlaceholder,
   name,
@@ -40,43 +44,56 @@ export function StudioBar({
   messages,
   onSubmit,
 }: StudioBarProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const canSave = !isSaving && (isNew || isDirty);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        if (canSave) formRef.current?.requestSubmit();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [canSave]);
+
   return (
-    <form className={styles.studioBar} onSubmit={onSubmit} noValidate>
-      <div className={styles.studioName}>
-        <label className={styles.label} htmlFor="studio-name">
-          {nameLabel}
-        </label>
+    <form ref={formRef} className={styles.studioBar} onSubmit={onSubmit} noValidate>
+      <div className={styles.studioIdentity}>
         <input
           id="studio-name"
-          className={`${styles.input} ${nameErrors ? styles.inputInvalid : ""}`}
+          className={`${styles.titleInput} ${nameErrors ? styles.inputInvalid : ""}`}
           value={name}
           maxLength={100}
           placeholder={namePlaceholder}
+          aria-label={nameLabel}
           aria-invalid={nameErrors ? true : undefined}
           aria-describedby={nameErrors ? "studio-name-error" : undefined}
           onChange={(event) => onNameChange(event.target.value)}
         />
+        <div className={styles.studioMeta} aria-live="polite">
+          {badges}
+          {isDirty ? (
+            <StatusPill tone="pending">Alterações não salvas</StatusPill>
+          ) : (
+            !isNew && <StatusPill tone="plain">Tudo salvo</StatusPill>
+          )}
+        </div>
         <FieldError id="studio-name-error" messages={nameErrors} />
       </div>
 
-      <div className={styles.studioStatus} aria-live="polite">
-        {badges}
-        {isDirty ? (
-          <span className={`${styles.badge} ${styles.badgeWarning}`}>Alterações não salvas</span>
-        ) : (
-          !isNew && <span className={`${styles.badge} ${styles.badgeVisible}`}>Salvo</span>
-        )}
-      </div>
-
       <div className={styles.studioActions}>
-        <Link href="/admin" className={styles.button}>
-          Voltar
+        <Link href={backHref} className={styles.buttonGhost}>
+          <Icon name="arrowLeft" />
+          <span className={styles.buttonLabel}>Voltar</span>
         </Link>
-        <button type="button" className={styles.button} onClick={onUndo} disabled={!isDirty || isSaving}>
-          {undoLabel ?? (isNew ? "Limpar" : "Desfazer alterações")}
+        <button type="button" className={styles.buttonGhost} onClick={onUndo} disabled={!isDirty || isSaving}>
+          <Icon name="undo" />
+          <span className={styles.buttonLabel}>{undoLabel ?? (isNew ? "Limpar" : "Desfazer")}</span>
         </button>
         {extraActions}
-        <button type="submit" className={styles.buttonPrimary} disabled={isSaving || (!isNew && !isDirty)}>
+        <button type="submit" className={styles.buttonPrimary} disabled={!canSave} title="Ctrl S">
           {isSaving ? "Salvando…" : isNew ? createLabel : "Salvar"}
         </button>
       </div>

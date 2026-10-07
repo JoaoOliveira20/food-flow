@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, getPreset, listIngredients, listPresets } from "@/api/admin/queries";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatus } from "@/components/admin/AdminStatus";
+import { CreatedToast } from "@/components/admin/CreatedToast";
 import { DeletePreset } from "@/components/admin/DeletePreset";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { PresetEditor } from "@/components/admin/PresetEditor";
 import { presetRecipe } from "@/components/admin/presetRecipe";
 
@@ -26,17 +27,18 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
 
   return (
     <>
-      <AdminPageHeader
-        trail={["Presets", preset.name]}
+      {created && <CreatedToast title="Preset criado" detail="Ele já aparece no montador se tudo estiver publicado." />}
+      <PageHeader
+        isTitleHidden
+        crumbs={[{ label: "Presets", href: "/admin/presets" }, { label: preset.name }]}
         title={preset.name}
-        subtitle={
+        description={
           preset.isInitial
-            ? "Composição inicial: é o hambúrguer que aparece ao abrir o montador (não aparece no painel de presets)."
+            ? "Composição inicial: o hambúrguer que aparece ao abrir o montador (não entra no painel de presets)."
             : preset.isAvailable
               ? "Disponível no montador."
-              : "Indisponível no montador: contém pão ou ingrediente oculto."
+              : "Fora do montador: leva pão ou ingrediente oculto."
         }
-        notice={created ? "Preset criado." : null}
       />
       {catalog ? (
         <PresetEditor

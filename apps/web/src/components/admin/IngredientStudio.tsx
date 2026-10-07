@@ -6,12 +6,16 @@ import { ApiError, createIngredient, updateIngredient, type FieldErrors } from "
 import type { AdminIngredient, AdminShape } from "@/api/admin/types";
 import type { BuilderCatalog } from "@/burger/catalog";
 import { RecipePreview } from "@/components/burger-builder/RecipePreview";
+import { Icon } from "./Icon";
 import { ImagePicker } from "./ImagePicker";
 import { ImageTips } from "./ImageTips";
 import { readLocalImage, type LocalImage } from "./localImage";
 import { ShapeField } from "./ShapeField";
+import { useToast } from "./shell/Toaster";
+import { StatusPill, VisibilityPill } from "./StatusPill";
 import { StudioBar } from "./StudioBar";
-import { useVisibilityToggle, visibilityBadge } from "./useVisibilityToggle";
+import { useUnsavedChangesWarning } from "./useUnsavedChangesWarning";
+import { useVisibilityToggle } from "./useVisibilityToggle";
 import styles from "./admin.module.css";
 
 const DEFAULT_SHAPE: AdminShape = { displayWidth: 290, restingSurfaceRatio: 0.4, sinkRatio: 0.2 };
@@ -33,8 +37,14 @@ function sameShape(first: AdminShape, second: AdminShape): boolean {
   );
 }
 
+function usageLabel(count: number): string {
+  if (count === 0) return "Não usado em presets";
+  return count === 1 ? "Em 1 preset" : `Em ${count} presets`;
+}
+
 export function IngredientStudio({ builderId, catalog, ingredient }: IngredientStudioProps) {
   const router = useRouter();
+  const toast = useToast();
   const isNew = ingredient === null;
   const savedName = ingredient?.name ?? "";
   const savedShape = ingredient?.shape ?? DEFAULT_SHAPE;
@@ -53,25 +63,20 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
   const [isSaving, setIsSaving] = useState(false);
 
   const isDirty = name !== savedName || !sameShape(shape, savedShape) || localImage !== null;
+  useUnsavedChangesWarning(isDirty);
   const visibility = useVisibilityToggle({
     isVisible: ingredient?.isVisible ?? false,
     isDirty,
+    itemName: savedName || "Ingrediente",
     presets: ingredient?.presets ?? [],
     hideWarning: (names) =>
-      `Ao ocultar, ${ingredient?.presets?.length === 1 ? "este preset fica indisponível" : "estes presets ficam indisponíveis"} no montador até o ingrediente voltar: ${names}.`,
+      `Ao ocultar, ${ingredient?.presets?.length === 1 ? "este preset sai" : "estes presets saem"} do montador até o ingrediente voltar: ${names}.`,
     onChange: (isVisible) => (ingredient ? updateIngredient(ingredient.id, { isVisible }) : Promise.resolve()),
   });
 
   useEffect(() => () => {
     if (localImage) URL.revokeObjectURL(localImage.image.url);
   }, [localImage]);
-
-  useEffect(() => {
-    if (!isDirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [isDirty]);
 
   async function selectFile(file: File) {
     setFieldErrors((errors) => Object.fromEntries(Object.entries(errors).filter(([field]) => field !== "image")));
@@ -104,10 +109,12 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
       const fields = { name, ...shape };
       if (ingredient) {
         await updateIngredient(ingredient.id, fields, localImage?.file ?? null);
+        toast({ tone: "success", title: "Alterações salvas" });
         router.refresh();
       } else if (localImage) {
         const created = await createIngredient(builderId, fields, localImage.file);
         router.push(`/admin/ingredients/${created.id}?created=1`);
+        router.refresh();
       }
     } catch (error) {
       if (error instanceof ApiError) {
@@ -146,26 +153,26 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
       : [...baseIngredientIds, DRAFT_ID]
     : baseIngredientIds.filter((id) => id !== DRAFT_ID);
   const bunVariantId = basePreset?.bunVariantId ?? catalog.bunVariants[0]?.id;
-  const presetsCount = ingredient?.presets?.length ?? 0;
 
   return (
     <div className={styles.studio}>
       <StudioBar
+        backHref="/admin/ingredients"
         nameLabel="Nome do ingrediente"
-        namePlaceholder="Ex.: Queijo prato"
+        namePlaceholder="Nome do ingrediente"
         name={name}
         nameErrors={fieldErrors.name}
         onNameChange={setName}
         badges={
           <>
-            {visibilityBadge(ingredient?.isVisible ?? false)}
-            {!isNew && <span>{presetsCount === 1 ? "usado em 1 preset" : `usado em ${presetsCount} presets`}</span>}
+            <VisibilityPill isVisible={ingredient?.isVisible ?? false} />
+            {!isNew && <StatusPill tone="plain">{usageLabel(ingredient.presets?.length ?? 0)}</StatusPill>}
           </>
         }
         isNew={isNew}
         isDirty={isDirty}
         isSaving={isSaving}
-        createLabel="Criar ingrediente (oculto)"
+        createLabel="Criar ingrediente"
         onUndo={undo}
         extraActions={!isNew && visibility.button}
         messages={
@@ -173,6 +180,7 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
             {!isNew && visibility.panel}
             {formError && (
               <p className={styles.alert} role="alert">
+                <Icon name="alert" />
                 {formError}
               </p>
             )}
@@ -183,98 +191,119 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
 
       <div className={styles.studioGrid}>
         <div className={styles.studioControls}>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Imagem</h2>
-            <ImagePicker
-              label="Arquivo"
-              current={ingredient?.image ?? null}
-              selected={localImage?.image ?? null}
-              errors={fieldErrors.image}
-              onSelect={selectFile}
-            />
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2 className={styles.panelTitle}>Imagem</h2>
+                <p className={styles.panelHint}>PNG ou WebP com fundo transparente.</p>
+              </div>
+            </div>
+            <div className={styles.panelBody}>
+              <ImagePicker
+                label="Imagem do ingrediente"
+                current={ingredient?.image ?? null}
+                selected={localImage?.image ?? null}
+                errors={fieldErrors.image}
+                onSelect={selectFile}
+              />
+            </div>
           </section>
-          <section className={`${styles.card} ${styles.form}`}>
-            <h2 className={styles.sectionTitle}>Encaixe na pilha</h2>
-            <ShapeField
-              id="display-width"
-              label="Largura na pilha"
-              help={`Largura quando a base do hambúrguer mede ${MAX_DISPLAY_WIDTH}. A carne usa 292; os molhos, 256.`}
-              value={shape.displayWidth}
-              min={1}
-              max={MAX_DISPLAY_WIDTH}
-              step={1}
-              errors={fieldErrors.displayWidth}
-              onChange={(value) => setShape((current) => ({ ...current, displayWidth: value }))}
-            />
-            <ShapeField
-              id="resting-surface-ratio"
-              label="Onde a camada de cima se apoia"
-              help="Fração da altura da imagem, a partir de baixo, em que a próxima camada pousa. 0,5 = no meio."
-              value={shape.restingSurfaceRatio}
-              min={0}
-              max={1}
-              step={0.01}
-              errors={fieldErrors.restingSurfaceRatio}
-              onChange={(value) => setShape((current) => ({ ...current, restingSurfaceRatio: value }))}
-            />
-            <ShapeField
-              id="sink-ratio"
-              label="Quanto afunda na camada de baixo"
-              help="Fração da própria altura sobreposta à camada de baixo. Molhos afundam bastante (0,78); a carne, pouco (0,1)."
-              value={shape.sinkRatio}
-              min={0}
-              max={1}
-              step={0.01}
-              errors={fieldErrors.sinkRatio}
-              onChange={(value) => setShape((current) => ({ ...current, sinkRatio: value }))}
-            />
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2 className={styles.panelTitle}>Encaixe na pilha</h2>
+                <p className={styles.panelHint}>Como a camada se apoia nas vizinhas.</p>
+              </div>
+            </div>
+            <div className={styles.panelBody}>
+              <ShapeField
+                id="display-width"
+                label="Largura na pilha"
+                help={`Largura quando a base mede ${MAX_DISPLAY_WIDTH}. A carne usa 292; os molhos, 256.`}
+                value={shape.displayWidth}
+                min={1}
+                max={MAX_DISPLAY_WIDTH}
+                step={1}
+                errors={fieldErrors.displayWidth}
+                onChange={(value) => setShape((current) => ({ ...current, displayWidth: value }))}
+              />
+              <ShapeField
+                id="resting-surface-ratio"
+                label="Apoio da camada de cima"
+                help="Altura da imagem, a partir de baixo, em que a próxima camada pousa. 0,5 = no meio."
+                value={shape.restingSurfaceRatio}
+                min={0}
+                max={1}
+                step={0.01}
+                errors={fieldErrors.restingSurfaceRatio}
+                onChange={(value) => setShape((current) => ({ ...current, restingSurfaceRatio: value }))}
+              />
+              <ShapeField
+                id="sink-ratio"
+                label="Afundamento"
+                help="Quanto da própria altura fica sobre a camada de baixo. Molhos: 0,78; carne: 0,1."
+                value={shape.sinkRatio}
+                min={0}
+                max={1}
+                step={0.01}
+                errors={fieldErrors.sinkRatio}
+                onChange={(value) => setShape((current) => ({ ...current, sinkRatio: value }))}
+              />
+            </div>
           </section>
         </div>
 
         <div className={styles.studioCenter}>
-          <div className={styles.studioStage}>
+          <div className={styles.stage}>
             {bunVariantId && <RecipePreview catalog={previewCatalog} recipe={{ bunVariantId, ingredientIds }} className="" />}
           </div>
-          <p className={styles.studioStageCaption}>
+          <p className={styles.stageCaption}>
             {!draftImage
               ? "Escolha uma imagem para ver o ingrediente no hambúrguer."
               : hasDraft
-                ? "Mesmo cálculo de empilhamento do montador. Ajuste o encaixe e veja na hora."
+                ? "Mesmo cálculo de empilhamento do montador."
                 : "Hambúrguer sem o ingrediente, para comparar."}
           </p>
         </div>
 
         <div className={styles.studioOptions}>
-          <section className={`${styles.card} ${styles.form}`}>
-            <h2 className={styles.sectionTitle}>Preview</h2>
-            <label className={styles.field}>
-              <span className={styles.label}>Hambúrguer de base</span>
-              <select className={styles.select} value={basePresetId} onChange={(event) => setBasePresetId(event.target.value)}>
-                {catalog.presets.map((preset) => (
-                  <option key={preset.id} value={preset.id}>
-                    {preset.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className={styles.field}>
-              <span className={styles.label} id="shows-ingredient-label">
-                Ingrediente no hambúrguer
-              </span>
-              <div className={styles.segmented} role="group" aria-labelledby="shows-ingredient-label">
-                <button type="button" aria-pressed={!showsIngredient} onClick={() => setShowsIngredient(false)}>
-                  Sem
-                </button>
-                <button type="button" aria-pressed={showsIngredient} onClick={() => setShowsIngredient(true)}>
-                  Com
-                </button>
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2 className={styles.panelTitle}>Preview</h2>
+                <p className={styles.panelHint}>Veja o ingrediente num hambúrguer pronto.</p>
               </div>
             </div>
-            <p className={styles.help}>
-              {baseIngredientIds.includes(DRAFT_ID)
-                ? "Este hambúrguer já leva o ingrediente; ele aparece no lugar dele, com as suas alterações."
-                : "O ingrediente entra no topo, logo abaixo do pão, como ao adicionar no montador."}
-            </p>
+            <div className={styles.panelBody}>
+              <label className={styles.field}>
+                <span className={styles.label}>Hambúrguer de base</span>
+                <select className={styles.select} value={basePresetId} onChange={(event) => setBasePresetId(event.target.value)}>
+                  {catalog.presets.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className={styles.field}>
+                <span className={styles.label} id="shows-ingredient-label">
+                  Ingrediente no hambúrguer
+                </span>
+                <div className={styles.segmented} role="group" aria-labelledby="shows-ingredient-label">
+                  <button type="button" aria-pressed={!showsIngredient} onClick={() => setShowsIngredient(false)}>
+                    Sem
+                  </button>
+                  <button type="button" aria-pressed={showsIngredient} onClick={() => setShowsIngredient(true)}>
+                    Com
+                  </button>
+                </div>
+              </div>
+              <p className={styles.help}>
+                {baseIngredientIds.includes(DRAFT_ID)
+                  ? "Este hambúrguer já leva o ingrediente; ele aparece no lugar dele, com as suas alterações."
+                  : "O ingrediente entra no topo, logo abaixo do pão, como ao adicionar no montador."}
+              </p>
+            </div>
           </section>
           <ImageTips />
         </div>

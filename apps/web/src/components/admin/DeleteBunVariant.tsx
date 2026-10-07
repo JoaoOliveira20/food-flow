@@ -4,16 +4,14 @@ import { deleteBunVariant } from "@/api/admin/mutations";
 import type { AdminBunVariant } from "@/api/admin/types";
 import { DeleteCard } from "./DeleteCard";
 
-type DeleteBunVariantProps = {
-  bunVariant: AdminBunVariant;
-};
-
-export function DeleteBunVariant({ bunVariant }: DeleteBunVariantProps) {
+export function DeleteBunVariant({ bunVariant }: { bunVariant: AdminBunVariant }) {
   return (
     <DeleteCard
       title="Excluir tipo de pão"
-      hint="A exclusão é definitiva e apaga as duas imagens. Para tirar o pão do montador sem perdê-lo, prefira ocultar."
+      hint="Apaga o pão e as duas imagens para sempre. Para só tirar do montador, use Ocultar."
       question={`Excluir o pão ${bunVariant.name} definitivamente?`}
+      deletedMessage={`O pão ${bunVariant.name} foi excluído`}
+      listHref="/admin/bun-variants"
       onDelete={() => deleteBunVariant(bunVariant.id)}
     />
   );

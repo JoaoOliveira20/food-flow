@@ -6,11 +6,15 @@ import { ApiError, createBunVariant, updateBunVariant, type FieldErrors } from "
 import type { AdminBunVariant, AdminImage } from "@/api/admin/types";
 import type { BuilderCatalog, BunImage, BunVariant } from "@/burger/catalog";
 import { RecipePreview } from "@/components/burger-builder/RecipePreview";
+import { Icon } from "./Icon";
 import { ImagePicker } from "./ImagePicker";
 import { ImageTips } from "./ImageTips";
 import { readLocalImage, type LocalImage } from "./localImage";
+import { useToast } from "./shell/Toaster";
+import { StatusPill, VisibilityPill } from "./StatusPill";
 import { StudioBar } from "./StudioBar";
-import { useVisibilityToggle, visibilityBadge } from "./useVisibilityToggle";
+import { useUnsavedChangesWarning } from "./useUnsavedChangesWarning";
+import { useVisibilityToggle } from "./useVisibilityToggle";
 import styles from "./admin.module.css";
 
 const DRAFT_ID = "draft";
@@ -35,16 +39,22 @@ function toBunImage(image: AdminImage | LocalImage): BunImage {
   return { imagePath: image.url, imageSize: { width: image.width, height: image.height } };
 }
 
-function proportionWarning(position: Position, image: AdminImage | LocalImage | null): string | null {
-  if (!image) return null;
+function proportionWarning(position: Position, image: AdminImage | LocalImage | null): string[] {
+  if (!image) return [];
   const ratio = image.width / image.height;
   const { min, max, label } = PROPORTIONS[position];
-  if (ratio >= min && ratio <= max) return null;
-  return `A proporção desta imagem (${ratio.toFixed(1).replace(".", ",")}:1) é diferente da usada no ${label}; o pão pode ficar desencaixado.`;
+  if (ratio >= min && ratio <= max) return [];
+  return [`Proporção ${ratio.toFixed(1).replace(".", ",")}:1, diferente da usada no ${label}; o pão pode ficar desencaixado.`];
+}
+
+function usageLabel(count: number): string {
+  if (count === 0) return "Não usado em presets";
+  return count === 1 ? "Em 1 preset" : `Em ${count} presets`;
 }
 
 export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantStudioProps) {
   const router = useRouter();
+  const toast = useToast();
   const isNew = bunVariant === null;
   const savedName = bunVariant?.name ?? "";
   const otherBunVariants = catalog.bunVariants.filter((variant) => variant.id !== String(bunVariant?.id));
@@ -58,12 +68,14 @@ export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantS
   const [isSaving, setIsSaving] = useState(false);
 
   const isDirty = name !== savedName || localImages.top !== null || localImages.bottom !== null;
+  useUnsavedChangesWarning(isDirty);
   const visibility = useVisibilityToggle({
     isVisible: bunVariant?.isVisible ?? false,
     isDirty,
+    itemName: savedName ? `Pão ${savedName}` : "Pão",
     presets: bunVariant?.presets ?? [],
     hideWarning: (names) =>
-      `Ao ocultar, ${bunVariant?.presets?.length === 1 ? "este preset fica indisponível" : "estes presets ficam indisponíveis"} no montador até o pão voltar: ${names}.`,
+      `Ao ocultar, ${bunVariant?.presets?.length === 1 ? "este preset sai" : "estes presets saem"} do montador até o pão voltar: ${names}.`,
     onChange: (isVisible) => (bunVariant ? updateBunVariant(bunVariant.id, { isVisible }) : Promise.resolve()),
   });
 
@@ -74,13 +86,6 @@ export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantS
     },
     [localImages],
   );
-
-  useEffect(() => {
-    if (!isDirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [isDirty]);
 
   async function selectImage(position: Position, file: File) {
     const field = position === "top" ? "topImage" : "bottomImage";
@@ -118,10 +123,12 @@ export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantS
     try {
       if (bunVariant) {
         await updateBunVariant(bunVariant.id, { name }, { topImage, bottomImage });
+        toast({ tone: "success", title: "Alterações salvas" });
         router.refresh();
       } else if (topImage && bottomImage) {
         const created = await createBunVariant(builderId, { name }, { topImage, bottomImage });
         router.push(`/admin/bun-variants/${created.id}?created=1`);
+        router.refresh();
       }
     } catch (error) {
       if (error instanceof ApiError) {
@@ -143,27 +150,26 @@ export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantS
       : null;
   const previewCatalog: BuilderCatalog = { ...catalog, bunVariants: draft ? [...otherBunVariants, draft] : otherBunVariants };
   const filling = catalog.presets.find((preset) => preset.id === fillPresetId)?.ingredientIds ?? [];
-  const warnings = [proportionWarning("top", topImage), proportionWarning("bottom", bottomImage)].filter(Boolean);
-  const presetsCount = bunVariant?.presets?.length ?? 0;
 
   return (
     <div className={styles.studio}>
       <StudioBar
+        backHref="/admin/bun-variants"
         nameLabel="Nome do tipo de pão"
-        namePlaceholder="Ex.: Australiano"
+        namePlaceholder="Nome do tipo de pão"
         name={name}
         nameErrors={fieldErrors.name}
         onNameChange={setName}
         badges={
           <>
-            {visibilityBadge(bunVariant?.isVisible ?? false)}
-            {!isNew && <span>{presetsCount === 1 ? "usado em 1 preset" : `usado em ${presetsCount} presets`}</span>}
+            <VisibilityPill isVisible={bunVariant?.isVisible ?? false} />
+            {!isNew && <StatusPill tone="plain">{usageLabel(bunVariant.presets?.length ?? 0)}</StatusPill>}
           </>
         }
         isNew={isNew}
         isDirty={isDirty}
         isSaving={isSaving}
-        createLabel="Criar tipo de pão (oculto)"
+        createLabel="Criar tipo de pão"
         onUndo={undo}
         extraActions={!isNew && visibility.button}
         messages={
@@ -171,6 +177,7 @@ export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantS
             {!isNew && visibility.panel}
             {formError && (
               <p className={styles.alert} role="alert">
+                <Icon name="alert" />
                 {formError}
               </p>
             )}
@@ -181,79 +188,95 @@ export function BunVariantStudio({ builderId, catalog, bunVariant }: BunVariantS
 
       <div className={styles.studioGrid}>
         <div className={styles.studioControls}>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Topo</h2>
-            <ImagePicker
-              id="top-image"
-              label="Imagem do topo"
-              current={bunVariant?.topImage ?? null}
-              selected={localImages.top?.image ?? null}
-              errors={fieldErrors.topImage}
-              onSelect={(file) => selectImage("top", file)}
-            />
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2 className={styles.panelTitle}>Topo</h2>
+                <p className={styles.panelHint}>A parte de cima, com a cúpula do pão.</p>
+              </div>
+            </div>
+            <div className={styles.panelBody}>
+              <ImagePicker
+                id="top-image"
+                label="Imagem do topo"
+                current={bunVariant?.topImage ?? null}
+                selected={localImages.top?.image ?? null}
+                errors={fieldErrors.topImage}
+                extraWarnings={proportionWarning("top", topImage)}
+                onSelect={(file) => selectImage("top", file)}
+              />
+            </div>
           </section>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Base</h2>
-            <ImagePicker
-              id="bottom-image"
-              label="Imagem da base"
-              current={bunVariant?.bottomImage ?? null}
-              selected={localImages.bottom?.image ?? null}
-              errors={fieldErrors.bottomImage}
-              onSelect={(file) => selectImage("bottom", file)}
-            />
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2 className={styles.panelTitle}>Base</h2>
+                <p className={styles.panelHint}>A parte de baixo, onde o hambúrguer apoia.</p>
+              </div>
+            </div>
+            <div className={styles.panelBody}>
+              <ImagePicker
+                id="bottom-image"
+                label="Imagem da base"
+                current={bunVariant?.bottomImage ?? null}
+                selected={localImages.bottom?.image ?? null}
+                errors={fieldErrors.bottomImage}
+                extraWarnings={proportionWarning("bottom", bottomImage)}
+                onSelect={(file) => selectImage("bottom", file)}
+              />
+            </div>
           </section>
-          {warnings.map((warning) => (
-            <p key={warning} className={styles.help}>
-              ⚠ {warning}
-            </p>
-          ))}
         </div>
 
         <div className={styles.studioCenter}>
-          <div className={styles.studioStage}>
+          <div className={styles.stage}>
             {draft ? (
               <RecipePreview catalog={previewCatalog} recipe={{ bunVariantId: DRAFT_ID, ingredientIds: filling }} className="" />
             ) : (
-              <p className={styles.help}>Escolha as imagens do topo e da base para ver o pão.</p>
+              <p className={styles.stageEmpty}>Escolha as imagens do topo e da base para ver o pão montado.</p>
             )}
           </div>
-          <p className={styles.studioStageCaption}>
-            O pão é desenhado com as mesmas proporções fixas de topo e base do montador.
-          </p>
+          <p className={styles.stageCaption}>Topo e base usam as proporções fixas de pão do montador.</p>
         </div>
 
         <div className={styles.studioOptions}>
-          <section className={`${styles.card} ${styles.form}`}>
-            <h2 className={styles.sectionTitle}>Preview</h2>
-            <label className={styles.field}>
-              <span className={styles.label}>Recheio</span>
-              <select className={styles.select} value={fillPresetId} onChange={(event) => setFillPresetId(event.target.value)}>
-                <option value={ONLY_BUN}>Só o pão</option>
-                {catalog.presets.map((preset) => (
-                  <option key={preset.id} value={preset.id}>
-                    {preset.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {comparisonId && (
-              <>
-                <label className={styles.field}>
-                  <span className={styles.label}>Comparar com</span>
-                  <select className={styles.select} value={comparisonId} onChange={(event) => setComparisonId(event.target.value)}>
-                    {otherBunVariants.map((variant) => (
-                      <option key={variant.id} value={variant.id}>
-                        {variant.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className={styles.previewStage}>
-                  <RecipePreview catalog={previewCatalog} recipe={{ bunVariantId: comparisonId, ingredientIds: filling }} className="" />
-                </div>
-              </>
-            )}
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <h2 className={styles.panelTitle}>Preview</h2>
+                <p className={styles.panelHint}>Monte o pão novo com um recheio e compare.</p>
+              </div>
+            </div>
+            <div className={styles.panelBody}>
+              <label className={styles.field}>
+                <span className={styles.label}>Recheio</span>
+                <select className={styles.select} value={fillPresetId} onChange={(event) => setFillPresetId(event.target.value)}>
+                  <option value={ONLY_BUN}>Só o pão</option>
+                  {catalog.presets.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {comparisonId && (
+                <>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Comparar com</span>
+                    <select className={styles.select} value={comparisonId} onChange={(event) => setComparisonId(event.target.value)}>
+                      {otherBunVariants.map((variant) => (
+                        <option key={variant.id} value={variant.id}>
+                          {variant.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className={styles.comparisonStage}>
+                    <RecipePreview catalog={previewCatalog} recipe={{ bunVariantId: comparisonId, ingredientIds: filling }} className="" />
+                  </div>
+                </>
+              )}
+            </div>
           </section>
           <ImageTips subject="bun" />
         </div>

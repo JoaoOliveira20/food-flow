@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatus } from "@/components/admin/AdminStatus";
 import { IngredientStudio } from "@/components/admin/IngredientStudio";
+import { PageHeader } from "@/components/admin/PageHeader";
+
+export const metadata = { title: "Novo ingrediente" };
 
 export default async function NewIngredientPage() {
   const builder = await getAdminBuilder();
@@ -16,10 +18,11 @@ export default async function NewIngredientPage() {
 
   return (
     <>
-      <AdminPageHeader
-        trail={["Novo ingrediente"]}
+      <PageHeader
+        isTitleHidden
+        crumbs={[{ label: "Ingredientes", href: "/admin/ingredients" }, { label: "Novo" }]}
         title="Novo ingrediente"
-        subtitle="Ele começa oculto: só aparece no montador depois de publicado."
+        description="Envie a foto, ajuste o encaixe e confira no hambúrguer. Ele começa oculto até você publicar."
       />
       {catalog ? (
         <IngredientStudio builderId={builder.id} catalog={catalog} ingredient={null} />

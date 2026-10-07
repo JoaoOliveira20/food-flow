@@ -4,9 +4,9 @@ import styles from "@/components/admin/admin.module.css";
 
 export default function NotFound() {
   return (
-    <AdminStatus title="Item não encontrado" message="O ingrediente ou preset que você procura não existe ou foi excluído.">
+    <AdminStatus title="Item não encontrado" message="O ingrediente, pão ou preset que você procura não existe ou foi excluído.">
       <Link href="/admin" className={styles.buttonPrimary}>
-        Voltar ao painel
+        Voltar à visão geral
       </Link>
     </AdminStatus>
   );

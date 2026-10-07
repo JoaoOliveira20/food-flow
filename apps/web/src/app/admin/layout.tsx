@@ -1,37 +1,85 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import styles from "@/components/admin/admin.module.css";
+import { Geist, Geist_Mono } from "next/font/google";
+import { getAdminBuilder, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
+import { AdminShell, type ShellCounts } from "@/components/admin/shell/AdminShell";
+import type { SearchEntry } from "@/components/admin/shell/CommandPalette";
+import { THEME_BOOT_SCRIPT } from "@/components/admin/shell/theme";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Admin · Food Flow",
+  title: { default: "Admin · Food Flow", template: "%s · Admin · Food Flow" },
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }: LayoutProps<"/admin">) {
+const NAVIGATION_ENTRIES: SearchEntry[] = [
+  { id: "page-overview", group: "Páginas", title: "Visão geral", meta: "Resumo do montador", href: "/admin", icon: "overview" },
+  { id: "page-ingredients", group: "Páginas", title: "Ingredientes", meta: "Catálogo", href: "/admin/ingredients", icon: "ingredient" },
+  { id: "page-buns", group: "Páginas", title: "Tipos de pão", meta: "Catálogo", href: "/admin/bun-variants", icon: "bun" },
+  { id: "page-presets", group: "Páginas", title: "Presets", meta: "Catálogo", href: "/admin/presets", icon: "preset" },
+  { id: "page-builder", group: "Páginas", title: "Abrir montador", meta: "Nova aba", href: "/", icon: "external" },
+  { id: "new-ingredient", group: "Ações", title: "Novo ingrediente", meta: "Criar", href: "/admin/ingredients/new", icon: "plus" },
+  { id: "new-bun", group: "Ações", title: "Novo tipo de pão", meta: "Criar", href: "/admin/bun-variants/new", icon: "plus" },
+  { id: "new-preset", group: "Ações", title: "Novo preset", meta: "Criar", href: "/admin/presets/new", icon: "plus" },
+];
+
+async function loadShellData(): Promise<{ counts: ShellCounts | null; entries: SearchEntry[] }> {
+  try {
+    const builder = await getAdminBuilder();
+    if (!builder) return { counts: null, entries: NAVIGATION_ENTRIES };
+    const [ingredients, bunVariants, presets] = await Promise.all([
+      listIngredients(builder.id),
+      listBunVariants(builder.id),
+      listPresets(builder.id),
+    ]);
+    const status = (isVisible: boolean) => (isVisible ? "Publicado" : "Oculto");
+    return {
+      counts: { ingredients: ingredients.length, bunVariants: bunVariants.length, presets: presets.length },
+      entries: [
+        ...NAVIGATION_ENTRIES,
+        ...ingredients.map((item): SearchEntry => ({
+          id: `ingredient-${item.id}`,
+          group: "Ingredientes",
+          title: item.name,
+          meta: status(item.isVisible),
+          href: `/admin/ingredients/${item.id}`,
+          icon: "ingredient",
+          image: item.image,
+        })),
+        ...bunVariants.map((item): SearchEntry => ({
+          id: `bun-${item.id}`,
+          group: "Tipos de pão",
+          title: item.name,
+          meta: status(item.isVisible),
+          href: `/admin/bun-variants/${item.id}`,
+          icon: "bun",
+          image: item.topImage,
+        })),
+        ...presets.map((item): SearchEntry => ({
+          id: `preset-${item.id}`,
+          group: "Presets",
+          title: item.name,
+          meta: item.isInitial ? "Composição inicial" : item.isAvailable ? "Disponível" : "Indisponível",
+          href: `/admin/presets/${item.id}`,
+          icon: "preset",
+        })),
+      ],
+    };
+  } catch {
+    return { counts: null, entries: NAVIGATION_ENTRIES };
+  }
+}
+
+export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
+  const { counts, entries } = await loadShellData();
+
   return (
-    <div className={styles.shell}>
-      <header className={styles.topBar}>
-        <Link href="/admin" className={styles.brand}>
-          <svg viewBox="0 0 32 32" aria-hidden="true">
-            <path d="M4 13c0-5 5.4-9 12-9s12 4 12 9H4z" />
-            <rect x="3" y="15" width="26" height="3" rx="1.5" />
-            <path d="M4 20h24v2a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6v-2z" />
-          </svg>
-          Food Flow <span className={styles.brandTag}>Admin</span>
-        </Link>
-        <nav className={styles.nav} aria-label="Admin">
-          <Link href="/admin" className={styles.navLink}>
-            Painel
-          </Link>
-          <Link href="/" className={styles.navLink}>
-            Ver montador ↗
-          </Link>
-        </nav>
-      </header>
-      <p className={styles.notice}>
-        Versão de demonstração: o admin ainda não tem login. Qualquer alteração aparece para todos.
-      </p>
-      <main className={styles.content}>{children}</main>
-    </div>
+    <>
+      <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      <AdminShell fontClassName={`${geist.variable} ${geistMono.variable}`} counts={counts} searchEntries={entries}>
+        {children}
+      </AdminShell>
+    </>
   );
 }

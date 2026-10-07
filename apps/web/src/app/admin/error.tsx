@@ -11,10 +11,10 @@ type ErrorProps = {
 export default function Error({ retry }: ErrorProps) {
   return (
     <AdminStatus
-      title="Não foi possível carregar o admin"
+      title="Não foi possível carregar"
       message="A API não respondeu. Verifique se ela está rodando (pnpm dev:api) e tente de novo."
     >
-      <button className={styles.buttonPrimary} onClick={() => retry()}>
+      <button type="button" className={styles.buttonPrimary} onClick={() => retry()}>
         Tentar de novo
       </button>
     </AdminStatus>
