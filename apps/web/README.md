@@ -124,12 +124,13 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 ## Admin (`/admin`)
 
-Gestão de ingredientes e presets, sem login nesta versão (`docs/BACKEND_DECISIONS.md` DT-06, BD-20).
+Gestão de ingredientes, tipos de pão e presets, sem login nesta versão (`docs/BACKEND_DECISIONS.md` DT-06, BD-20).
 
 | Rota | Tela |
 | --- | --- |
 | `/admin` | painel: contagens, ingredientes (miniatura, visível/oculto, uso) e presets (miniatura, inicial, disponível) |
 | `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview no renderer real, dicas de imagem; publicar/ocultar; excluir |
+| `/admin/bun-variants/new`, `/admin/bun-variants/[id]` | nome, imagens do topo e da base com avisos de proporção, preview do pão novo ao lado de um existente com o recheio de um preset; publicar/ocultar; excluir |
 | `/admin/presets/new`, `/admin/presets/[id]` | o próprio montador (`BurgerBuilder` com `isEmbedded` e `renderHeader`) com a barra do preset: nome, salvar, desfazer, aviso de ocultos; painel "Começar a partir de" com os outros presets; excluir |
 
 Fluxo de dados (BD-12):

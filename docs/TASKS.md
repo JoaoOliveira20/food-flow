@@ -143,7 +143,7 @@ Testes de cada tarefa entram junto com ela; a Fase G é a passada final.
 | T-H4 | Proteção do admin no Next | Segmento `/admin` com layout único; ver docs do Next 16 para o mecanismo |
 | T-H5 | Usuários | Pré-requisito de H1–H3 |
 | T-H6 | Auditoria | Autoria e histórico de alterações, se fizer sentido |
-| T-H7 | Admin de variantes de pão | 🚧 07/10/2026 — API pronta (BD-22): visibilidade, CRUD com duas imagens, regras de disponibilidade e de último pão visível, 11 testes; falta a tela do admin |
+| T-H7 | Admin de variantes de pão | ✅ 07/10/2026 (pedido do responsável) — API (BD-22): visibilidade, CRUD com duas imagens, preset com pão oculto indisponível, último pão visível protegido, 11 testes. Admin: seção "Tipos de pão" no painel, `/admin/bun-variants/new` e `/[id]` com as duas imagens, avisos de proporção, preview do pão novo com o recheio de um preset ao lado de um pão existente, publicar/ocultar, excluir; editor de preset avisa pão oculto. Cartões de visibilidade e exclusão viraram componentes genéricos. Roteiro de ponta a ponta 34/34 |
 | T-H8 | Comando para listar/remover arquivos órfãos | BD-16 |
 | T-H9 | Storage externo (S3 ou similar) | Troca de disco por configuração (BD-09) |
 | T-H10 | Segundo montador (ex.: pizza) | Retoma `OPEN_DECISIONS.md` §15/§16 para o renderer; decidir BD-04 B ou C |

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdminBuilder, getAdminCatalog, listIngredients } from "@/api/admin/queries";
+import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients } from "@/api/admin/queries";
 import { IngredientForm } from "@/components/admin/IngredientForm";
 import styles from "@/components/admin/admin.module.css";
 
 export default async function NewIngredientPage() {
   const builder = await getAdminBuilder();
   if (!builder) notFound();
-  const catalog = await getAdminCatalog(builder, await listIngredients(builder.id));
+  const [ingredients, bunVariants] = await Promise.all([listIngredients(builder.id), listBunVariants(builder.id)]);
+  const catalog = getAdminCatalog(builder, { bunVariants, ingredients });
 
   return (
     <>

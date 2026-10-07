@@ -19,6 +19,8 @@ export type AdminBuilder = {
   ingredientsCount: number;
   visibleIngredientsCount: number;
   presetsCount: number;
+  bunVariantsCount: number;
+  visibleBunVariantsCount: number;
 };
 
 export type AdminPresetReference = {
@@ -50,6 +52,21 @@ export type AdminPreset = {
   sortOrder: number;
   isInitial: boolean;
   isAvailable: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminBunVariant = {
+  id: number;
+  builderId: number;
+  slug: string;
+  name: string;
+  topImage: AdminImage;
+  bottomImage: AdminImage;
+  isVisible: boolean;
+  sortOrder: number;
+  presetsCount?: number;
+  presets?: AdminPresetReference[];
   createdAt: string;
   updatedAt: string;
 };

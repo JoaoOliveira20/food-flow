@@ -20,6 +20,7 @@ type PresetEditorProps = {
   builderId: number;
   catalog: BuilderCatalog;
   hiddenIngredientIds: string[];
+  hiddenBunVariantIds: string[];
   preset: SavedPreset | null;
 };
 
@@ -38,7 +39,7 @@ function recipeErrors(fieldErrors: FieldErrors): string[] | undefined {
   return messages.length > 0 ? [...new Set(messages)] : undefined;
 }
 
-export function PresetEditor({ builderId, catalog, hiddenIngredientIds, preset }: PresetEditorProps) {
+export function PresetEditor({ builderId, catalog, hiddenIngredientIds, hiddenBunVariantIds, preset }: PresetEditorProps) {
   const savedRecipe = preset?.recipe ?? { bunVariantId: catalog.bunVariants[0].id, ingredientIds: [] };
   const savedName = preset?.name ?? "";
   const [name, setName] = useState(savedName);
@@ -63,6 +64,7 @@ export function PresetEditor({ builderId, catalog, hiddenIngredientIds, preset }
             builderId={builderId}
             controls={controls}
             hiddenIngredientIds={hiddenIngredientIds}
+            hiddenBunVariantIds={hiddenBunVariantIds}
             maxLayers={catalog.maxLayers}
             name={name}
             preset={preset}
@@ -81,6 +83,7 @@ type PresetEditorBarProps = {
   builderId: number;
   controls: BuilderHeaderControls;
   hiddenIngredientIds: string[];
+  hiddenBunVariantIds: string[];
   maxLayers: number;
   name: string;
   preset: SavedPreset | null;
@@ -94,6 +97,7 @@ function PresetEditorBar({
   builderId,
   controls,
   hiddenIngredientIds,
+  hiddenBunVariantIds,
   maxLayers,
   name,
   preset,
@@ -109,6 +113,7 @@ function PresetEditorBar({
   const { recipe, reset } = controls;
   const isDirty = name !== savedName || !sameRecipe(recipe, savedRecipe);
   const hiddenCount = new Set(recipe.ingredientIds.filter((id) => hiddenIngredientIds.includes(id))).size;
+  const isBunHidden = hiddenBunVariantIds.includes(recipe.bunVariantId);
 
   useEffect(() => onDirtyChange(isDirty), [isDirty, onDirtyChange]);
 
@@ -178,6 +183,11 @@ function PresetEditorBar({
           <span className={`${styles.badge} ${styles.badgeWarning}`}>
             {hiddenCount === 1 ? "1 ingrediente oculto" : `${hiddenCount} ingredientes ocultos`}: o preset fica indisponível no
             montador até a publicação
+          </span>
+        )}
+        {isBunHidden && (
+          <span className={`${styles.badge} ${styles.badgeWarning}`}>
+            Pão oculto: o preset fica indisponível no montador até a publicação
           </span>
         )}
         {isDirty ? (

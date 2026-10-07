@@ -326,3 +326,16 @@ lista suspensa. A tela passou a ser o próprio `BurgerBuilder`, reaproveitado co
 (`initialRecipe`, `renderHeader`, `isEmbedded`, `presetsTitle`) que não alteram o montador público. O painel de
 presets virou "Começar a partir de". A revisão por captura achou e corrigiu uma coluna da grade de presets que
 estourava com nomes longos (`minmax(0, 1fr)`).
+
+---
+
+## 2026-10-07 — Admin de tipos de pão (T-H7)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável perguntou se toda a lista estava feita (sim, as fases 0 e A–G; a Fase H era de evoluções futuras, só
+registradas) e pediu a T-H7. Implementada no padrão dos ingredientes (BD-22): pão nasce oculto, preset com pão oculto
+fica indisponível, o último pão visível não pode ser ocultado nem excluído. O catálogo do admin passou a usar a lista de
+pães do admin (com ocultos marcados) em vez do catálogo público, para o editor de preset e os previews enxergarem pães
+ocultos. Os cartões de visibilidade e exclusão viraram componentes genéricos. O roteiro de ponta a ponta ganhou o ciclo
+do pão (34/34); um erro no próprio roteiro (`$$` virando `$` no texto de substituição) foi encontrado e corrigido.

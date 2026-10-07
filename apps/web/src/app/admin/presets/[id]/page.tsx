@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdminBuilder, getAdminCatalog, getPreset, listIngredients, listPresets } from "@/api/admin/queries";
+import { getAdminBuilder, getAdminCatalog, listBunVariants, getPreset, listIngredients, listPresets } from "@/api/admin/queries";
 import { AdminStatus } from "@/components/admin/AdminStatus";
 import { DeletePreset } from "@/components/admin/DeletePreset";
 import { PresetEditor } from "@/components/admin/PresetEditor";
@@ -15,10 +15,15 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
 
   const [builder, preset] = await Promise.all([getAdminBuilder(), getPreset(presetId)]);
   if (!builder || !preset) notFound();
-  const [ingredients, presets] = await Promise.all([listIngredients(builder.id), listPresets(builder.id)]);
+  const [ingredients, presets, bunVariants] = await Promise.all([
+    listIngredients(builder.id),
+    listPresets(builder.id),
+    listBunVariants(builder.id),
+  ]);
   const otherPresets = presets.filter((other) => other.id !== preset.id);
-  const catalog = await getAdminCatalog(builder, ingredients, otherPresets);
+  const catalog = getAdminCatalog(builder, { bunVariants, ingredients, presets: otherPresets });
   const hiddenIngredientIds = ingredients.filter((ingredient) => !ingredient.isVisible).map((ingredient) => String(ingredient.id));
+  const hiddenBunVariantIds = bunVariants.filter((variant) => !variant.isVisible).map((variant) => String(variant.id));
 
   return (
     <>
@@ -48,6 +53,7 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
           builderId={builder.id}
           catalog={catalog}
           hiddenIngredientIds={hiddenIngredientIds}
+          hiddenBunVariantIds={hiddenBunVariantIds}
           preset={{ id: preset.id, name: preset.name, recipe: presetRecipe(preset) }}
         />
       ) : (

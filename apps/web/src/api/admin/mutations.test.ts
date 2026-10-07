@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, createIngredient, deletePreset, updateIngredient, updatePreset } from "./mutations";
+import {
+  ApiError,
+  createBunVariant,
+  createIngredient,
+  deletePreset,
+  updateBunVariant,
+  updateIngredient,
+  updatePreset,
+} from "./mutations";
 
 const fetchMock = vi.fn();
 
@@ -111,5 +119,44 @@ describe("preset mutations", () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
 
     await expect(deletePreset(4)).resolves.toBeUndefined();
+  });
+});
+
+describe("bun variant mutations", () => {
+  it("creates a bun variant with both images in one multipart request", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(201, { data: { id: 5 } }));
+
+    await createBunVariant(
+      1,
+      { name: "Australiano" },
+      { topImage: new File(["t"], "topo.png"), bottomImage: new File(["b"], "base.png") },
+    );
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://api.test/api/admin/builders/1/bun-variants");
+    expect((init.body as FormData).get("name")).toBe("Australiano");
+    expect((init.body as FormData).get("topImage")).toBeInstanceOf(File);
+    expect((init.body as FormData).get("bottomImage")).toBeInstanceOf(File);
+  });
+
+  it("replaces only the chosen image through method spoofing", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, { data: { id: 5 } }));
+
+    await updateBunVariant(5, {}, { topImage: null, bottomImage: new File(["b"], "base.png") });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://api.test/api/admin/bun-variants/5");
+    expect(init.method).toBe("POST");
+    expect((init.body as FormData).get("_method")).toBe("PATCH");
+    expect((init.body as FormData).has("topImage")).toBe(false);
+  });
+
+  it("publishes with a JSON PATCH when no image changes", async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, { data: { id: 5 } }));
+
+    await updateBunVariant(5, { isVisible: true });
+
+    expect(fetchMock.mock.calls[0][1].method).toBe("PATCH");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ isVisible: true });
   });
 });

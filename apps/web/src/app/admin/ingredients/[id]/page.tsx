@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdminBuilder, getAdminCatalog, getIngredient, listIngredients } from "@/api/admin/queries";
+import { getAdminBuilder, getAdminCatalog, getIngredient, listBunVariants, listIngredients } from "@/api/admin/queries";
 import { DeleteIngredient } from "@/components/admin/DeleteIngredient";
 import { IngredientForm } from "@/components/admin/IngredientForm";
 import { IngredientVisibility } from "@/components/admin/IngredientVisibility";
@@ -14,7 +14,8 @@ export default async function EditIngredientPage({ params, searchParams }: PageP
 
   const [builder, ingredient] = await Promise.all([getAdminBuilder(), getIngredient(ingredientId)]);
   if (!builder || !ingredient) notFound();
-  const catalog = await getAdminCatalog(builder, await listIngredients(builder.id));
+  const [ingredients, bunVariants] = await Promise.all([listIngredients(builder.id), listBunVariants(builder.id)]);
+  const catalog = getAdminCatalog(builder, { bunVariants, ingredients });
 
   return (
     <>

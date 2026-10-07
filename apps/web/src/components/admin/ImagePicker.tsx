@@ -11,6 +11,8 @@ const MAX_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/webp"];
 
 type ImagePickerProps = {
+  id?: string;
+  label?: string;
   current: AdminImage | null;
   selected: LocalImage | null;
   errors: string[] | undefined;
@@ -33,14 +35,14 @@ function formatKilobytes(bytes: number): string {
   return `${Math.round(bytes / 1024).toLocaleString("pt-BR")} KB`;
 }
 
-export function ImagePicker({ current, selected, errors, onSelect }: ImagePickerProps) {
+export function ImagePicker({ id = "image", label = "Imagem", current, selected, errors, onSelect }: ImagePickerProps) {
   const shown = selected ?? current;
   const warnings = selected ? imageWarnings(selected) : [];
 
   return (
     <div className={styles.field}>
-      <span className={styles.label} id="image-label">
-        Imagem
+      <span className={styles.label} id={`${id}-label`}>
+        {label}
       </span>
       {shown && (
         <div>
@@ -66,9 +68,9 @@ export function ImagePicker({ current, selected, errors, onSelect }: ImagePicker
         <input
           type="file"
           accept={ACCEPTED_TYPES.join(",")}
-          aria-labelledby="image-label"
+          aria-labelledby={`${id}-label`}
           aria-invalid={errors ? true : undefined}
-          aria-describedby={errors ? "image-error" : undefined}
+          aria-describedby={errors ? `${id}-error` : undefined}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) onSelect(file);
@@ -83,7 +85,7 @@ export function ImagePicker({ current, selected, errors, onSelect }: ImagePicker
           ⚠ {warning}
         </p>
       ))}
-      <FieldError id="image-error" messages={errors} />
+      <FieldError id={`${id}-error`} messages={errors} />
     </div>
   );
 }

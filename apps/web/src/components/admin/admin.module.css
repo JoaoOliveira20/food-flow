@@ -455,6 +455,30 @@
   height: 100%;
 }
 
+.comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparisonItem {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.comparisonControls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.comparisonItem .previewStage {
+  height: 280px;
+}
+
 .previewControls {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

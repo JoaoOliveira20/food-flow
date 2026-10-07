@@ -63,7 +63,7 @@ export type BuilderCatalogResult =
   | { status: "unavailable" }
   | { status: "notFound" };
 
-export async function fetchBuilderCatalogData(slug: string): Promise<ApiBuilderCatalog | null> {
+async function fetchBuilderCatalogData(slug: string): Promise<ApiBuilderCatalog | null> {
   const response = await fetch(`${serverApiUrl()}/api/builders/${encodeURIComponent(slug)}`, {
     headers: { Accept: "application/json" },
   });

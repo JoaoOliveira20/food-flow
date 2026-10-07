@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAdminBuilder, getAdminCatalog, listIngredients, listPresets } from "@/api/admin/queries";
+import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
 import { findBunVariant } from "@/burger/catalog";
 import { RecipePreview } from "@/components/burger-builder/RecipePreview";
 import { AdminStatus } from "@/components/admin/AdminStatus";
@@ -22,8 +22,12 @@ export default async function AdminDashboard() {
     );
   }
 
-  const [ingredients, presets] = await Promise.all([listIngredients(builder.id), listPresets(builder.id)]);
-  const catalog = await getAdminCatalog(builder, ingredients);
+  const [ingredients, presets, bunVariants] = await Promise.all([
+    listIngredients(builder.id),
+    listPresets(builder.id),
+    listBunVariants(builder.id),
+  ]);
+  const catalog = getAdminCatalog(builder, { bunVariants, ingredients });
 
   return (
     <>
@@ -44,6 +48,12 @@ export default async function AdminDashboard() {
         <div className={styles.stat}>
           <span className={styles.statValue}>{builder.presetsCount}</span>
           <span className={styles.statLabel}>Presets · inclui a composição inicial</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.statValue}>{builder.bunVariantsCount}</span>
+          <span className={styles.statLabel}>
+            Tipos de pão · {pluralize(builder.visibleBunVariantsCount, "visível", "visíveis")}
+          </span>
         </div>
         <div className={styles.stat}>
           <span className={styles.statValue}>{builder.maxLayers}</span>
@@ -83,6 +93,36 @@ export default async function AdminDashboard() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className={styles.card} aria-labelledby="bun-variants-title">
+        <div className={styles.cardHeader}>
+          <h2 id="bun-variants-title" className={styles.cardTitle}>
+            Tipos de pão
+          </h2>
+          <Link href="/admin/bun-variants/new" className={styles.buttonPrimary}>
+            + Novo tipo de pão
+          </Link>
+        </div>
+        <ul className={styles.list}>
+          {bunVariants.map((variant) => (
+            <li key={variant.id} className={styles.listItem}>
+              <IngredientThumbnail image={variant.topImage} />
+              <div>
+                <div className={styles.itemName}>{variant.name}</div>
+                <div className={styles.itemMeta}>
+                  <span className={`${styles.badge} ${variant.isVisible ? styles.badgeVisible : styles.badgeHidden}`}>
+                    {variant.isVisible ? "Visível" : "Oculto"}
+                  </span>
+                  <span>{pluralize(variant.presetsCount ?? 0, "preset usa", "presets usam")}</span>
+                </div>
+              </div>
+              <Link href={`/admin/bun-variants/${variant.id}`} className={styles.button}>
+                Editar
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className={styles.card} aria-labelledby="presets-title">
