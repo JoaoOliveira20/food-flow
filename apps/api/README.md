@@ -58,6 +58,8 @@ seeder não duplica dados se o montador já existir.
 Leituras (`GET`) têm limite alto, só contra sobrecarga, porque vêm quase todas do servidor do Next (um IP para todos
 os visitantes); escritas do admin vêm do navegador de cada pessoa e têm o limite estrito. Respostas em JSON, chaves em camelCase, envelope `data`; erros em JSON com mensagens em pt-BR (`message` e, na
 validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18).
+Os contadores do limite ficam no cache em arquivo (`CACHE_LIMITER_STORE=file`; nos testes, `array`): no cache em banco,
+as requisições paralelas de uma página do admin causavam *deadlock* na tabela `cache` (500 intermitente).
 
 | Método e rota | Limite por IP | Descrição |
 | --- | --- | --- |

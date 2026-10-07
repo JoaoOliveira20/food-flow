@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Rate Limiter Cache Store
+    |--------------------------------------------------------------------------
+    |
+    | Rate limit counters are written on every request. With the database store,
+    | the parallel requests of a single admin page deadlocked on the cache table,
+    | so the counters live in files instead (docs/BACKEND_DECISIONS.md BD-18).
+    |
+    */
+
+    'limiter' => env('CACHE_LIMITER_STORE', 'file'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------
     |
