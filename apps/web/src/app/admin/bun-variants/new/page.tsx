@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatus } from "@/components/admin/AdminStatus";
-import { BunVariantForm } from "@/components/admin/BunVariantForm";
-import styles from "@/components/admin/admin.module.css";
+import { BunVariantStudio } from "@/components/admin/BunVariantStudio";
 
 export default async function NewBunVariantPage() {
   const builder = await getAdminBuilder();
@@ -17,17 +16,13 @@ export default async function NewBunVariantPage() {
 
   return (
     <>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>
-            <Link href="/admin">Painel</Link> / Novo tipo de pão
-          </p>
-          <h1 className={styles.pageTitle}>Novo tipo de pão</h1>
-          <p className={styles.pageSubtitle}>Ele começa oculto: só aparece no montador depois de publicado.</p>
-        </div>
-      </div>
+      <AdminPageHeader
+        trail={["Novo tipo de pão"]}
+        title="Novo tipo de pão"
+        subtitle="Ele começa oculto: só aparece no montador depois de publicado."
+      />
       {catalog ? (
-        <BunVariantForm builderId={builder.id} catalog={catalog} bunVariant={null} />
+        <BunVariantStudio builderId={builder.id} catalog={catalog} bunVariant={null} />
       ) : (
         <AdminStatus title="Montador sem pães" message="Rode os dados iniciais da API (kool run setup em apps/api)." />
       )}

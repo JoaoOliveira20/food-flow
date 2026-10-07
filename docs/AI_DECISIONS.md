@@ -339,3 +339,15 @@ fica indisponível, o último pão visível não pode ser ocultado nem excluído
 pães do admin (com ocultos marcados) em vez do catálogo público, para o editor de preset e os previews enxergarem pães
 ocultos. Os cartões de visibilidade e exclusão viraram componentes genéricos. O roteiro de ponta a ponta ganhou o ciclo
 do pão (34/34); um erro no próprio roteiro (`$$` virando `$` no texto de substituição) foi encontrado e corrigido.
+
+---
+
+## 2026-10-07 — Padronização das telas de criação/edição do admin
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável apontou que cada tela de criação/edição estava de um jeito e que a de ingrediente estava ruim. Entre
+"estúdio no estilo do montador" e "formulário simples padronizado", escolheu o estúdio. As três telas passaram a
+compartilhar `AdminPageHeader`, `StudioBar`, `useVisibilityToggle` e `DeleteCard`; o layout de três colunas segue o
+do montador. Na revisão, a ordem das media queries foi corrigida (a de 1100 px vinha depois da de 720 px e
+anularia o layout do celular).

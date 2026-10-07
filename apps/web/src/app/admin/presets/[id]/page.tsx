@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, getPreset, listIngredients, listPresets } from "@/api/admin/queries";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatus } from "@/components/admin/AdminStatus";
 import { DeletePreset } from "@/components/admin/DeletePreset";
 import { PresetEditor } from "@/components/admin/PresetEditor";
 import { presetRecipe } from "@/components/admin/presetRecipe";
-import styles from "@/components/admin/admin.module.css";
 
 export default async function EditPresetPage({ params, searchParams }: PageProps<"/admin/presets/[id]">) {
   const { id } = await params;
@@ -27,26 +26,18 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
 
   return (
     <>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>
-            <Link href="/admin">Painel</Link> / Presets / {preset.name}
-          </p>
-          <h1 className={styles.pageTitle}>{preset.name}</h1>
-          <p className={styles.pageSubtitle}>
-            {preset.isInitial
-              ? "Composição inicial: é o hambúrguer que aparece ao abrir o montador (não aparece no painel de presets)."
-              : preset.isAvailable
-                ? "Disponível no montador."
-                : "Indisponível no montador: contém ingrediente oculto."}
-          </p>
-        </div>
-      </div>
-      {created && (
-        <p className={styles.success} role="status">
-          Preset criado.
-        </p>
-      )}
+      <AdminPageHeader
+        trail={["Presets", preset.name]}
+        title={preset.name}
+        subtitle={
+          preset.isInitial
+            ? "Composição inicial: é o hambúrguer que aparece ao abrir o montador (não aparece no painel de presets)."
+            : preset.isAvailable
+              ? "Disponível no montador."
+              : "Indisponível no montador: contém pão ou ingrediente oculto."
+        }
+        notice={created ? "Preset criado." : null}
+      />
       {catalog ? (
         <PresetEditor
           key={preset.updatedAt}

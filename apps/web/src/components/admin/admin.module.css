@@ -295,13 +295,6 @@
   gap: 10px;
 }
 
-.twoColumns {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
-}
-
 .form {
   display: flex;
   flex-direction: column;
@@ -455,37 +448,6 @@
   height: 100%;
 }
 
-.comparison {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.comparisonItem {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.comparisonControls {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.comparisonItem .previewStage {
-  height: 280px;
-}
-
-.previewControls {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-}
-
 .tips {
   margin: 0;
   padding-left: 18px;
@@ -509,57 +471,131 @@
   line-height: 1.45;
 }
 
-.content:has(.builderEditor) {
+.content:has(.studio) {
   max-width: 1440px;
 }
 
-.builderEditor {
+.studio {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.editorBar {
+.studioBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: grid;
   grid-template-columns: minmax(220px, 1fr) auto auto;
   grid-template-areas:
     "name status actions"
-    "errors errors errors";
+    "messages messages messages";
   align-items: end;
   gap: 12px 20px;
   padding: 16px 20px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--surface);
+  box-shadow: 0 8px 24px rgba(31, 26, 23, 0.06);
 }
 
-.editorName {
+.studioName {
   grid-area: name;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.editorStatus {
+.studioStatus {
   grid-area: status;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 10px;
+  gap: 6px 8px;
   min-height: 42px;
   color: var(--muted);
   font-size: 14px;
 }
 
-.editorActions {
+.studioActions {
   grid-area: actions;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.editorBar > :nth-child(n + 4) {
-  grid-column: 1 / -1;
+.studioMessages {
+  grid-area: messages;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.studioMessages:empty {
+  display: none;
+}
+
+.studioGrid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 300px;
+  grid-template-areas: "controls stage options";
+  gap: 20px;
+  align-items: start;
+}
+
+.studioControls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.studioCenter {
+  grid-area: stage;
+  position: sticky;
+  top: 132px;
+}
+
+.studioOptions {
+  grid-area: options;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.studioStage {
+  display: grid;
+  place-items: end center;
+  height: clamp(420px, 62vh, 640px);
+  padding: 24px 0;
+}
+
+.studioStage svg {
+  width: 100%;
+  height: 100%;
+}
+
+.studioStageCaption {
+  margin: 10px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dangerZone {
+  border: 1px solid #efc7c3;
+  border-radius: 20px;
+  background: var(--surface);
+  padding: 20px;
 }
 
 .statusCard {
@@ -568,9 +604,41 @@
   text-align: center;
 }
 
-@media (max-width: 860px) {
-  .twoColumns {
+@media (max-width: 1100px) {
+  .studioBar {
+    position: static;
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "name"
+      "status"
+      "actions"
+      "messages";
+  }
+
+  .studioGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "stage stage"
+      "controls options";
+  }
+
+  .studioCenter {
+    position: static;
+  }
+
+}
+
+@media (max-width: 720px) {
+  .studioGrid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "stage"
+      "controls"
+      "options";
+  }
+
+  .studioStage {
+    height: 360px;
   }
 }
 
@@ -604,18 +672,5 @@
     height: 40px;
   }
 
-  .previewControls {
-    grid-template-columns: 1fr;
-  }
 }
 
-@media (max-width: 1100px) {
-  .editorBar {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "name"
-      "status"
-      "actions"
-      "errors";
-  }
-}

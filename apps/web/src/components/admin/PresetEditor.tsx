@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { ApiError, createPreset, updatePreset, type FieldErrors } from "@/api/admin/mutations";
@@ -8,6 +7,7 @@ import type { BuilderCatalog } from "@/burger/catalog";
 import type { CompositionRecipe } from "@/burger/composition";
 import { BurgerBuilder, type BuilderHeaderControls } from "@/components/burger-builder/BurgerBuilder";
 import { FieldError } from "./FieldError";
+import { StudioBar } from "./StudioBar";
 import styles from "./admin.module.css";
 
 type SavedPreset = {
@@ -53,7 +53,7 @@ export function PresetEditor({ builderId, catalog, hiddenIngredientIds, hiddenBu
   }, [isDirty]);
 
   return (
-    <div className={styles.builderEditor}>
+    <div className={styles.studio}>
       <BurgerBuilder
         catalog={catalog}
         initialRecipe={savedRecipe}
@@ -157,64 +157,41 @@ function PresetEditorBar({
   }
 
   return (
-    <form className={styles.editorBar} onSubmit={save} noValidate>
-      <div className={styles.editorName}>
-        <label className={styles.label} htmlFor="preset-name">
-          Nome do preset
-        </label>
-        <input
-          id="preset-name"
-          className={`${styles.input} ${fieldErrors.name ? styles.inputInvalid : ""}`}
-          value={name}
-          maxLength={100}
-          placeholder="Ex.: Cheeseburger"
-          aria-invalid={fieldErrors.name ? true : undefined}
-          aria-describedby={fieldErrors.name ? "preset-name-error" : undefined}
-          onChange={(event) => onNameChange(event.target.value)}
-        />
-        <FieldError id="preset-name-error" messages={fieldErrors.name} />
-      </div>
-
-      <div className={styles.editorStatus} aria-live="polite">
-        <span>
-          {recipe.ingredientIds.length} de {maxLayers} ingredientes
-        </span>
-        {hiddenCount > 0 && (
-          <span className={`${styles.badge} ${styles.badgeWarning}`}>
-            {hiddenCount === 1 ? "1 ingrediente oculto" : `${hiddenCount} ingredientes ocultos`}: o preset fica indisponível no
-            montador até a publicação
+    <StudioBar
+      nameLabel="Nome do preset"
+      namePlaceholder="Ex.: Cheeseburger"
+      name={name}
+      nameErrors={fieldErrors.name}
+      onNameChange={onNameChange}
+      badges={
+        <>
+          <span>
+            {recipe.ingredientIds.length} de {maxLayers} ingredientes
           </span>
-        )}
-        {isBunHidden && (
-          <span className={`${styles.badge} ${styles.badgeWarning}`}>
-            Pão oculto: o preset fica indisponível no montador até a publicação
-          </span>
-        )}
-        {isDirty ? (
-          <span className={`${styles.badge} ${styles.badgeWarning}`}>Alterações não salvas</span>
-        ) : (
-          preset && <span className={`${styles.badge} ${styles.badgeVisible}`}>Salvo</span>
-        )}
-      </div>
-
-      <div className={styles.editorActions}>
-        <Link href="/admin" className={styles.button}>
-          Voltar
-        </Link>
-        <button type="button" className={styles.button} onClick={restore} disabled={!isDirty || isSaving}>
-          {preset ? "Desfazer alterações" : "Limpar"}
-        </button>
-        <button type="submit" className={styles.buttonPrimary} disabled={isSaving || (preset !== null && !isDirty)}>
-          {isSaving ? "Salvando…" : preset ? "Salvar preset" : "Criar preset"}
-        </button>
-      </div>
-
-      <FieldError id="preset-recipe-error" messages={recipeErrors(fieldErrors)} />
-      {formError && (
-        <p className={styles.alert} role="alert">
-          {formError}
-        </p>
-      )}
-    </form>
+          {hiddenCount > 0 && (
+            <span className={`${styles.badge} ${styles.badgeWarning}`}>
+              {hiddenCount === 1 ? "1 ingrediente oculto" : `${hiddenCount} ingredientes ocultos`}: fica fora do montador
+            </span>
+          )}
+          {isBunHidden && <span className={`${styles.badge} ${styles.badgeWarning}`}>Pão oculto: fica fora do montador</span>}
+        </>
+      }
+      isNew={preset === null}
+      isDirty={isDirty}
+      isSaving={isSaving}
+      createLabel="Criar preset"
+      onUndo={restore}
+      messages={
+        <>
+          <FieldError id="preset-recipe-error" messages={recipeErrors(fieldErrors)} />
+          {formError && (
+            <p className={styles.alert} role="alert">
+              {formError}
+            </p>
+          )}
+        </>
+      }
+      onSubmit={save}
+    />
   );
 }

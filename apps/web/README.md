@@ -141,6 +141,9 @@ Fluxo de dados (BD-12):
   `router.refresh()` ou navegação. `ApiError` traz erros por campo (422) e mensagens próprias para 409, 413 e 429.
 - Os previews usam o mesmo `computeStackLayout` do builder (`RecipePreview`) com um catálogo que inclui os
   ingredientes ocultos (`getAdminCatalog`).
+- Telas de criação/edição seguem o padrão **estúdio**: `AdminPageHeader`, `StudioBar` (nome, status, Voltar, Desfazer,
+  Publicar/Ocultar, Salvar), controles à esquerda, hambúrguer ao centro, opções e dicas à direita e `DeleteCard` como
+  zona de perigo. O editor de preset usa o próprio `BurgerBuilder` no lugar das três colunas.
 - Componentes em `src/components/admin/`; estilos em `admin.module.css`, com os tokens de cor do builder.
 
 ## Como fazer alterações comuns

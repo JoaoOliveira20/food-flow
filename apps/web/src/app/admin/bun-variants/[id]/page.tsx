@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getAdminBuilder,
@@ -8,10 +7,9 @@ import {
   listIngredients,
   listPresets,
 } from "@/api/admin/queries";
-import { BunVariantForm } from "@/components/admin/BunVariantForm";
-import { BunVariantVisibility } from "@/components/admin/BunVariantVisibility";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { BunVariantStudio } from "@/components/admin/BunVariantStudio";
 import { DeleteBunVariant } from "@/components/admin/DeleteBunVariant";
-import styles from "@/components/admin/admin.module.css";
 
 export default async function EditBunVariantPage({ params, searchParams }: PageProps<"/admin/bun-variants/[id]">) {
   const { id } = await params;
@@ -28,28 +26,20 @@ export default async function EditBunVariantPage({ params, searchParams }: PageP
   ]);
   const catalog = getAdminCatalog(builder, { bunVariants, ingredients, presets });
   if (!catalog) notFound();
-  const usage = bunVariant.presets?.length ?? 0;
 
   return (
     <>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>
-            <Link href="/admin">Painel</Link> / Tipos de pão / {bunVariant.name}
-          </p>
-          <h1 className={styles.pageTitle}>{bunVariant.name}</h1>
-          <p className={styles.pageSubtitle}>
-            Identificador <code>{bunVariant.slug}</code> · usado em {usage === 1 ? "1 preset" : `${usage} presets`}
-          </p>
-        </div>
-      </div>
-      {created && (
-        <p className={styles.success} role="status">
-          Tipo de pão criado e oculto. Confira o preview abaixo e publique quando estiver pronto.
-        </p>
-      )}
-      <BunVariantVisibility bunVariant={bunVariant} />
-      <BunVariantForm key={bunVariant.updatedAt} builderId={builder.id} catalog={catalog} bunVariant={bunVariant} />
+      <AdminPageHeader
+        trail={["Tipos de pão", bunVariant.name]}
+        title={bunVariant.name}
+        subtitle={
+          <>
+            Identificador <code>{bunVariant.slug}</code>
+          </>
+        }
+        notice={created ? "Tipo de pão criado e oculto. Confira o preview e publique quando estiver pronto." : null}
+      />
+      <BunVariantStudio key={bunVariant.updatedAt} builderId={builder.id} catalog={catalog} bunVariant={bunVariant} />
       <DeleteBunVariant bunVariant={bunVariant} />
     </>
   );

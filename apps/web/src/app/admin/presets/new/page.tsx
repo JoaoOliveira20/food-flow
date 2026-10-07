@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatus } from "@/components/admin/AdminStatus";
 import { PresetEditor } from "@/components/admin/PresetEditor";
-import styles from "@/components/admin/admin.module.css";
 
 export default async function NewPresetPage() {
   const builder = await getAdminBuilder();
@@ -19,18 +18,11 @@ export default async function NewPresetPage() {
 
   return (
     <>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>
-            <Link href="/admin">Painel</Link> / Novo preset
-          </p>
-          <h1 className={styles.pageTitle}>Novo preset</h1>
-          <p className={styles.pageSubtitle}>
-            Monte o hambúrguer como no montador: clique ou arraste ingredientes, escolha o pão ou comece a partir de um
-            preset existente.
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        trail={["Novo preset"]}
+        title="Novo preset"
+        subtitle="Monte o hambúrguer como no montador: clique ou arraste ingredientes, escolha o pão ou comece a partir de um preset existente."
+      />
       {catalog ? (
         <PresetEditor
           builderId={builder.id}

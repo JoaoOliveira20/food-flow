@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminBuilder, getAdminCatalog, listBunVariants, listIngredients } from "@/api/admin/queries";
-import { IngredientForm } from "@/components/admin/IngredientForm";
-import styles from "@/components/admin/admin.module.css";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminStatus } from "@/components/admin/AdminStatus";
+import { IngredientStudio } from "@/components/admin/IngredientStudio";
 
 export default async function NewIngredientPage() {
   const builder = await getAdminBuilder();
@@ -12,16 +12,16 @@ export default async function NewIngredientPage() {
 
   return (
     <>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.breadcrumb}>
-            <Link href="/admin">Painel</Link> / Novo ingrediente
-          </p>
-          <h1 className={styles.pageTitle}>Novo ingrediente</h1>
-          <p className={styles.pageSubtitle}>Ele começa oculto: só aparece no montador depois de publicado.</p>
-        </div>
-      </div>
-      <IngredientForm builderId={builder.id} catalog={catalog} ingredient={null} />
+      <AdminPageHeader
+        trail={["Novo ingrediente"]}
+        title="Novo ingrediente"
+        subtitle="Ele começa oculto: só aparece no montador depois de publicado."
+      />
+      {catalog ? (
+        <IngredientStudio builderId={builder.id} catalog={catalog} ingredient={null} />
+      ) : (
+        <AdminStatus title="Montador sem pães" message="Cadastre um tipo de pão antes de criar ingredientes." />
+      )}
     </>
   );
 }

@@ -39,7 +39,7 @@ export function DeleteCard({ title, hint, question, blockedReason, onDelete }: D
   }
 
   return (
-    <section className={styles.card} aria-labelledby="delete-title">
+    <section className={styles.dangerZone} aria-labelledby="delete-title">
       <h2 id="delete-title" className={styles.cardTitle}>
         {title}
       </h2>

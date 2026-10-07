@@ -10,7 +10,7 @@ export function ImageTips({ subject = "ingredient" }: ImageTipsProps) {
 
   return (
     <section className={styles.card} aria-labelledby="image-tips-title">
-      <h2 id="image-tips-title" className={styles.cardTitle}>
+      <h2 id="image-tips-title" className={styles.sectionTitle}>
         Dicas para uma boa imagem
       </h2>
       <ul className={styles.tips}>
