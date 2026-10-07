@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { VisibilityPill } from "@/components/admin/StatusPill";
 import styles from "@/components/admin/admin.module.css";
 
+const EAGER_TILES = 8;
+
 export const metadata = { title: "Tipos de pão" };
 
 export default async function BunVariantsPage() {
@@ -16,7 +18,7 @@ export default async function BunVariantsPage() {
   const bunVariants = await listBunVariants(builder.id);
 
   const items = bunVariants.map(
-    (variant): CatalogItem => ({
+    (variant, index): CatalogItem => ({
       key: String(variant.id),
       href: `/admin/bun-variants/${variant.id}`,
       title: variant.name,
@@ -30,12 +32,20 @@ export default async function BunVariantsPage() {
       badge: <VisibilityPill isVisible={variant.isVisible} />,
       media: (
         <span className={styles.tileStack}>
-          <Image src={variant.topImage.url} alt="" width={variant.topImage.width} height={variant.topImage.height} unoptimized />
+          <Image
+            src={variant.topImage.url}
+            alt=""
+            width={variant.topImage.width}
+            height={variant.topImage.height}
+            loading={index < EAGER_TILES ? "eager" : "lazy"}
+            unoptimized
+          />
           <Image
             src={variant.bottomImage.url}
             alt=""
             width={variant.bottomImage.width}
             height={variant.bottomImage.height}
+            loading={index < EAGER_TILES ? "eager" : "lazy"}
             unoptimized
           />
         </span>

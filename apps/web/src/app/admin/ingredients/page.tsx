@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { VisibilityPill } from "@/components/admin/StatusPill";
 import styles from "@/components/admin/admin.module.css";
 
+const EAGER_TILES = 8;
+
 export const metadata = { title: "Ingredientes" };
 
 function usage(count: number): string {
@@ -21,7 +23,7 @@ export default async function IngredientsPage() {
   const ingredients = await listIngredients(builder.id);
 
   const items = ingredients.map(
-    (ingredient): CatalogItem => ({
+    (ingredient, index): CatalogItem => ({
       key: String(ingredient.id),
       href: `/admin/ingredients/${ingredient.id}`,
       title: ingredient.name,
@@ -34,6 +36,7 @@ export default async function IngredientsPage() {
           alt=""
           width={ingredient.image.width}
           height={ingredient.image.height}
+          loading={index < EAGER_TILES ? "eager" : "lazy"}
           unoptimized
         />
       ),

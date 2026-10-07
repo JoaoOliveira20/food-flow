@@ -137,3 +137,8 @@ export function scaleStackToStage(layout: StackLayout, stage: StageSize): number
 export function hitAreaCenter(hitArea: HitArea): number {
   return hitArea.bottom + hitArea.height / 2;
 }
+
+export function expandHitArea(hitArea: HitArea, minHeight: number): HitArea {
+  if (hitArea.height >= minHeight) return hitArea;
+  return { bottom: hitArea.bottom - (minHeight - hitArea.height) / 2, height: minHeight };
+}

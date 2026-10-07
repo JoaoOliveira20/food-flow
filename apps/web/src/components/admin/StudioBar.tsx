@@ -46,6 +46,8 @@ export function StudioBar({
 }: StudioBarProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const canSave = !isSaving && (isNew || isDirty);
+  const undoText = undoLabel ?? (isNew ? "Limpar" : "Desfazer");
+  const submitText = isSaving ? "Salvando…" : isNew ? createLabel : "Salvar";
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -88,13 +90,33 @@ export function StudioBar({
           <Icon name="arrowLeft" />
           <span className={styles.buttonLabel}>Voltar</span>
         </Link>
-        <button type="button" className={styles.buttonGhost} onClick={onUndo} disabled={!isDirty || isSaving}>
+        <button
+          type="button"
+          className={`${styles.buttonGhost} ${styles.desktopOnly}`}
+          onClick={onUndo}
+          disabled={!isDirty || isSaving}
+        >
           <Icon name="undo" />
-          <span className={styles.buttonLabel}>{undoLabel ?? (isNew ? "Limpar" : "Desfazer")}</span>
+          <span className={styles.buttonLabel}>{undoText}</span>
         </button>
         {extraActions}
-        <button type="submit" className={styles.buttonPrimary} disabled={!canSave} title="Ctrl S">
-          {isSaving ? "Salvando…" : isNew ? createLabel : "Salvar"}
+        <button
+          type="submit"
+          className={`${styles.buttonPrimary} ${styles.desktopOnly}`}
+          disabled={!canSave}
+          title="Ctrl S"
+        >
+          {submitText}
+        </button>
+      </div>
+
+      <div className={styles.mobileSaveBar} data-visible={isNew || isDirty || isSaving}>
+        <span className={styles.mobileSaveStatus}>{isDirty ? "Alterações não salvas" : isNew ? "Novo item" : "Tudo salvo"}</span>
+        <button type="button" className={styles.buttonGhost} onClick={onUndo} disabled={!isDirty || isSaving}>
+          {undoText}
+        </button>
+        <button type="submit" className={styles.buttonPrimary} disabled={!canSave}>
+          {submitText}
         </button>
       </div>
 

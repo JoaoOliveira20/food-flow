@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { getAdminBuilder, listBunVariants, listIngredients, listPresets } from "@/api/admin/queries";
 import { AdminShell, type ShellCounts } from "@/components/admin/shell/AdminShell";
 import type { SearchEntry } from "@/components/admin/shell/CommandPalette";
+import { SIDEBAR_BOOT_SCRIPT } from "@/components/admin/shell/sidebar";
 import { THEME_BOOT_SCRIPT } from "@/components/admin/shell/theme";
 import { PRESET_STATUS_LABELS, presetStatus } from "@/components/admin/presetStatus";
 
@@ -77,7 +78,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
 
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      <script dangerouslySetInnerHTML={{ __html: `${THEME_BOOT_SCRIPT};${SIDEBAR_BOOT_SCRIPT}` }} />
       <AdminShell fontClassName={`${geist.variable} ${geistMono.variable}`} counts={counts} searchEntries={entries}>
         {children}
       </AdminShell>

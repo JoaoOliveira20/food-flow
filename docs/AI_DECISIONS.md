@@ -385,3 +385,17 @@ arraste) foi extraído do `BurgerBuilder` para `useBurgerWorkbench` e `BurgerWor
 estúdio; o montador público passou a usar os mesmos componentes, sem mudança de comportamento (roteiro de ponta a
 ponta do montador inalterado). "Substituir" fica escondido no estúdio por não haver painel de ingredientes para
 escolher o substituto. O preview é só visual: não altera presets nem marca alterações não salvas.
+
+## 2026-10-07 — Responsividade e ergonomia multiplataforma (T-F15)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O trabalho começou por uma auditoria automática (Chrome headless em 8 larguras, com toque emulado abaixo de 1024 px)
+em vez de ajustes no olho: não havia rolagem lateral nem imagens distorcidas; os problemas reais eram áreas de toque
+de 30–38 px, campos com fonte menor que 16 px (zoom automático no iOS) e textos de 11 px. As áreas de toque usam
+`pointer: coarse` e não a largura, porque tablets em paisagem passam de 1024 px. Navegação inferior no celular (4
+destinos, cabe no polegar) mantendo a gaveta para o resto; menu recolhível no desktop com o mesmo padrão sem
+piscar do tema (script antes da pintura + `useSyncExternalStore`). No palco, as camadas finas ganham área mínima
+centrada, com prioridade para a mais fina, sem mudar a geometria do arraste. Na revisão foram corrigidos: os scripts
+de inicialização concatenados sem `;` (quebrava a página) e um *deadlock* do rate limit no cache em banco, achado
+pelas capturas (commit próprio).

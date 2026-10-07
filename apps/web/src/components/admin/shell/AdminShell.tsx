@@ -5,7 +5,17 @@ import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { BrandMark, Icon, type IconName } from "../Icon";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { CommandPalette, type SearchEntry } from "./CommandPalette";
+import {
+  DESKTOP_QUERY,
+  WIDE_QUERY,
+  applySidebarState,
+  isRail,
+  readSidebarPreference,
+  storeSidebarPreference,
+  subscribeToSidebarPreference,
+} from "./sidebar";
 import {
   prefersDarkTheme,
   readThemePreference,
@@ -33,6 +43,7 @@ type AdminShellProps = {
 type NavLink = {
   href: string;
   label: string;
+  shortLabel: string;
   icon: IconName;
   count?: number;
 };
@@ -64,7 +75,17 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const theme = useResolvedTheme(preference);
+  const sidebarPreference = useSyncExternalStore(subscribeToSidebarPreference, readSidebarPreference, () => "auto" as const);
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const isWide = useMediaQuery(WIDE_QUERY);
+  const isSidebarRail = isRail(sidebarPreference, isDesktop, isWide);
 
+  useEffect(() => {
+    applySidebarState();
+    const queries = [window.matchMedia(DESKTOP_QUERY), window.matchMedia(WIDE_QUERY)];
+    queries.forEach((query) => query.addEventListener("change", applySidebarState));
+    return () => queries.forEach((query) => query.removeEventListener("change", applySidebarState));
+  }, []);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -81,16 +102,15 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
     storeThemePreference(next);
   }
 
+  const overviewLink: NavLink = { href: "/admin", label: "Visão geral", shortLabel: "Início", icon: "overview" };
+  const catalogLinks: NavLink[] = [
+    { href: "/admin/ingredients", label: "Ingredientes", shortLabel: "Ingredientes", icon: "ingredient", count: counts?.ingredients },
+    { href: "/admin/bun-variants", label: "Tipos de pão", shortLabel: "Pães", icon: "bun", count: counts?.bunVariants },
+    { href: "/admin/presets", label: "Presets", shortLabel: "Presets", icon: "preset", count: counts?.presets },
+  ];
   const sections: { label: string; links: NavLink[] }[] = [
-    { label: "Geral", links: [{ href: "/admin", label: "Visão geral", icon: "overview" }] },
-    {
-      label: "Catálogo",
-      links: [
-        { href: "/admin/ingredients", label: "Ingredientes", icon: "ingredient", count: counts?.ingredients },
-        { href: "/admin/bun-variants", label: "Tipos de pão", icon: "bun", count: counts?.bunVariants },
-        { href: "/admin/presets", label: "Presets", icon: "preset", count: counts?.presets },
-      ],
-    },
+    { label: "Geral", links: [overviewLink] },
+    { label: "Catálogo", links: catalogLinks },
   ];
 
   const sidebar = (layoutGroup: string) => (
@@ -103,9 +123,9 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
         <span className={styles.brandTag}>Admin</span>
       </Link>
 
-      <button type="button" className={styles.searchTrigger} onClick={() => setIsPaletteOpen(true)}>
+      <button type="button" className={styles.searchTrigger} onClick={() => setIsPaletteOpen(true)} title="Buscar (Ctrl K)">
         <Icon name="search" />
-        Buscar…
+        <span className={styles.searchLabel}>Buscar…</span>
         <span className={styles.kbd}>Ctrl K</span>
       </button>
 
@@ -121,6 +141,7 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
                   href={link.href}
                   className={styles.navItem}
                   aria-current={active ? "page" : undefined}
+                  title={link.label}
                   onClick={() => setIsDrawerOpen(false)}
                 >
                   {active && (
@@ -131,7 +152,7 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
                     />
                   )}
                   <Icon name={link.icon} />
-                  <span>{link.label}</span>
+                  <span className={styles.navText}>{link.label}</span>
                   {link.count !== undefined && <span className={styles.navCount}>{link.count}</span>}
                 </Link>
               );
@@ -140,9 +161,9 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
         ))}
         <div className={styles.navSection}>
           <p className={styles.navLabel}>Montador</p>
-          <a href="/" target="_blank" rel="noopener" className={styles.navItem}>
+          <a href="/" target="_blank" rel="noopener" className={styles.navItem} title="Abrir montador">
             <Icon name="external" />
-            <span>Abrir montador</span>
+            <span className={styles.navText}>Abrir montador</span>
           </a>
         </div>
       </nav>
@@ -152,19 +173,30 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
           <strong>Modo demonstração</strong>
           Sem login: qualquer alteração aparece para todos no montador.
         </p>
-        <div className={styles.themeSwitch} role="group" aria-label="Tema">
-          {THEMES.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-label={option.label}
-              title={option.label}
-              aria-pressed={preference === option.value}
-              onClick={() => choosePreference(option.value)}
-            >
-              <Icon name={option.icon} />
-            </button>
-          ))}
+        <div className={styles.sidebarControls}>
+          <div className={styles.themeSwitch} role="group" aria-label="Tema">
+            {THEMES.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-label={option.label}
+                title={option.label}
+                aria-pressed={preference === option.value}
+                onClick={() => choosePreference(option.value)}
+              >
+                <Icon name={option.icon} />
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className={styles.collapseButton}
+            onClick={() => storeSidebarPreference(isSidebarRail ? "expanded" : "collapsed")}
+            aria-label={isSidebarRail ? "Expandir menu" : "Recolher menu"}
+            title={isSidebarRail ? "Expandir menu" : "Recolher menu"}
+          >
+            <Icon name="sidebar" />
+          </button>
         </div>
       </div>
     </aside>
@@ -192,6 +224,24 @@ export function AdminShell({ fontClassName, counts, searchEntries, children }: A
             </header>
             <main className={styles.content}>{children}</main>
           </div>
+          <nav aria-label="Navegação principal" className={styles.bottomNav}>
+            {[overviewLink, ...catalogLinks].map((link) => {
+              const active = isActive(pathname, link.href);
+              return (
+                <Link key={link.href} href={link.href} className={styles.bottomNavItem} aria-current={active ? "page" : undefined}>
+                  {active && (
+                    <motion.span
+                      layoutId="bottom-nav-active"
+                      className={styles.bottomNavActive}
+                      transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                    />
+                  )}
+                  <Icon name={link.icon} />
+                  <span>{link.shortLabel}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
         <AnimatePresence>

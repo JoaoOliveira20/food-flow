@@ -142,7 +142,8 @@ Fluxo de dados (BD-12):
   `router.refresh()` ou navegação. `ApiError` traz erros por campo (422) e mensagens próprias para 409, 413 e 429.
 - Os previews usam o mesmo `computeStackLayout` do builder (`RecipePreview`) com um catálogo que inclui os
   ingredientes ocultos (`getAdminCatalog`).
-- Shell em `src/components/admin/shell/`: menu lateral (gaveta no celular), busca `Ctrl K`/`⌘K` (`CommandPalette`),
+- Shell em `src/components/admin/shell/`: menu lateral recolhível (`sidebar.ts`: automático entre 1024 e 1279 px, preferência
+  salva e aplicada antes da pintura), navegação inferior e gaveta abaixo de 1024 px, barra de salvar fixa no celular, busca `Ctrl K`/`⌘K` (`CommandPalette`),
   tema claro/escuro/sistema guardado no navegador (`theme.ts`, aplicado antes da pintura para não piscar) e toasts
   (`Toaster`, `useToast`).
 - Telas de criação/edição seguem o padrão **estúdio**: `PageHeader`, `StudioBar` (nome, status, Voltar, Desfazer,

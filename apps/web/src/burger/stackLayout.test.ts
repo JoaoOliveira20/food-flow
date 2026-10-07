@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BURGER_CATALOG_FIXTURE } from "../test/burgerCatalogFixture";
 import { createInitialComposition, type Composition } from "./composition";
-import { computeStackLayout, scaleStackToStage, STACK_BASE_WIDTH } from "./stackLayout";
+import { computeStackLayout, expandHitArea, scaleStackToStage, STACK_BASE_WIDTH } from "./stackLayout";
 
 const INITIAL_COMPOSITION = createInitialComposition(BURGER_CATALOG_FIXTURE.initialRecipe, BURGER_CATALOG_FIXTURE.maxLayers);
 const INGREDIENTS = BURGER_CATALOG_FIXTURE.ingredients;
@@ -97,5 +97,15 @@ describe("scaleStackToStage", () => {
   it("does not enlarge the composition beyond the maximum scale", () => {
     const layout = layoutOf(compositionWith(["beef"]));
     expect(scaleStackToStage(layout, { width: 4000, height: 4000 })).toBe(1.25);
+  });
+});
+
+describe("expandHitArea", () => {
+  it("keeps hit areas that are already big enough", () => {
+    expect(expandHitArea({ bottom: 10, height: 50 }, 44)).toEqual({ bottom: 10, height: 50 });
+  });
+
+  it("grows thin hit areas around their center", () => {
+    expect(expandHitArea({ bottom: 100, height: 10 }, 44)).toEqual({ bottom: 83, height: 44 });
   });
 });
