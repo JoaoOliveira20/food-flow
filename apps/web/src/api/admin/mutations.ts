@@ -99,6 +99,7 @@ export type PresetFields = {
   name?: string;
   bunVariantId?: number;
   ingredientIds?: number[];
+  isVisible?: boolean;
 };
 
 export async function createPreset(builderId: number, fields: PresetFields): Promise<AdminPreset> {

@@ -4,6 +4,7 @@ import { getAdminBuilder, listBunVariants, listIngredients, listPresets } from "
 import { AdminShell, type ShellCounts } from "@/components/admin/shell/AdminShell";
 import type { SearchEntry } from "@/components/admin/shell/CommandPalette";
 import { THEME_BOOT_SCRIPT } from "@/components/admin/shell/theme";
+import { PRESET_STATUS_LABELS, presetStatus } from "@/components/admin/presetStatus";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
@@ -60,7 +61,7 @@ async function loadShellData(): Promise<{ counts: ShellCounts | null; entries: S
           id: `preset-${item.id}`,
           group: "Presets",
           title: item.name,
-          meta: item.isInitial ? "Composição inicial" : item.isAvailable ? "Disponível" : "Indisponível",
+          meta: PRESET_STATUS_LABELS[presetStatus(item)],
           href: `/admin/presets/${item.id}`,
           icon: "preset",
         })),

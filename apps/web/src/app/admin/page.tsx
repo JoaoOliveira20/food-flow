@@ -8,6 +8,7 @@ import { AdminStatus } from "@/components/admin/AdminStatus";
 import { Icon, type IconName } from "@/components/admin/Icon";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { presetRecipe } from "@/components/admin/presetRecipe";
+import { presetStatus } from "@/components/admin/presetStatus";
 import { relativeTime } from "@/components/admin/relativeTime";
 import styles from "@/components/admin/admin.module.css";
 
@@ -133,7 +134,10 @@ export default async function AdminOverview() {
       .filter((_, index) => !bunVariants[index].isVisible)
       .map((row) => ({ ...row, meta: "Tipo de pão oculto · publique para aparecer no montador" })),
     ...presetRows
-      .filter((_, index) => !presets[index].isAvailable)
+      .filter((_, index) => presetStatus(presets[index]) === "hidden")
+      .map((row) => ({ ...row, meta: "Preset oculto · publique para aparecer no montador" })),
+    ...presetRows
+      .filter((_, index) => presetStatus(presets[index]) === "unavailable")
       .map((row) => ({ ...row, meta: "Preset fora do montador · leva pão ou ingrediente oculto" })),
   ];
   const recent = [...ingredientRows, ...bunRows, ...presetRows]
@@ -142,7 +146,7 @@ export default async function AdminOverview() {
 
   const visibleIngredients = ingredients.filter((item) => item.isVisible).length;
   const visibleBuns = bunVariants.filter((item) => item.isVisible).length;
-  const availablePresets = presets.filter((item) => item.isAvailable).length;
+  const availablePresets = presets.filter((item) => ["initial", "published"].includes(presetStatus(item))).length;
 
   return (
     <>

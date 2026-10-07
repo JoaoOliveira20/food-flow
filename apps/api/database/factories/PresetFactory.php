@@ -19,8 +19,14 @@ class PresetFactory extends Factory
             'builder_id' => Builder::factory(),
             'bun_variant_id' => fn (array $attributes) => BunVariant::factory()->create(['builder_id' => $attributes['builder_id']]),
             'name' => fake()->unique()->words(2, true),
+            'is_visible' => true,
             'sort_order' => 0,
         ];
+    }
+
+    public function hidden(): static
+    {
+        return $this->state(fn () => ['is_visible' => false]);
     }
 
     /**

@@ -6,6 +6,7 @@ import { DeletePreset } from "@/components/admin/DeletePreset";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { PresetEditor } from "@/components/admin/PresetEditor";
 import { presetRecipe } from "@/components/admin/presetRecipe";
+import { PRESET_STATUS_DESCRIPTIONS, presetStatus } from "@/components/admin/presetStatus";
 
 export default async function EditPresetPage({ params, searchParams }: PageProps<"/admin/presets/[id]">) {
   const { id } = await params;
@@ -27,18 +28,12 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
 
   return (
     <>
-      {created && <CreatedToast title="Preset criado" detail="Ele já aparece no montador se tudo estiver publicado." />}
+      {created && <CreatedToast title="Preset criado" detail="Ele está oculto: confira e publique." />}
       <PageHeader
         isTitleHidden
         crumbs={[{ label: "Presets", href: "/admin/presets" }, { label: preset.name }]}
         title={preset.name}
-        description={
-          preset.isInitial
-            ? "Composição inicial: o hambúrguer que aparece ao abrir o montador (não entra no painel de presets)."
-            : preset.isAvailable
-              ? "Disponível no montador."
-              : "Fora do montador: leva pão ou ingrediente oculto."
-        }
+        description={PRESET_STATUS_DESCRIPTIONS[presetStatus(preset)]}
       />
       {catalog ? (
         <PresetEditor
@@ -47,7 +42,14 @@ export default async function EditPresetPage({ params, searchParams }: PageProps
           catalog={catalog}
           hiddenIngredientIds={hiddenIngredientIds}
           hiddenBunVariantIds={hiddenBunVariantIds}
-          preset={{ id: preset.id, name: preset.name, recipe: presetRecipe(preset) }}
+          preset={{
+            id: preset.id,
+            name: preset.name,
+            recipe: presetRecipe(preset),
+            isVisible: preset.isVisible,
+            isInitial: preset.isInitial,
+            isAvailable: preset.isAvailable,
+          }}
         />
       ) : (
         <AdminStatus title="Sem tipos de pão" message="Cadastre um tipo de pão para editar presets." />

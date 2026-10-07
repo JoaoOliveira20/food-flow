@@ -68,10 +68,10 @@ validação, `errors` por campo). Decisões: `docs/BACKEND_DECISIONS.md` (BD-18)
 | `GET /api/admin/ingredients/{id}` | 600/min | Detalhe, com os `presets` que usam o ingrediente |
 | `PATCH /api/admin/ingredients/{id}` | 60/min | Edição parcial (JSON); com nova imagem, `POST` multipart + `_method=PATCH` |
 | `DELETE /api/admin/ingredients/{id}` | 60/min | 204; **409** com `presets` se estiver em uso |
-| `GET /api/admin/builders/{id}/presets` | 600/min | Presets do montador, inclusive o inicial (`isInitial`), com `isAvailable` |
-| `POST /api/admin/builders/{id}/presets` | 60/min | Cria (JSON: `name`, `bunVariantId`, `ingredientIds` da base para o topo, repetições permitidas; `sortOrder` opcional); 201 |
+| `GET /api/admin/builders/{id}/presets` | 600/min | Presets do montador, inclusive o inicial (`isInitial`) e os ocultos, com `isVisible` e `isAvailable` (pão e ingredientes visíveis) |
+| `POST /api/admin/builders/{id}/presets` | 60/min | Cria (JSON: `name`, `bunVariantId`, `ingredientIds` da base para o topo, repetições permitidas; `sortOrder` opcional); nasce oculto (`isVisible` proibido); 201 |
 | `GET /api/admin/presets/{id}` | 600/min | Detalhe |
-| `PATCH /api/admin/presets/{id}` | 60/min | Edição parcial; `ingredientIds` substitui a lista inteira |
+| `PATCH /api/admin/presets/{id}` | 60/min | Edição parcial; `ingredientIds` substitui a lista inteira; `isVisible` publica ou oculta; **409** ao ocultar o preset inicial |
 | `DELETE /api/admin/presets/{id}` | 60/min | 204; **409** se for o preset inicial do montador |
 | `GET /api/admin/builders/{id}/bun-variants` | 600/min | Tipos de pão, inclusive ocultos, com `presetsCount` |
 | `POST /api/admin/builders/{id}/bun-variants` | 60/min | Cria (multipart: `name`, `topImage`, `bottomImage`; `slug` e `sortOrder` opcionais); nasce oculto; 201 |

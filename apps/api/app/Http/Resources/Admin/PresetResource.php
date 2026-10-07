@@ -23,6 +23,7 @@ class PresetResource extends JsonResource
             'bunVariantId' => $this->bun_variant_id,
             'ingredientIds' => $this->items->map(fn (PresetItem $item) => $item->ingredient_id)->values(),
             'sortOrder' => $this->sort_order,
+            'isVisible' => $this->is_visible,
             'isInitial' => $this->builder->initial_preset_id === $this->id,
             'isAvailable' => $this->bunVariant->is_visible && $this->items->every(fn (PresetItem $item) => $item->ingredient->is_visible),
             'createdAt' => $this->created_at?->toIso8601String(),

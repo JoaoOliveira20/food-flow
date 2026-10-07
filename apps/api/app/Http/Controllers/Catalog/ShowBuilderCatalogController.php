@@ -15,7 +15,7 @@ class ShowBuilderCatalogController extends Controller
             'bunVariants' => fn (HasMany $bunVariants) => $bunVariants->visible(),
             'ingredients' => fn (HasMany $ingredients) => $ingredients->visible(),
             'presets' => function (HasMany $presets) use ($builder) {
-                $presets->available()->with('items');
+                $presets->visible()->available()->with('items');
 
                 if ($builder->initial_preset_id !== null) {
                     $presets->whereKeyNot($builder->initial_preset_id);

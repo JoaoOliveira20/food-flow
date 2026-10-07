@@ -12,12 +12,21 @@ type VisibilityOptions = {
   isVisible: boolean;
   isDirty: boolean;
   itemName: string;
-  presets: AdminPresetReference[];
-  hideWarning: (presetNames: string) => string;
+  presets?: AdminPresetReference[];
+  hideWarning?: (presetNames: string) => string;
+  publishedDetail?: string;
   onChange: (isVisible: boolean) => Promise<unknown>;
 };
 
-export function useVisibilityToggle({ isVisible, isDirty, itemName, presets, hideWarning, onChange }: VisibilityOptions) {
+export function useVisibilityToggle({
+  isVisible,
+  isDirty,
+  itemName,
+  presets = [],
+  hideWarning = () => "",
+  publishedDetail = "Já aparece no montador.",
+  onChange,
+}: VisibilityOptions) {
   const router = useRouter();
   const toast = useToast();
   const [isConfirmingHide, setIsConfirmingHide] = useState(false);
@@ -31,7 +40,7 @@ export function useVisibilityToggle({ isVisible, isDirty, itemName, presets, hid
       toast({
         tone: "success",
         title: nextIsVisible ? `${itemName} publicado` : `${itemName} ocultado`,
-        detail: nextIsVisible ? "Já aparece no montador." : "Não aparece mais no montador.",
+        detail: nextIsVisible ? publishedDetail : "Não aparece mais no montador.",
       });
       router.refresh();
     } catch (caught) {

@@ -11,15 +11,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['bun_variant_id', 'name', 'sort_order'])]
+#[Fillable(['bun_variant_id', 'name', 'is_visible', 'sort_order'])]
 class Preset extends Model
 {
     /** @use HasFactory<PresetFactory> */
     use HasFactory;
 
+    protected $attributes = [
+        'is_visible' => false,
+    ];
+
     protected function casts(): array
     {
         return [
+            'is_visible' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
@@ -39,6 +44,15 @@ class Preset extends Model
         return $this->hasMany(PresetItem::class)->orderBy('position');
     }
 
+    #[Scope]
+    protected function visible(QueryBuilder $query): void
+    {
+        $query->where('is_visible', true);
+    }
+
+    /**
+     * Presets whose bun and ingredients are all visible (BD-14), whatever the preset's own visibility (BD-23).
+     */
     #[Scope]
     protected function available(QueryBuilder $query): void
     {

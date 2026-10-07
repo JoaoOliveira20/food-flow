@@ -9,15 +9,20 @@ import { BurgerBuilder, type BuilderHeaderControls } from "@/components/burger-b
 import { FieldError } from "./FieldError";
 import { Icon } from "./Icon";
 import { useToast } from "./shell/Toaster";
-import { StatusPill } from "./StatusPill";
+import { presetStatus } from "./presetStatus";
+import { PresetStatusPill, StatusPill, VisibilityPill } from "./StatusPill";
 import { StudioBar } from "./StudioBar";
 import { useUnsavedChangesWarning } from "./useUnsavedChangesWarning";
+import { useVisibilityToggle } from "./useVisibilityToggle";
 import styles from "./admin.module.css";
 
 type SavedPreset = {
   id: number;
   name: string;
   recipe: CompositionRecipe;
+  isVisible: boolean;
+  isInitial: boolean;
+  isAvailable: boolean;
 };
 
 type PresetEditorProps = {
@@ -117,6 +122,17 @@ function PresetEditorBar({
 
   useEffect(() => onDirtyChange(isDirty), [isDirty, onDirtyChange]);
 
+  const visibility = useVisibilityToggle({
+    isVisible: preset?.isVisible ?? false,
+    isDirty,
+    itemName: savedName || "Preset",
+    publishedDetail: preset?.isAvailable
+      ? "Já aparece no painel de presets do montador."
+      : "Ele só aparece no montador quando o pão e todos os ingredientes estiverem publicados.",
+    onChange: (isVisible) => (preset ? updatePreset(preset.id, { isVisible }) : Promise.resolve()),
+  });
+  const canToggleVisibility = preset !== null && !preset.isInitial;
+
   async function save(event: FormEvent) {
     event.preventDefault();
     const fields = {
@@ -168,6 +184,7 @@ function PresetEditorBar({
       onNameChange={onNameChange}
       badges={
         <>
+          {preset ? <PresetStatusPill status={presetStatus(preset)} /> : <VisibilityPill isVisible={false} />}
           <StatusPill tone="plain">
             {recipe.ingredientIds.length} de {maxLayers} camadas
           </StatusPill>
@@ -184,6 +201,7 @@ function PresetEditorBar({
       isSaving={isSaving}
       createLabel="Criar preset"
       onUndo={restore}
+      extraActions={canToggleVisibility && visibility.button}
       messages={
         <>
           <FieldError id="preset-recipe-error" messages={recipeErrors(fieldErrors)} />

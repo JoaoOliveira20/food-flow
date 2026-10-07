@@ -118,6 +118,7 @@ class BurgerCatalogSeeder extends Seeder
             $model = $builder->presets()->create([
                 'name' => $preset['name'],
                 'bun_variant_id' => $bunVariants[$preset['bun']]->id,
+                'is_visible' => true,
                 'sort_order' => $order,
             ]);
 

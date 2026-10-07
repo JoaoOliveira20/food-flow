@@ -372,7 +372,8 @@ Presets: os requisitos não pedem visibilidade para presets ("Salvar → Preset 
 **disponibilidade derivada**, sem campo novo — a API pública só devolve um preset se todos os seus ingredientes
 estiverem visíveis; o admin mostra "indisponível: contém ingrediente oculto". Alternativas consideradas:
 `is_visible` também em presets (mais controle, mais um estado para gerenciar); remover os ingredientes ocultos do
-preset na resposta (muda a receita silenciosamente — descartado). Confirmação: ⏳ O3.
+preset na resposta (muda a receita silenciosamente — descartado). Confirmação: ⏳ O3. **Revisada pela BD-23** (presets ganharam
+`is_visible` próprio).
 
 Variantes de pão: sem visibilidade nesta fase (não há admin de variantes).
 
@@ -495,6 +496,19 @@ autorização e roles/permissões conforme a necessidade.
   visível** (o montador ficaria indisponível).
 - As formas de empilhamento dos pães (`TOP_BUN_SHAPE`/`BOTTOM_BUN_SHAPE`) continuam no renderer (BD-03): as imagens
   novas precisam seguir as proporções dos pães atuais, o que o preview do admin ajuda a conferir.
+
+### BD-23 — Visibilidade própria dos presets
+
+🟢 **Decidido em 07/10/2026** — o responsável pediu para poder deixar um preset só no admin enquanto trabalha nele;
+revisa a parte de presets da BD-14 (O3):
+
+- `presets.is_visible` (padrão `false`); os presets existentes foram marcados visíveis na migration.
+- Preset novo **nasce oculto** (`isVisible` proibido na criação), como ingredientes e pães; publicar e ocultar pelo
+  `PATCH`.
+- O catálogo público só devolve presets **visíveis e disponíveis**; a disponibilidade derivada da BD-14 continua
+  (`isAvailable`: pão e ingredientes visíveis). No admin os estados são: Publicado, Oculto, Indisponível (publicado
+  mas com pão ou ingrediente oculto) e Composição inicial.
+- O **preset inicial não pode ser ocultado** (409, como na exclusão): o montador abriria vazio.
 
 ---
 

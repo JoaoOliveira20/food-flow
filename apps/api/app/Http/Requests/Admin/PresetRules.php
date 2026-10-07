@@ -22,6 +22,7 @@ final class PresetRules
             'ingredientIds' => [...$presence, 'list', 'min:1', 'max:'.$builder->max_layers],
             'ingredientIds.*' => ['required', 'integer', Rule::exists('ingredients', 'id')->where('builder_id', $builder->id)],
             'sortOrder' => ['sometimes', 'required', 'integer', 'min:0', 'max:65535'],
+            'isVisible' => $ignorePresetId === null ? ['prohibited'] : ['sometimes', 'required', 'boolean'],
         ];
     }
 
@@ -36,6 +37,7 @@ final class PresetRules
             'ingredientIds.min' => 'Escolha pelo menos um ingrediente.',
             'ingredientIds.max' => "Um preset pode ter no máximo {$builder->max_layers} ingredientes.",
             'ingredientIds.*.exists' => 'Um dos ingredientes escolhidos não pertence a este montador.',
+            'isVisible.prohibited' => 'Um preset novo começa oculto; publique-o depois de conferir no montador.',
         ];
     }
 
@@ -45,7 +47,7 @@ final class PresetRules
      */
     public static function toAttributes(array $validated): array
     {
-        $columns = ['name' => 'name', 'bunVariantId' => 'bun_variant_id', 'sortOrder' => 'sort_order'];
+        $columns = ['name' => 'name', 'bunVariantId' => 'bun_variant_id', 'sortOrder' => 'sort_order', 'isVisible' => 'is_visible'];
 
         $attributes = [];
         foreach ($columns as $field => $column) {

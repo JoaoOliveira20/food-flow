@@ -50,6 +50,7 @@ export type AdminPreset = {
   bunVariantId: number;
   ingredientIds: number[];
   sortOrder: number;
+  isVisible: boolean;
   isInitial: boolean;
   isAvailable: boolean;
   createdAt: string;

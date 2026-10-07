@@ -6,7 +6,8 @@ import { CatalogBrowser, type CatalogItem } from "@/components/admin/CatalogBrow
 import { Icon } from "@/components/admin/Icon";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { presetRecipe } from "@/components/admin/presetRecipe";
-import { StatusPill } from "@/components/admin/StatusPill";
+import { presetStatus } from "@/components/admin/presetStatus";
+import { PresetStatusPill } from "@/components/admin/StatusPill";
 import styles from "@/components/admin/admin.module.css";
 
 export const metadata = { title: "Presets" };
@@ -28,14 +29,8 @@ export default async function PresetsPage() {
       href: `/admin/presets/${preset.id}`,
       title: preset.name,
       meta: `${preset.ingredientIds.length} ${preset.ingredientIds.length === 1 ? "ingrediente" : "ingredientes"} · pão ${bunNames.get(preset.bunVariantId) ?? ""}`,
-      filter: preset.isInitial ? "initial" : preset.isAvailable ? "available" : "unavailable",
-      badge: preset.isInitial ? (
-        <StatusPill tone="live">Composição inicial</StatusPill>
-      ) : preset.isAvailable ? (
-        <StatusPill tone="live">Disponível</StatusPill>
-      ) : (
-        <StatusPill tone="warning">Indisponível</StatusPill>
-      ),
+      filter: presetStatus(preset),
+      badge: <PresetStatusPill status={presetStatus(preset)} />,
       media: catalog ? <RecipePreview catalog={catalog} recipe={presetRecipe(preset)} className="" /> : null,
     }),
   );
@@ -50,13 +45,14 @@ export default async function PresetsPage() {
     <>
       <PageHeader
         title="Presets"
-        description="Hambúrgueres prontos que o público escolhe no montador. A composição inicial é o que aparece ao abrir."
+        description="Hambúrgueres prontos que o público escolhe no montador. Novos presets começam ocultos até serem publicados; a composição inicial é o que aparece ao abrir."
         actions={newButton}
       />
       <CatalogBrowser
         items={items}
         filters={[
-          { value: "available", label: "Disponíveis" },
+          { value: "published", label: "Publicados" },
+          { value: "hidden", label: "Ocultos" },
           { value: "unavailable", label: "Indisponíveis" },
           { value: "initial", label: "Inicial" },
         ]}

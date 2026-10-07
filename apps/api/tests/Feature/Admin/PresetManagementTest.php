@@ -49,6 +49,7 @@ class PresetManagementTest extends TestCase
             ->assertJsonPath('data.*.id', [$initial->id, $unavailable->id])
             ->assertJsonPath('data.*.isInitial', [true, false])
             ->assertJsonPath('data.*.isAvailable', [true, false])
+            ->assertJsonPath('data.*.isVisible', [true, true])
             ->assertJsonPath('data.1.ingredientIds', [$this->beef->id, $hidden->id]);
     }
 
@@ -67,9 +68,51 @@ class PresetManagementTest extends TestCase
             ->assertJsonPath('data.bunVariantId', $this->classic->id)
             ->assertJsonPath('data.ingredientIds', $ingredientIds)
             ->assertJsonPath('data.isInitial', false)
-            ->assertJsonPath('data.isAvailable', true);
+            ->assertJsonPath('data.isAvailable', true)
+            ->assertJsonPath('data.isVisible', false);
+
+        $this->getJson('/api/builders/burger')->assertJsonPath('data.presets', []);
+
+        $this->patchJson("/api/admin/presets/{$response->json('data.id')}", ['isVisible' => true])
+            ->assertOk()
+            ->assertJsonPath('data.isVisible', true);
 
         $this->getJson('/api/builders/burger')->assertJsonPath('data.presets.0.ingredientIds', $ingredientIds);
+    }
+
+    public function test_a_new_preset_cannot_be_created_already_published(): void
+    {
+        $this->postJson($this->storeUrl(), [
+            'name' => 'Duplo',
+            'bunVariantId' => $this->classic->id,
+            'ingredientIds' => [$this->beef->id],
+            'isVisible' => true,
+        ])->assertJsonValidationErrors(['isVisible' => 'Um preset novo começa oculto; publique-o depois de conferir no montador.']);
+    }
+
+    public function test_hiding_a_preset_removes_it_from_the_public_builder_and_publishing_brings_it_back(): void
+    {
+        $preset = Preset::factory()->for($this->builder)->for($this->classic)->withIngredients([$this->beef])->create();
+
+        $this->getJson('/api/builders/burger')->assertJsonPath('data.presets.*.id', [$preset->id]);
+
+        $this->patchJson("/api/admin/presets/{$preset->id}", ['isVisible' => false])
+            ->assertOk()
+            ->assertJsonPath('data.isVisible', false)
+            ->assertJsonPath('data.isAvailable', true)
+            ->assertJsonPath('data.ingredientIds', [$this->beef->id]);
+        $this->getJson('/api/builders/burger')->assertJsonPath('data.presets', []);
+
+        $this->patchJson("/api/admin/presets/{$preset->id}", ['isVisible' => true])->assertOk();
+        $this->getJson('/api/builders/burger')->assertJsonPath('data.presets.*.id', [$preset->id]);
+    }
+
+    public function test_a_published_preset_with_a_hidden_ingredient_stays_out_of_the_public_builder(): void
+    {
+        $hidden = Ingredient::factory()->for($this->builder)->hidden()->create();
+        Preset::factory()->for($this->builder)->for($this->classic)->withIngredients([$hidden])->create();
+
+        $this->getJson('/api/builders/burger')->assertJsonPath('data.presets', []);
     }
 
     public function test_it_validates_the_preset_with_translated_messages(): void
@@ -214,6 +257,18 @@ class PresetManagementTest extends TestCase
             ->assertExactJson(['message' => 'O preset inicial do montador não pode ser excluído; ele define a composição que aparece ao abrir o montador.']);
 
         $this->assertModelExists($initial);
+    }
+
+    public function test_it_refuses_to_hide_the_initial_preset(): void
+    {
+        $initial = Preset::factory()->for($this->builder)->for($this->classic)->withIngredients([$this->beef])->create();
+        $this->builder->initialPreset()->associate($initial)->save();
+
+        $this->patchJson("/api/admin/presets/{$initial->id}", ['isVisible' => false])
+            ->assertConflict()
+            ->assertExactJson(['message' => 'A composição inicial não pode ser ocultada; ela é o hambúrguer que aparece ao abrir o montador.']);
+
+        $this->assertTrue($initial->fresh()->is_visible);
     }
 
     public function test_the_initial_preset_can_be_edited(): void

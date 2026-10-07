@@ -364,3 +364,13 @@ script no `<head>` + `useSyncExternalStore` (sem efeito com `setState`, exigênc
 capturas foram corrigidos: marcadores e recuo padrão das galerias (`<ul>`), indicador do menu ativo deslocado por
 especificidade de CSS, título repetido nos estúdios (agora só no breadcrumb, com `h1` acessível), botões da barra
 do estúdio quebrando no celular (só ícone abaixo de 720 px) e `/favicon.ico` 404 (redirecionado para `/icon.svg`).
+
+## 2026-10-07 — Publicar/ocultar presets (T-F13, BD-23)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável notou que não havia como deixar um preset fora do montador e que o filtro "Indisponíveis" dependia só
+de ocultar ingredientes ou pães. Ingredientes e tipos de pão já tinham Publicar/Ocultar na barra do estúdio; os
+presets ganharam visibilidade própria no mesmo padrão (nasce oculto, publicar pela barra). Mantive a disponibilidade
+derivada como um estado separado ("Indisponível") em vez de juntar tudo em "Oculto", porque as duas causas pedem ações
+diferentes. Ocultar a composição inicial foi bloqueado na API (409) e o botão não aparece nela.

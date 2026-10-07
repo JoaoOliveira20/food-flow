@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Creates, updates and deletes presets with their ordered ingredients
- * (docs/BACKEND_DECISIONS.md BD-06, BD-07, BD-15).
+ * (docs/BACKEND_DECISIONS.md BD-06, BD-07, BD-15, BD-23).
  */
 class PresetService
 {
@@ -22,6 +22,7 @@ class PresetService
         return DB::transaction(function () use ($builder, $attributes, $ingredientIds) {
             $preset = $builder->presets()->create([
                 ...$attributes,
+                'is_visible' => false,
                 'sort_order' => $attributes['sort_order'] ?? $this->nextSortOrder($builder),
             ]);
             $preset->replaceItems($ingredientIds);
@@ -36,6 +37,10 @@ class PresetService
      */
     public function update(Preset $preset, array $attributes, ?array $ingredientIds): Preset
     {
+        if (($attributes['is_visible'] ?? true) === false && $this->isInitial($preset)) {
+            throw PresetIsInitialException::cannotBeHidden();
+        }
+
         DB::transaction(function () use ($preset, $attributes, $ingredientIds) {
             $preset->update($attributes);
 
@@ -50,11 +55,16 @@ class PresetService
 
     public function delete(Preset $preset): void
     {
-        if (Builder::where('initial_preset_id', $preset->id)->exists()) {
-            throw new PresetIsInitialException;
+        if ($this->isInitial($preset)) {
+            throw PresetIsInitialException::cannotBeDeleted();
         }
 
         $preset->delete();
+    }
+
+    private function isInitial(Preset $preset): bool
+    {
+        return Builder::where('initial_preset_id', $preset->id)->exists();
     }
 
     private function nextSortOrder(Builder $builder): int
