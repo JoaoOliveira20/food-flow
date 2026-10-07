@@ -16,8 +16,8 @@ import styles from "./admin.module.css";
 
 const DEFAULT_SHAPE: AdminShape = { displayWidth: 290, restingSurfaceRatio: 0.4, sinkRatio: 0.2 };
 const MAX_DISPLAY_WIDTH = 340;
-const NONE = "";
 const DRAFT_ID = "draft";
+const DEFAULT_PREVIEW_PRESET = "Clássico";
 
 type IngredientStudioProps = {
   builderId: number;
@@ -38,14 +38,16 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
   const isNew = ingredient === null;
   const savedName = ingredient?.name ?? "";
   const savedShape = ingredient?.shape ?? DEFAULT_SHAPE;
-  const neighbors = catalog.ingredients.filter((item) => item.id !== String(ingredient?.id));
+  const editedId = ingredient ? String(ingredient.id) : null;
+  const neighbors = catalog.ingredients.filter((item) => item.id !== editedId);
 
   const [name, setName] = useState(savedName);
   const [shape, setShape] = useState<AdminShape>(savedShape);
   const [localImage, setLocalImage] = useState<{ file: File; image: LocalImage } | null>(null);
-  const [bunVariantId, setBunVariantId] = useState(catalog.bunVariants[0]?.id ?? NONE);
-  const [belowId, setBelowId] = useState(neighbors[0]?.id ?? NONE);
-  const [aboveId, setAboveId] = useState(neighbors[1]?.id ?? NONE);
+  const [basePresetId, setBasePresetId] = useState(
+    (catalog.presets.find((preset) => preset.name === DEFAULT_PREVIEW_PRESET) ?? catalog.presets[0])?.id ?? "",
+  );
+  const [showsIngredient, setShowsIngredient] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -135,7 +137,15 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
         ],
       }
     : { ...catalog, ingredients: neighbors };
-  const ingredientIds = [belowId, draftImage ? DRAFT_ID : NONE, aboveId].filter((id) => id !== NONE);
+  const basePreset = catalog.presets.find((preset) => preset.id === basePresetId);
+  const baseIngredientIds = (basePreset?.ingredientIds ?? []).map((id) => (id === editedId ? DRAFT_ID : id));
+  const hasDraft = draftImage !== null && showsIngredient;
+  const ingredientIds = hasDraft
+    ? baseIngredientIds.includes(DRAFT_ID)
+      ? baseIngredientIds
+      : [...baseIngredientIds, DRAFT_ID]
+    : baseIngredientIds.filter((id) => id !== DRAFT_ID);
+  const bunVariantId = basePreset?.bunVariantId ?? catalog.bunVariants[0]?.id;
   const presetsCount = ingredient?.presets?.length ?? 0;
 
   return (
@@ -226,9 +236,11 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
             {bunVariantId && <RecipePreview catalog={previewCatalog} recipe={{ bunVariantId, ingredientIds }} className="" />}
           </div>
           <p className={styles.studioStageCaption}>
-            {draftImage
-              ? "Mesmo cálculo de empilhamento do montador. Ajuste o encaixe e veja na hora."
-              : "Escolha uma imagem para ver o ingrediente na pilha."}
+            {!draftImage
+              ? "Escolha uma imagem para ver o ingrediente no hambúrguer."
+              : hasDraft
+                ? "Mesmo cálculo de empilhamento do montador. Ajuste o encaixe e veja na hora."
+                : "Hambúrguer sem o ingrediente, para comparar."}
           </p>
         </div>
 
@@ -236,37 +248,33 @@ export function IngredientStudio({ builderId, catalog, ingredient }: IngredientS
           <section className={`${styles.card} ${styles.form}`}>
             <h2 className={styles.sectionTitle}>Preview</h2>
             <label className={styles.field}>
-              <span className={styles.label}>Camada acima</span>
-              <select className={styles.select} value={aboveId} onChange={(event) => setAboveId(event.target.value)}>
-                <option value={NONE}>Nenhuma (pão)</option>
-                {neighbors.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
+              <span className={styles.label}>Hambúrguer de base</span>
+              <select className={styles.select} value={basePresetId} onChange={(event) => setBasePresetId(event.target.value)}>
+                {catalog.presets.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.name}
                   </option>
                 ))}
               </select>
             </label>
-            <label className={styles.field}>
-              <span className={styles.label}>Camada abaixo</span>
-              <select className={styles.select} value={belowId} onChange={(event) => setBelowId(event.target.value)}>
-                <option value={NONE}>Nenhuma (pão)</option>
-                {neighbors.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>Pão</span>
-              <select className={styles.select} value={bunVariantId} onChange={(event) => setBunVariantId(event.target.value)}>
-                {catalog.bunVariants.map((variant) => (
-                  <option key={variant.id} value={variant.id}>
-                    {variant.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className={styles.field}>
+              <span className={styles.label} id="shows-ingredient-label">
+                Ingrediente no hambúrguer
+              </span>
+              <div className={styles.segmented} role="group" aria-labelledby="shows-ingredient-label">
+                <button type="button" aria-pressed={!showsIngredient} onClick={() => setShowsIngredient(false)}>
+                  Sem
+                </button>
+                <button type="button" aria-pressed={showsIngredient} onClick={() => setShowsIngredient(true)}>
+                  Com
+                </button>
+              </div>
+            </div>
+            <p className={styles.help}>
+              {baseIngredientIds.includes(DRAFT_ID)
+                ? "Este hambúrguer já leva o ingrediente; ele aparece no lugar dele, com as suas alterações."
+                : "O ingrediente entra no topo, logo abaixo do pão, como ao adicionar no montador."}
+            </p>
           </section>
           <ImageTips />
         </div>
