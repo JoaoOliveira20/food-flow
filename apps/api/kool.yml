@@ -1,0 +1,21 @@
+scripts:
+  composer: kool exec app composer
+  artisan: kool exec app php artisan
+  test: kool exec app php artisan test
+  pint: kool exec app ./vendor/bin/pint
+
+  setup:
+    - kool run before-start
+    - kool start
+    - kool run composer install
+    - kool run artisan key:generate
+    - kool exec app ln -sfn ../storage/app/public public/storage
+    - kool run artisan migrate --seed
+
+  reset:
+    - kool run composer install
+    - kool exec app rm -rf storage/app/public/ingredients storage/app/public/bun-variants
+    - kool run artisan migrate:fresh --seed
+
+  before-start:
+    - cp -n .env.example .env

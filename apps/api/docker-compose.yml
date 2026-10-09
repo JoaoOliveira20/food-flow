@@ -1,0 +1,50 @@
+name: food-flow-api
+
+services:
+  app:
+    image: kooldev/php:8.4-nginx
+    ports:
+      - "${KOOL_APP_PORT:-8000}:80"
+    environment:
+      ASUSER: "${KOOL_ASUSER:-0}"
+      UID: "${UID:-0}"
+      PHP_UPLOAD_MAX_FILESIZE: 3M
+      PHP_POST_MAX_SIZE: 4M
+      NGINX_CLIENT_MAX_BODY_SIZE: 4M
+    volumes:
+      - .:/app:delegated
+    networks:
+      - kool_local
+      - kool_global
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: mysql:8.4
+    ports:
+      - "127.0.0.1:${KOOL_DATABASE_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-root}"
+      MYSQL_DATABASE: "${DB_DATABASE:-food_flow}"
+      MYSQL_USER: "${DB_USERNAME:-food_flow}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - database:/var/lib/mysql:delegated
+      - ./docker/mysql/initdb:/docker-entrypoint-initdb.d:ro
+    networks:
+      - kool_local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  database:
+
+networks:
+  kool_local:
+  kool_global:
+    external: true
+    name: "${KOOL_GLOBAL_NETWORK:-kool_global}"

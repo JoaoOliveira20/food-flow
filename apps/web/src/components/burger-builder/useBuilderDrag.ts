@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, RefObject } from "react";
+import type { BuilderCatalog } from "@/burger/catalog";
 import { placeDraggedItem, type Composition, type CompositionAction } from "@/burger/composition";
 import { useCompositionDrag } from "@/hooks/useCompositionDrag";
 import { DRAG_CANCELLED_MESSAGE, dropConfirmationMessage } from "./dragMessages";
@@ -8,16 +9,26 @@ import { DRAG_CANCELLED_MESSAGE, dropConfirmationMessage } from "./dragMessages"
 type BuilderDragOptions = {
   stageRef: RefObject<HTMLElement | null>;
   composition: Composition;
+  catalog: BuilderCatalog;
   dispatch: Dispatch<CompositionAction>;
   stackScale: number | null;
   bunName: string;
   showMessage: (text: string) => void;
 };
 
-export function useBuilderDrag({ stageRef, composition, dispatch, stackScale, bunName, showMessage }: BuilderDragOptions) {
+export function useBuilderDrag({
+  stageRef,
+  composition,
+  catalog,
+  dispatch,
+  stackScale,
+  bunName,
+  showMessage,
+}: BuilderDragOptions) {
   return useCompositionDrag({
     stageRef,
     composition,
+    catalog,
     stackScale,
     onDragStart(source) {
       const isAlreadySelected = composition.selectedInstanceId === source.instanceId;
@@ -27,8 +38,8 @@ export function useBuilderDrag({ stageRef, composition, dispatch, stackScale, bu
     },
     onDrop(source, index, ingredientId) {
       dispatch({ type: "placeDraggedItem", source, index });
-      const resultingLayers = placeDraggedItem(composition.layers, source, index);
-      showMessage(dropConfirmationMessage(source, ingredientId, resultingLayers, bunName));
+      const resultingLayers = placeDraggedItem(composition, source, index);
+      showMessage(dropConfirmationMessage(catalog, source, ingredientId, resultingLayers, bunName));
     },
     onCancel() {
       showMessage(DRAG_CANCELLED_MESSAGE);

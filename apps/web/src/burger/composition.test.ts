@@ -1,16 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { BURGER_CATALOG_FIXTURE } from "../test/burgerCatalogFixture";
 import {
   compositionReducer,
+  createInitialComposition,
   hasChangedSinceAppliedRecipe,
-  INITIAL_COMPOSITION,
-  INITIAL_RECIPE,
   matchesRecipe,
-  MAX_LAYERS,
   placeDraggedItem,
   type Composition,
   type CompositionRecipe,
   type LayerInstance,
 } from "./composition";
+
+const INITIAL_RECIPE = BURGER_CATALOG_FIXTURE.initialRecipe;
+const MAX_LAYERS = BURGER_CATALOG_FIXTURE.maxLayers;
+const INITIAL_COMPOSITION = createInitialComposition(INITIAL_RECIPE, MAX_LAYERS);
 
 function compositionWith(ingredientIds: string[], overrides: Partial<Composition> = {}): Composition {
   return {
@@ -109,31 +112,32 @@ describe("moveLayer", () => {
 });
 
 describe("placeDraggedItem", () => {
-  const layers = compositionWith(["beef", "cheddar", "tomato", "lettuce"]).layers;
+  const composition = compositionWith(["beef", "cheddar", "tomato", "lettuce"]);
+  const layers = composition.layers;
 
   it("moves an existing layer to the requested index", () => {
-    const next = placeDraggedItem(layers, { kind: "existingLayer", instanceId: "layer-0" }, 3);
+    const next = placeDraggedItem(composition, { kind: "existingLayer", instanceId: "layer-0" }, 3);
     expect(instanceIdsOf(next)).toEqual(["layer-1", "layer-2", "layer-3", "layer-0"]);
   });
 
   it("inserts a new ingredient at the requested index", () => {
-    const next = placeDraggedItem(layers, { kind: "newIngredient", instanceId: "new", ingredientId: "bacon" }, 1);
+    const next = placeDraggedItem(composition, { kind: "newIngredient", instanceId: "new", ingredientId: "bacon" }, 1);
     expect(ingredientIdsOf(next)).toEqual(["beef", "bacon", "cheddar", "tomato", "lettuce"]);
   });
 
   it("clamps the index to the stack bounds", () => {
-    const next = placeDraggedItem(layers, { kind: "existingLayer", instanceId: "layer-3" }, 99);
+    const next = placeDraggedItem(composition, { kind: "existingLayer", instanceId: "layer-3" }, 99);
     expect(instanceIdsOf(next)).toEqual(instanceIdsOf(layers));
   });
 
   it("returns the same layers when a new ingredient does not fit", () => {
-    const fullLayers = compositionWith(Array.from({ length: MAX_LAYERS }, () => "beef")).layers;
-    const next = placeDraggedItem(fullLayers, { kind: "newIngredient", instanceId: "new", ingredientId: "bacon" }, 0);
-    expect(next).toBe(fullLayers);
+    const full = compositionWith(Array.from({ length: MAX_LAYERS }, () => "beef"));
+    const next = placeDraggedItem(full, { kind: "newIngredient", instanceId: "new", ingredientId: "bacon" }, 0);
+    expect(next).toBe(full.layers);
   });
 
   it("returns the same layers when the dragged layer no longer exists", () => {
-    const next = placeDraggedItem(layers, { kind: "existingLayer", instanceId: "missing" }, 0);
+    const next = placeDraggedItem(composition, { kind: "existingLayer", instanceId: "missing" }, 0);
     expect(next).toBe(layers);
   });
 

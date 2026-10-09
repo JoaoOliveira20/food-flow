@@ -4,6 +4,9 @@ Aplicação principal do Food Flow: montador visual de hambúrguer em camadas (N
 React 19, TypeScript). As animações usam **Motion for React** (`motion`, importado de `motion/react`) —
 decisão registrada em `docs/LIBRARY_DECISION.md`.
 
+O catálogo (ingredientes, pães, presets) vem da API Laravel (`apps/api`), buscada no servidor a cada requisição.
+Antes de rodar: `cp .env.example .env.local` (define `API_URL`) e suba a API (`pnpm dev:api` na raiz).
+
 ```bash
 pnpm dev        # na raiz do monorepo → http://localhost:3000
 pnpm build
@@ -13,11 +16,15 @@ pnpm --filter @food-flow/web typecheck
 pnpm --filter @food-flow/web test   # Vitest (composição, empilhamento, presets e tamanhos dos PNGs)
 ```
 
+> Fase seguinte em planejamento: catálogo, presets e imagens passarão a vir de uma API Laravel
+> (`docs/ARCHITECTURE.md`, `docs/TASKS.md`). Este documento descreve o código atual.
+
 ---
 
 ## Arquitetura
 
-O estado da composição é a única fonte de verdade. O layout é derivado dele, e as animações apenas
+O estado da composição é a única fonte de verdade. O catálogo (ingredientes, pães, presets, composição inicial e limite
+de camadas) chega como dado (`BuilderCatalog`) pela prop `catalog` do `BurgerBuilder` e é repassado às funções puras. O layout é derivado dele, e as animações apenas
 levam cada camada até a posição derivada. Nada de posição visual é guardado à parte.
 
 ```text
@@ -28,9 +35,10 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 | Pasta / arquivo | Responsabilidade | Depende do Motion? |
 | --- | --- | --- |
-| `src/burger/ingredientCatalog.ts` | catálogo de ingredientes e variantes de pão (dados) | não |
-| `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`); receitas (`INITIAL_RECIPE`, `matchesRecipe`) | não |
-| `src/burger/presetCatalog.ts` | presets (dados: nome, variante de pão, ingredientes) | não |
+| `src/burger/catalog.ts` | tipos do catálogo (`BuilderCatalog`, ingredientes, variantes de pão, presets) e buscas (`findIngredient`, `findBunVariant`) | não |
+| `src/burger/composition.ts` | estado e ações (`compositionReducer`, `placeDraggedItem`); receitas (`createInitialComposition`, `matchesRecipe`) | não |
+| `src/api/builderCatalog.ts` | busca o catálogo na API (`fetchBuilderCatalog`) e converte a resposta (`toBuilderCatalog`) | não |
+| `src/test/burgerCatalogFixture.ts` | catálogo de exemplo, só para os testes | não |
 | `src/burger/stackLayout.ts` | posições finais da pilha (`computeStackLayout`, `scaleStackToStage`) | não |
 | `src/burger/dragGeometry.ts` | índice de inserção e posição da miniatura durante o arraste | não |
 | `src/hooks/useCompositionDrag.ts` | arrastar e soltar com Pointer Events | não |
@@ -68,7 +76,7 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 ### Receitas, reset e presets
 
 - Uma receita (`CompositionRecipe`) é `{ bunVariantId, ingredientIds }`. A composição inicial
-  (`INITIAL_RECIPE`) e os presets (`PRESETS`) são receitas; reset e preset usam a mesma ação
+  (`catalog.initialRecipe`) e os presets (`catalog.presets`) são receitas; reset e preset usam a mesma ação
   (`applyRecipe`), que cria novas instâncias e guarda a receita em `appliedRecipe`.
 - `hasChangedSinceAppliedRecipe` compara ingredientes, ordem e pão com a última receita aplicada
   (seleção não conta). Se houve mudança, escolher um preset abre a confirmação no próprio painel
@@ -114,15 +122,44 @@ estado (composition.ts) ─▶ layout (stackLayout.ts) ─▶ BurgerStage/StackL
 
 ---
 
+## Admin (`/admin`)
+
+Gestão de ingredientes, tipos de pão e presets, sem login nesta versão (`docs/BACKEND_DECISIONS.md` DT-06, BD-20).
+
+| Rota | Tela |
+| --- | --- |
+| `/admin` | visão geral: indicadores, itens que precisam de atenção (ocultos e presets indisponíveis), editados recentemente e atalhos de criação |
+| `/admin/ingredients`, `/admin/bun-variants`, `/admin/presets` | galerias com busca, filtros (publicados/ocultos; disponíveis/indisponíveis/inicial) e contagem |
+| `/admin/ingredients/new`, `/admin/ingredients/[id]` | imagem com preview local e avisos, nome, medidas de encaixe, preview interativo num hambúrguer pronto (arrastar e reordenar camadas com o palco do montador, `BurgerWorkbench`), dicas de imagem; publicar/ocultar; excluir |
+| `/admin/bun-variants/new`, `/admin/bun-variants/[id]` | nome, imagens do topo e da base com avisos de proporção, preview do pão novo ao lado de um existente com o recheio de um preset; publicar/ocultar; excluir |
+| `/admin/presets/new`, `/admin/presets/[id]` | o próprio montador (`BurgerBuilder` com `isEmbedded` e `renderHeader`) com a barra do preset: nome, salvar, desfazer, aviso de ocultos; painel "Começar a partir de" com os outros presets; excluir |
+
+Fluxo de dados (BD-12):
+
+- **Leituras** no servidor do Next (`src/api/admin/queries.ts`, com `API_URL` e `connection()`): sempre atualizadas,
+  com `loading.tsx`, `error.tsx` e `not-found.tsx` próprios em `src/app/admin/`.
+- **Escritas** do navegador direto para a API (`src/api/admin/mutations.ts`, com `NEXT_PUBLIC_API_URL`), seguidas de
+  `router.refresh()` ou navegação. `ApiError` traz erros por campo (422) e mensagens próprias para 409, 413 e 429.
+- Os previews usam o mesmo `computeStackLayout` do builder (`RecipePreview`) com um catálogo que inclui os
+  ingredientes ocultos (`getAdminCatalog`).
+- Shell em `src/components/admin/shell/`: menu lateral recolhível (`sidebar.ts`: automático entre 1024 e 1279 px, preferência
+  salva e aplicada antes da pintura), navegação inferior e gaveta abaixo de 1024 px, barra de salvar fixa no celular, busca `Ctrl K`/`⌘K` (`CommandPalette`),
+  tema claro/escuro/sistema guardado no navegador (`theme.ts`, aplicado antes da pintura para não piscar) e toasts
+  (`Toaster`, `useToast`).
+- Telas de criação/edição seguem o padrão **estúdio**: `PageHeader`, `StudioBar` (nome, status, Voltar, Desfazer,
+  Publicar/Ocultar, Salvar), controles à esquerda, hambúrguer ao centro, opções e dicas à direita e `DeleteCard` como
+  zona de perigo. O editor de preset usa o próprio `BurgerBuilder` no lugar das três colunas.
+- Componentes em `src/components/admin/`; estilos em `admin.module.css`, com tokens próprios (claro e escuro) que
+  sobrescrevem os do builder dentro do admin.
+
 ## Como fazer alterações comuns
 
 | Quero… | Onde |
 | --- | --- |
-| adicionar um ingrediente | colocar o PNG em `public/assets/ingredients/` e uma entrada em `INGREDIENTS` (`ingredientCatalog.ts`) com `imageSize` e `shape`; nenhuma outra mudança |
-| trocar o PNG de um ingrediente | atualizar `imageSize` com o tamanho natural do novo arquivo (o teste `ingredientCatalog.test.ts` falha se divergir) e revisar `shape` |
+| adicionar ou trocar um ingrediente | pelo admin (`/admin/ingredients`); os dados iniciais ficam em `apps/api/database/seeders/BurgerCatalogSeeder.php` |
 | ajustar como um ingrediente se encaixa | `shape` do ingrediente (`restingSurfaceRatio`, `sinkRatio`, `displayWidth`) |
-| adicionar uma variante de pão | PNGs de topo e base + entrada em `BUN_VARIANTS` |
-| adicionar ou mudar um preset | entrada em `PRESETS` (`presetCatalog.ts`); o teste `presetCatalog.test.ts` confere ids e limite |
+| adicionar uma variante de pão | pelo admin (`/admin/bun-variants/new`) |
+| adicionar ou mudar um preset | pelo admin (`/admin/presets`) |
 | mudar a entrada, a saída ou a mola | `layerMotion.ts` |
 | criar um novo comportamento de composição | nova ação em `compositionReducer` (`composition.ts`) e o gatilho na interface; o Motion anima o resultado sem mudanças |
 | mudar regras do arraste | `useCompositionDrag.ts` (gestos) e `dragGeometry.ts` (geometria) |

@@ -14,6 +14,7 @@ export type Composition = {
   selectedInstanceId: string | null;
   isReplacingSelection: boolean;
   appliedRecipe: CompositionRecipe;
+  maxLayers: number;
 };
 
 export type DragSource =
@@ -33,12 +34,6 @@ export type CompositionAction =
   | { type: "selectBunVariant"; bunVariantId: string }
   | { type: "applyRecipe"; recipe: CompositionRecipe; instanceIds: string[] };
 
-export const MAX_LAYERS = 14;
-export const INITIAL_RECIPE: CompositionRecipe = {
-  bunVariantId: "classic",
-  ingredientIds: ["beef", "cheddar", "onion", "tomato", "lettuce"],
-};
-
 let instanceCounter = 0;
 
 export function createInstanceId(): string {
@@ -50,20 +45,25 @@ export function createRecipeInstanceIds(recipe: CompositionRecipe): string[] {
   return recipe.ingredientIds.map(() => createInstanceId());
 }
 
-export function createCompositionFromRecipe(recipe: CompositionRecipe, instanceIds: string[]): Composition {
+export function createCompositionFromRecipe(
+  recipe: CompositionRecipe,
+  instanceIds: string[],
+  maxLayers: number,
+): Composition {
   return {
     layers: recipe.ingredientIds.map((ingredientId, index) => ({ instanceId: instanceIds[index], ingredientId })),
     bunVariantId: recipe.bunVariantId,
     selectedInstanceId: null,
     isReplacingSelection: false,
     appliedRecipe: recipe,
+    maxLayers,
   };
 }
 
-export const INITIAL_COMPOSITION = createCompositionFromRecipe(
-  INITIAL_RECIPE,
-  INITIAL_RECIPE.ingredientIds.map((_, index) => `initial-layer-${index}`),
-);
+export function createInitialComposition(recipe: CompositionRecipe, maxLayers: number): Composition {
+  const instanceIds = recipe.ingredientIds.map((_, index) => `initial-layer-${index}`);
+  return createCompositionFromRecipe(recipe, instanceIds, maxLayers);
+}
 
 export function matchesRecipe(composition: Composition, recipe: CompositionRecipe): boolean {
   return (
@@ -77,36 +77,36 @@ export function hasChangedSinceAppliedRecipe(composition: Composition): boolean 
   return !matchesRecipe(composition, composition.appliedRecipe);
 }
 
-export function hasReachedLayerLimit(layers: LayerInstance[]): boolean {
-  return layers.length >= MAX_LAYERS;
+export function hasReachedLayerLimit(composition: Composition): boolean {
+  return composition.layers.length >= composition.maxLayers;
 }
 
 function layersWithoutDraggedItem(layers: LayerInstance[], source: DragSource): LayerInstance[] {
   return source.kind === "existingLayer" ? layers.filter((layer) => layer.instanceId !== source.instanceId) : layers;
 }
 
-function findDraggedLayer(layers: LayerInstance[], source: DragSource): LayerInstance | undefined {
-  if (source.kind === "existingLayer") return layers.find((layer) => layer.instanceId === source.instanceId);
-  if (hasReachedLayerLimit(layers)) return undefined;
+function findDraggedLayer(composition: Composition, source: DragSource): LayerInstance | undefined {
+  if (source.kind === "existingLayer") return composition.layers.find((layer) => layer.instanceId === source.instanceId);
+  if (hasReachedLayerLimit(composition)) return undefined;
   return { instanceId: source.instanceId, ingredientId: source.ingredientId };
 }
 
-export function placeDraggedItem(layers: LayerInstance[], source: DragSource, index: number): LayerInstance[] {
-  const draggedLayer = findDraggedLayer(layers, source);
-  if (!draggedLayer) return layers;
-  const remainingLayers = layersWithoutDraggedItem(layers, source);
+export function placeDraggedItem(composition: Composition, source: DragSource, index: number): LayerInstance[] {
+  const draggedLayer = findDraggedLayer(composition, source);
+  if (!draggedLayer) return composition.layers;
+  const remainingLayers = layersWithoutDraggedItem(composition.layers, source);
   const insertionIndex = Math.max(0, Math.min(index, remainingLayers.length));
   return [...remainingLayers.slice(0, insertionIndex), draggedLayer, ...remainingLayers.slice(insertionIndex)];
 }
 
 function addIngredient(state: Composition, ingredientId: string, instanceId: string): Composition {
-  if (hasReachedLayerLimit(state.layers)) return state;
+  if (hasReachedLayerLimit(state)) return state;
   return { ...state, layers: [...state.layers, { instanceId, ingredientId }] };
 }
 
 function duplicateLayer(state: Composition, instanceId: string, copyInstanceId: string): Composition {
   const index = state.layers.findIndex((layer) => layer.instanceId === instanceId);
-  if (index === -1 || hasReachedLayerLimit(state.layers)) return state;
+  if (index === -1 || hasReachedLayerLimit(state)) return state;
   const copy = { instanceId: copyInstanceId, ingredientId: state.layers[index].ingredientId };
   const layers = [...state.layers.slice(0, index + 1), copy, ...state.layers.slice(index + 1)];
   return { ...state, layers, selectedInstanceId: copyInstanceId };
@@ -139,7 +139,7 @@ function moveLayer(state: Composition, instanceId: string, direction: "up" | "do
 }
 
 function placeDraggedItemInComposition(state: Composition, source: DragSource, index: number): Composition {
-  const layers = placeDraggedItem(state.layers, source, index);
+  const layers = placeDraggedItem(state, source, index);
   if (layers === state.layers) return state;
   return { ...state, layers, selectedInstanceId: source.instanceId, isReplacingSelection: false };
 }
@@ -172,6 +172,6 @@ export function compositionReducer(state: Composition, action: CompositionAction
     case "selectBunVariant":
       return { ...state, bunVariantId: action.bunVariantId };
     case "applyRecipe":
-      return createCompositionFromRecipe(action.recipe, action.instanceIds);
+      return createCompositionFromRecipe(action.recipe, action.instanceIds, state.maxLayers);
   }
 }

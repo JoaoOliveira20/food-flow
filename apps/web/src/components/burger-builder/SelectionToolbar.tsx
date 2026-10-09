@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Ingredient } from "@/burger/ingredientCatalog";
+import type { Ingredient } from "@/burger/catalog";
 import styles from "./burgerBuilder.module.css";
 
 type SelectionToolbarProps = {
@@ -7,6 +7,7 @@ type SelectionToolbarProps = {
   canMoveUp: boolean;
   canMoveDown: boolean;
   canDuplicate: boolean;
+  canReplace?: boolean;
   isReplacing: boolean;
   onMove: (direction: "up" | "down") => void;
   onDuplicate: () => void;
@@ -20,6 +21,7 @@ export function SelectionToolbar({
   canMoveUp,
   canMoveDown,
   canDuplicate,
+  canReplace = true,
   isReplacing,
   onMove,
   onDuplicate,
@@ -51,13 +53,15 @@ export function SelectionToolbar({
         <button onClick={onDuplicate} disabled={!canDuplicate}>
           Duplicar
         </button>
-        <button
-          onClick={onToggleReplacing}
-          aria-pressed={isReplacing}
-          className={isReplacing ? styles.actionActive : ""}
-        >
-          {isReplacing ? "Cancelar" : "Substituir"}
-        </button>
+        {canReplace && (
+          <button
+            onClick={onToggleReplacing}
+            aria-pressed={isReplacing}
+            className={isReplacing ? styles.actionActive : ""}
+          >
+            {isReplacing ? "Cancelar" : "Substituir"}
+          </button>
+        )}
         <button onClick={onRemove} className={styles.actionDanger}>
           Remover
         </button>

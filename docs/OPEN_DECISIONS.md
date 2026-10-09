@@ -4,7 +4,7 @@ Este documento registra decisões que ainda não foram tomadas ou que possuem de
 
 **Regra:** uma questão só deve sair deste documento quando houver uma decisão consciente baseada em pesquisa, experimento ou implementação.
 
-Itens decididos permanecem aqui com a decisão no topo (🟢) e o texto anterior como histórico. ⏸ indica item adiado.
+Itens decididos permanecem aqui com a decisão no topo (🟢) e o texto anterior como histórico. ⏸ indica item adiado. 🔷 indica proposta registrada que aguarda confirmação do responsável.
 
 ---
 
@@ -256,6 +256,8 @@ Ainda precisamos definir:
 
 Estado da implementação (28/09/2026): em `apps/web`, a troca altera os pães superior e inferior, com uma leve acomodação animada. O pão do meio continua uma camada independente e **não** muda com a variante, porque só existe um asset (`middle-bun.png`); isso ainda não atende a `DOMAIN_DECISIONS.md` §6. Proposta: produzir um PNG de pão do meio por variante e associá-lo à variante no catálogo, sem mudar a lógica de composição.
 
+Nota (06/10/2026): na fase Backend/Admin, as quatro variantes atuais viram dados iniciais (seed) do backend; a lista continua não confirmada (`BACKEND_DECISIONS.md` BD-03, ⏳ O1).
+
 ---
 
 ## 14. Presets
@@ -285,6 +287,8 @@ Ainda precisamos definir:
 
 **Decisão (28/09/2026):** adiado até a conclusão do montador de hambúrguer, incluindo os presets.
 
+🟢 **06/10/2026 — conflito resolvido pelo responsável (parte de dados reativada):** os requisitos da fase Backend/Admin pedem que ingredientes e presets pertençam a um montador, pensando em pizza. Proposta: reativar só a parte de **dados** (montador como entidade) e manter adiada a reutilização do **renderer**. Ver `BACKEND_DECISIONS.md` C1 e BD-02. O item continua ⏸ para o renderer.
+
 _Histórico:_
 
 Precisamos descobrir o que pode ser compartilhado entre:
@@ -303,6 +307,8 @@ Ainda não foi decidido se haverá uma única estratégia de composição ou est
 ⏸ **Adiado**
 
 **Decisão (28/09/2026):** adiado até a conclusão do montador de hambúrguer, incluindo os presets.
+
+🟢 **06/10/2026:** os requisitos citam pizza como exemplo de montador futuro. Confirmado que pizza **não** foi escolhida como segundo dataset (`BACKEND_DECISIONS.md` C1).
 
 _Histórico:_
 
@@ -356,6 +362,29 @@ Precisamos testar o sistema com:
 * ingredientes muito grandes;
 * ingredientes muito pequenos;
 * várias duplicatas.
+
+---
+
+## 20. Backend, admin e conteúdo dinâmico
+
+🟢 **Revisado pelo responsável em 06/10/2026** — recomendações aceitas; banco MySQL. Pendentes: ambiente (BD-21) e O5. Os símbolos 🔷 da tabela abaixo passaram a 🟢 com a revisão.
+
+As questões técnicas desta fase estão em `BACKEND_DECISIONS.md`, com alternativas e trade-offs; o planejamento das tarefas, em `TASKS.md`. Resumo:
+
+| Questão | Situação | Onde |
+| --- | --- | --- |
+| Fronteira Next.js/Laravel | 🟢 decidida (requisitos); detalhes 🔷 propostos | DT-01–DT-03, BD-01, BD-12 |
+| Montador/contexto | 🔷 tabela `builders` | BD-02 (⚠️ C1) |
+| Variantes de pão | 🔷 tabela própria, só leitura | BD-03 (⚠️ C3, ⏳ O1) |
+| Modelagem dos ingredientes e configurações visuais | 🔷 colunas tipadas; dimensões calculadas no upload | BD-04, BD-05 |
+| Presets ↔ ingredientes | 🔷 tabela de itens ordenados com repetição | BD-06 (⚠️ C2) |
+| Composição inicial | 🔷 preset inicial do montador | BD-07 (⚠️ C4, ⏳ O2) |
+| Upload e preview | 🔷 multipart ao salvar; nasce oculto | BD-08 (⚠️ C5) |
+| Storage | 🔷 disco configurável, caminho relativo, nome por hash | BD-09, BD-16 |
+| Formatos e limites de imagem | 🔷 PNG/WebP; 2 MB; 280–3000 px | BD-10 |
+| Visibilidade/publicação | 🔷 `is_visible`; presets com disponibilidade derivada | BD-14 (⏳ O3) |
+| Banco e ambiente | 🟢 MySQL, `apps/api`; ambiente WSL2 + Kool 🔷 proposto | BD-19, BD-21 |
+| Autenticação e controle de acesso | ⏸ futuro; pontos de encaixe preparados | BD-20, `TASKS.md` Fase H |
 
 ---
 

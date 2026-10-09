@@ -176,3 +176,226 @@ ingredientes, sem colocá-los à frente de tudo.
 ### Pendente
 
 - Miniaturas dos molhos no painel de ingredientes ficam finas; decisão de interface não tomada.
+
+---
+
+## 2026-10-06 — Planejamento da fase Backend, Admin e Conteúdo Dinâmico
+
+**Ferramenta:** Claude Code (Claude Opus 5.5).
+
+### Contexto e solicitação
+
+O responsável entregou os requisitos da próxima fase (Laravel como API e fonte de verdade, ingredientes e presets
+gerenciáveis, admin sem autenticação, Storage, visibilidade) e pediu **só planejamento**: incorporar os requisitos
+à documentação, analisar alternativas antes de decidir, registrar conflitos sem resolvê-los silenciosamente e
+organizar as tarefas. Nenhum código foi alterado.
+
+### O que foi feito
+
+- Requisitos copiados para `docs/requirements/food-flow-backend-admin-evolution.md`.
+- Comparação entre documentação e código: sem divergências.
+- Medição dos 21 PNGs (dimensões, alfa, tamanho) para basear os limites de upload em dados (`ASSET_ANALYSIS.md`).
+- Verificado na documentação do Next 16 instalada: bloqueio de otimização de imagens de IP local
+  (`dangerouslyAllowLocalIP`) e limite padrão de 1 MB em Server Actions — ambos influenciaram BD-11/BD-12.
+- Novos documentos: `BACKEND_DECISIONS.md` (decisões tomadas, conflitos, 20 propostas com alternativas, abertas),
+  `ARCHITECTURE.md` (estado atual, alvo, divisão de regras, contrato inicial da API, arquivos afetados) e
+  `TASKS.md` (fases A–H com dependências).
+
+### Sugestões registradas como propostas (não adotadas até a revisão)
+
+Montador como tabela; variantes de pão em tabela própria só leitura; configurações visuais em colunas; dimensões
+calculadas no upload; itens de preset em tabela própria (sem `belongsToMany`, que descartaria repetições);
+composição inicial como preset do montador; `is_visible` booleano e presets com disponibilidade derivada; Storage
+em disco configurável com caminho relativo e nome por hash; PNG/WebP, 2 MB, 280–3000 px; refatorar o catálogo
+para "dado recebido" antes do backend existir.
+
+### Conflitos registrados (aguardando o responsável)
+
+C1 reutilização/segundo dataset adiados × montador pensando em pizza; C2 lista de presets decidida × presets
+editáveis; C3 pão como variante × pão listado como ingrediente no exemplo; C4 composição inicial fixa no frontend;
+C5 ordem do fluxo de publicação.
+
+---
+
+## 2026-10-06 — Ambiente no WSL2 e T-B1/T-B2 (Laravel + MySQL via Kool)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), já rodando no WSL.
+
+### Contexto
+
+O responsável aceitou as recomendações do planejamento (T-A9), escolheu MySQL e pediu o backend no WSL2 com
+Kool/Docker. Uma cópia do projeto feita pelo Explorador do Windows travou no `node_modules` e recriava a pasta de
+destino; o Explorador foi reiniciado (com autorização), a pasta parcial removida e o repositório **clonado** a partir
+da cópia do Windows, com a documentação não commitada trazida por cima. As conversas do Claude Code e a memória
+foram copiadas para o projeto do WSL.
+
+### Sugestões adotadas
+
+- Fase 0: Node 24 (nvm), Corepack, `core.autocrlf input`, `.gitattributes` (LF; renormalização sem mudança em
+  código), validação completa no Linux, README com o fluxo de desenvolvimento.
+- **Experimentos encerrados** por decisão do responsável: só foram executados para validar o ambiente.
+- Laravel 13 criado com o Composer **dentro** de `kooldev/php:8.4`; nenhum PHP no host.
+- `docker-compose.yml`/`kool.yml` escritos à mão no formato do preset: o assistente do Kool 3.6 só oferece PHP
+  até 8.3 e é interativo. Imagem `kooldev/php:8.4-nginx` e `mysql:8.4` oficial; projeto Compose com nome próprio
+  (`food-flow-api`) para não colidir com outros projetos; MySQL exposto só em `127.0.0.1`.
+- Banco de testes MySQL separado (`food_flow_testing`), criado por script de inicialização, em vez de SQLite em
+  memória (decisão de usar MySQL).
+- `apps/api` excluído do pnpm workspace; scripts `dev:api`, `stop:api`, `test:api` na raiz.
+- O esqueleto do Laravel 13 traz um `AGENTS.md`/`CLAUDE.md` que manda instalar PHP no host e o Laravel Boost;
+  **substituído** pelas regras do projeto (PHP só via Kool; nenhum pacote sem decisão registrada).
+
+### Pendente
+
+- Push do branch `feature/backend-admin` (aguarda autorização); O5; aposentar a cópia do Windows (T-07).
+
+---
+
+## 2026-10-06 — Backend (T-B3 a T-B9), integração do builder (Fase E) e API de gestão (Fases C e D)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+### Contexto e solicitação
+
+O responsável pediu para seguir as tarefas com commits por etapa, sem push, e respondeu a O5: o projeto roda só
+localmente, mas deve ser feito com padrão de produção, como se fosse ficar no ar.
+
+### Sugestões adotadas (decisões de implementação)
+
+- **API:** camelCase nas respostas e requisições; mensagens em pt-BR; erros sempre em JSON; limites de 120/60
+  requisições por minuto; CORS só para o frontend; Eloquent em modo estrito fora de produção (pegou carregamentos
+  N+1 durante o desenvolvimento); API pura, sem o Vite/Tailwind do esqueleto.
+- **Storage:** `config/media.php` centraliza disco, diretórios e limites; `ImageStorage` gera nomes por hash e
+  extensão pelo conteúdo; link `public/storage` relativo (sem o pacote extra que o `--relative` exigiria); limites do
+  PHP (3 MB/4 MB) e do nginx (4 MB) alinhados à regra de 2 MB.
+- **Uploads:** validação pelo conteúdo + extensão coerente; testes com uploads reais, porque
+  `UploadedFile::fake()` informa o tipo pelo nome e esconderia falhas; grava o arquivo antes do banco e o remove se a
+  transação falhar; o antigo só é apagado após o commit.
+- **Seed:** conteúdo do frontend levado ao banco, idempotente, com as imagens gravadas pelo Storage.
+- **Frontend:** catálogo passado como dado (`BuilderCatalog`), refatorado antes da integração e validado por HTML
+  idêntico; busca no servidor com `connection()`, porque sem isso o Next 16 buscaria o catálogo uma única vez no
+  build; estados de carregamento, erro, não encontrado, indisponível e vazio.
+- **Correção do BD-10:** o builder usa `<Image unoptimized>`, então o Next não otimiza a entrega; também não é
+  preciso `remotePatterns`/`dangerouslyAllowLocalIP`.
+- **`.env.example`** estava ignorado pelos `.gitignore` (`.env*`); passou a ser versionado.
+
+### Pendente
+
+- Fase F (admin), Fase G (qualidade), T-07 (cópia do Windows), push (aguarda autorização).
+- Verificação no navegador da interação do builder (arraste, animações) e da tela de erro: não havia navegador
+  automatizado no WSL nesta sessão.
+
+---
+
+## 2026-10-06 — Admin (Fase F) e qualidade (Fase G)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+### Sugestões adotadas
+
+- **Admin no Next:** leituras no servidor (como o builder) e escritas do navegador direto para a API, seguidas de
+  `router.refresh()`; erros 422 por campo; 409/413/429 com mensagens próprias (o 413 do nginx não é JSON).
+- **Formulário de ingrediente:** análise local da imagem antes do envio (dimensões, tamanho, bordas sem
+  transparência, proporção, nitidez), medidas com explicação em linguagem simples e preview no mesmo cálculo de
+  empilhamento do builder, entre camadas e pão escolhidos.
+- **Editor de preset** desenhado como a pilha, com "adicionar no topo" como no builder.
+- **Confirmações dentro da tela** (sem `window.confirm`), como no builder.
+- **Verificação de ponta a ponta** com Chrome headless controlado por `puppeteer-core` instalado numa pasta temporária
+  do Windows (fora do repositório, sem dependência nova), contra o build de produção e a API real; o roteiro cria e
+  remove seus próprios itens "E2E".
+
+### Problemas encontrados pela verificação e corrigidos
+
+- **Limites de requisição por IP:** as leituras vêm do servidor do Next, então todos os visitantes compartilhavam o
+  limite de 60/120 por minuto; três execuções seguidas do roteiro geraram 429 e derrubaram uma página. Leituras
+  passaram a 600/min (proteção contra sobrecarga) e só as escritas do admin ficaram em 60/min (BD-18).
+- Miniaturas do admin desenhadas fora da caixa (pareciam vazias); texto de apoio colado ao título; barra do topo
+  quebrando no celular; favicon ausente (pendência antiga) — resolvido com `app/icon.svg`.
+
+### Pendente
+
+- Push do branch `feature/backend-admin` (aguarda autorização); T-07 (cópia do Windows); Fase H (futuro).
+
+---
+
+## 2026-10-06 — Editor de preset no formato do montador
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável testou o admin e achou a tela de preset "um formulário chato": os ingredientes ficavam escondidos numa
+lista suspensa. A tela passou a ser o próprio `BurgerBuilder`, reaproveitado com quatro opções novas
+(`initialRecipe`, `renderHeader`, `isEmbedded`, `presetsTitle`) que não alteram o montador público. O painel de
+presets virou "Começar a partir de". A revisão por captura achou e corrigiu uma coluna da grade de presets que
+estourava com nomes longos (`minmax(0, 1fr)`).
+
+---
+
+## 2026-10-07 — Admin de tipos de pão (T-H7)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável perguntou se toda a lista estava feita (sim, as fases 0 e A–G; a Fase H era de evoluções futuras, só
+registradas) e pediu a T-H7. Implementada no padrão dos ingredientes (BD-22): pão nasce oculto, preset com pão oculto
+fica indisponível, o último pão visível não pode ser ocultado nem excluído. O catálogo do admin passou a usar a lista de
+pães do admin (com ocultos marcados) em vez do catálogo público, para o editor de preset e os previews enxergarem pães
+ocultos. Os cartões de visibilidade e exclusão viraram componentes genéricos. O roteiro de ponta a ponta ganhou o ciclo
+do pão (34/34); um erro no próprio roteiro (`$$` virando `$` no texto de substituição) foi encontrado e corrigido.
+
+---
+
+## 2026-10-07 — Padronização das telas de criação/edição do admin
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável apontou que cada tela de criação/edição estava de um jeito e que a de ingrediente estava ruim. Entre
+"estúdio no estilo do montador" e "formulário simples padronizado", escolheu o estúdio. As três telas passaram a
+compartilhar `AdminPageHeader`, `StudioBar`, `useVisibilityToggle` e `DeleteCard`; o layout de três colunas segue o
+do montador. Na revisão, a ordem das media queries foi corrigida (a de 1100 px vinha depois da de 720 px e
+anularia o layout do celular).
+
+## 2026-10-07 — Redesenho do admin (T-F12)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável não gostou do admin anterior e pediu o menu e todas as telas no nível de produtos como Linear e
+Vercel. Decisões: menu lateral fixo com gaveta no celular em vez de abas; listas separadas por tipo (galerias) e uma
+visão geral voltada a "o que precisa de atenção"; busca `Ctrl K` alimentada pelo layout no servidor; tema com
+script no `<head>` + `useSyncExternalStore` (sem efeito com `setState`, exigência do lint do React Compiler) e
+`suppressHydrationWarning` só no `<html>`; fonte Geist via `next/font`, sem dependências novas. Na revisão por
+capturas foram corrigidos: marcadores e recuo padrão das galerias (`<ul>`), indicador do menu ativo deslocado por
+especificidade de CSS, título repetido nos estúdios (agora só no breadcrumb, com `h1` acessível), botões da barra
+do estúdio quebrando no celular (só ícone abaixo de 720 px) e `/favicon.ico` 404 (redirecionado para `/icon.svg`).
+
+## 2026-10-07 — Publicar/ocultar presets (T-F13, BD-23)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável notou que não havia como deixar um preset fora do montador e que o filtro "Indisponíveis" dependia só
+de ocultar ingredientes ou pães. Ingredientes e tipos de pão já tinham Publicar/Ocultar na barra do estúdio; os
+presets ganharam visibilidade própria no mesmo padrão (nasce oculto, publicar pela barra). Mantive a disponibilidade
+derivada como um estado separado ("Indisponível") em vez de juntar tudo em "Oculto", porque as duas causas pedem ações
+diferentes. Ocultar a composição inicial foi bloqueado na API (409) e o botão não aparece nela.
+
+## 2026-10-07 — Posição do ingrediente no preview do estúdio (T-F14)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O responsável estranhou não poder escolher onde o ingrediente fica no preview, já que o editor de preset tem arrastar
+e soltar. Em vez de um seletor de posição, o palco do montador (arrastar, seleção, barra de ações, fantasma do
+arraste) foi extraído do `BurgerBuilder` para `useBurgerWorkbench` e `BurgerWorkbench` e reaproveitado no
+estúdio; o montador público passou a usar os mesmos componentes, sem mudança de comportamento (roteiro de ponta a
+ponta do montador inalterado). "Substituir" fica escondido no estúdio por não haver painel de ingredientes para
+escolher o substituto. O preview é só visual: não altera presets nem marca alterações não salvas.
+
+## 2026-10-07 — Responsividade e ergonomia multiplataforma (T-F15)
+
+**Ferramenta:** Claude Code (Claude Opus 5.5), no WSL.
+
+O trabalho começou por uma auditoria automática (Chrome headless em 8 larguras, com toque emulado abaixo de 1024 px)
+em vez de ajustes no olho: não havia rolagem lateral nem imagens distorcidas; os problemas reais eram áreas de toque
+de 30–38 px, campos com fonte menor que 16 px (zoom automático no iOS) e textos de 11 px. As áreas de toque usam
+`pointer: coarse` e não a largura, porque tablets em paisagem passam de 1024 px. Navegação inferior no celular (4
+destinos, cabe no polegar) mantendo a gaveta para o resto; menu recolhível no desktop com o mesmo padrão sem
+piscar do tema (script antes da pintura + `useSyncExternalStore`). No palco, as camadas finas ganham área mínima
+centrada, com prioridade para a mais fina, sem mudar a geometria do arraste. Na revisão foram corrigidos: os scripts
+de inicialização concatenados sem `;` (quebrava a página) e um *deadlock* do rate limit no cache em banco, achado
+pelas capturas (commit próprio).

@@ -68,6 +68,7 @@ export function BurgerStage({
         <DropIndicator layout={layout} draggedInstanceId={draggedInstanceId} />
         <LayerHitAreas
           layers={layout.layers}
+          stackScale={stackScale}
           selectedInstanceId={selectedInstanceId}
           onSelectLayer={onSelectLayer}
           onLayerPointerDown={onLayerPointerDown}

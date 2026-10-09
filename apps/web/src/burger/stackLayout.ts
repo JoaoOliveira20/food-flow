@@ -4,9 +4,10 @@ import {
   findBunVariant,
   findIngredient,
   TOP_BUN_SHAPE,
+  type BuilderCatalog,
   type ImageSize,
   type StackShape,
-} from "./ingredientCatalog";
+} from "./catalog";
 
 export const STACK_BASE_WIDTH = 340;
 export const STACK_BASELINE_RATIO = 0.06;
@@ -52,10 +53,10 @@ type StackEntry = {
   shape: StackShape;
 };
 
-function buildStackEntries(composition: Composition): StackEntry[] {
-  const bunVariant = findBunVariant(composition.bunVariantId);
+function buildStackEntries(composition: Composition, catalog: BuilderCatalog): StackEntry[] {
+  const bunVariant = findBunVariant(catalog, composition.bunVariantId);
   const ingredientEntries = composition.layers.map((layer): StackEntry => {
-    const ingredient = findIngredient(layer.ingredientId);
+    const ingredient = findIngredient(catalog, layer.ingredientId);
     return {
       key: layer.instanceId,
       kind: "ingredient",
@@ -96,12 +97,12 @@ function separateHitAreas(layers: PositionedLayer[]): PositionedLayer[] {
   });
 }
 
-export function computeStackLayout(composition: Composition): StackLayout {
+export function computeStackLayout(composition: Composition, catalog: BuilderCatalog): StackLayout {
   const layers: PositionedLayer[] = [];
   let restingSurface = 0;
   let stackHeight = 0;
 
-  buildStackEntries(composition).forEach((entry, index) => {
+  buildStackEntries(composition, catalog).forEach((entry, index) => {
     const { displayWidth, restingSurfaceRatio, sinkRatio } = entry.shape;
     const height = (displayWidth * entry.imageSize.height) / entry.imageSize.width;
     const bottom = Math.max(0, restingSurface - sinkRatio * height);
@@ -135,4 +136,9 @@ export function scaleStackToStage(layout: StackLayout, stage: StageSize): number
 
 export function hitAreaCenter(hitArea: HitArea): number {
   return hitArea.bottom + hitArea.height / 2;
+}
+
+export function expandHitArea(hitArea: HitArea, minHeight: number): HitArea {
+  if (hitArea.height >= minHeight) return hitArea;
+  return { bottom: hitArea.bottom - (minHeight - hitArea.height) / 2, height: minHeight };
 }
